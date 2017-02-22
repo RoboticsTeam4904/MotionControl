@@ -43,21 +43,17 @@ strictfp public class MotionTrajectory {
 		rightWheelTickMap = rightWheel.generateTickMap();
 	}
 	
-	public LinkedList<MotionTrajectorySegment> generateIsolatedSegments(LinkedList<SplineSegment> featureSegments) {
+	public LinkedList<MotionTrajectorySegment> generateSegmentsAndForwardPass(LinkedList<SplineSegment> featureSegments) {
 		LinkedList<MotionTrajectorySegment> trajectorySegments = new LinkedList<>();
-		SplineSegment featureSegment = featureSegments.get(0); // The only(ish) reason for initializing a segment before the for loop is to set the initial velocity to 0 
+		SplineSegment featureSegment = featureSegments.get(0); 
 		Tuple<Double,Double> velAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegment.maxCurvature, featureSegment.maxDCurvature);
-		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(featureSegment.length, 0.0, velAndAccel.getX(), velAndAccel.getY());
+		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(0.0); // Initialize velocity at 0
 		for (int i = 0; i < featureSegments.size(); i++) {
+			featureSegment = featureSegments.get(i);
+			lastSegment = new MotionTrajectorySegment(featureSegment.length, lastSegment.finVel, velAndAccel.getX(), velAndAccel.getY());
 			velAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegment.maxCurvature, featureSegment.maxDCurvature);
-			double newMaxVel = velAndAccel.getX();
-			double newMaxAccel = velAndAccel.getY();
-			lastSegment.finVel = Math.min(lastSegment.calcReachableEndVel(), Math.min(lastSegment.maxVel, newMaxVel));
+			lastSegment.finVel = Math.min(lastSegment.calcReachableEndVel(), Math.min(lastSegment.maxVel, velAndAccel.getX()));
 			trajectorySegments.add(lastSegment);
-			if (i != featureSegments.size() - 1) {
-				featureSegment = featureSegments.get(i);
-				lastSegment = new MotionTrajectorySegment(featureSegment.length, lastSegment.finVel, velAndAccel.getX(), velAndAccel.getY());
-			}
 		}
 	}
 
