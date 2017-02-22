@@ -1,5 +1,6 @@
 package io.getcoffee.motionprofiles;
 
+
 public class MotionTrajectorySegment {
 	protected double initVel;
 	protected double finVel;
@@ -21,6 +22,10 @@ public class MotionTrajectorySegment {
 		this.initVel = initVel;
 		this.maxVel = maxVel;
 		this.maxAccel = maxAccel;
+	}
+
+	public MotionTrajectorySegment(double finVel) {
+		this.finVel = finVel;
 	}
 
 	public double calcVelFromFrontAndBack(double distance) {
@@ -87,9 +92,10 @@ public class MotionTrajectorySegment {
 		pos += Pos(t, vel, accel);
 		return new MotionTrajectoryPoint(tick, context.absoluteDistance + pos, vel, accel);
 	}
-	
+
 	@Override
 	public String toString() {
-		return "MotionSegment#{InitVel: "+ initVel + ", FinVel: " + finVel + ", MaxVel: " + maxVel + ", Length: " + length + ", Duration: " + duration + "}";
+		return "MotionSegment#{InitVel: " + initVel + ", FinVel: " + finVel + ", MaxVel: " + maxVel + ", Length: " + length
+			+ ", Duration: " + duration + "}";
 	}
 }

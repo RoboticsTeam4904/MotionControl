@@ -31,7 +31,7 @@ strictfp public class MotionTrajectory {
 	 */
 	public MotionTrajectory(SplineGenerator splineGenerator, double plantWidth, double tickTime, double tickTotal) {
 		this.splineGenerator = splineGenerator;
-		this.plantWidth = plantWidth/2.0;
+		this.plantWidth = plantWidth / 2.0;
 		this.tickTime = tickTime;
 		this.tickTotal = tickTotal;
 		// TODO: Update the threshold to reflect a real value.
@@ -42,22 +42,20 @@ strictfp public class MotionTrajectory {
 		leftWheelTickMap = leftWheel.generateTickMap();
 		rightWheelTickMap = rightWheel.generateTickMap();
 	}
-	
-	public LinkedList<MotionTrajectorySegment> generateIsolatedSegments(LinkedList<SplineSegment> featureSegments) {
+
+	public LinkedList<MotionTrajectorySegment> generateSegmentsAndForwardPass(LinkedList<SplineSegment> featureSegments) {
 		LinkedList<MotionTrajectorySegment> trajectorySegments = new LinkedList<>();
-		SplineSegment featureSegment = featureSegments.get(0); // The only(ish) reason for initializing a segment before the for loop is to set the initial velocity to 0 
-		Tuple<Double,Double> velAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegment.maxCurvature, featureSegment.maxDCurvature);
-		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(featureSegment.length, 0.0, velAndAccel.getX(), velAndAccel.getY());
+		SplineSegment featureSegment = featureSegments.get(0);
+		Tuple<Double, Double> velAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegment.maxCurvature,
+			featureSegment.maxDCurvature);
+		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(0.0); // Initialize velocity at 0
 		for (int i = 0; i < featureSegments.size(); i++) {
+			featureSegment = featureSegments.get(i);
+			lastSegment = new MotionTrajectorySegment(featureSegment.length, lastSegment.finVel, velAndAccel.getX(),
+				velAndAccel.getY());
 			velAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegment.maxCurvature, featureSegment.maxDCurvature);
-			double newMaxVel = velAndAccel.getX();
-			double newMaxAccel = velAndAccel.getY();
-			lastSegment.finVel = Math.min(lastSegment.calcReachableEndVel(), Math.min(lastSegment.maxVel, newMaxVel));
+			lastSegment.finVel = Math.min(lastSegment.calcReachableEndVel(), Math.min(lastSegment.maxVel, velAndAccel.getX()));
 			trajectorySegments.add(lastSegment);
-			if (i != featureSegments.size() - 1) {
-				featureSegment = featureSegments.get(i);
-				lastSegment = new MotionTrajectorySegment(featureSegment.length, lastSegment.finVel, velAndAccel.getX(), velAndAccel.getY());
-			}
 		}
 	}
 
@@ -81,18 +79,19 @@ strictfp public class MotionTrajectory {
 
 	/**
 	 * Super constraining right now. Uses maxVel, maxCurvature and maxCurvatureD.
- 	 * It would ideally find the minAccel given the maxCurvature and maxCurvatureD at every point
- 	 * As well as vel at that point as a function of maxVel and accel itself (simultaneous calculation possible?)
+	 * It would ideally find the minAccel given the maxCurvature and maxCurvatureD at every point
+	 * As well as vel at that point as a function of maxVel and accel itself (simultaneous calculation possible?)
+	 * 
 	 * @param curvature
 	 * @param dCurvature
 	 * @return
 	 */
-	public Tuple<Double,Double> calcMaxAccelFromCurvatureAndDerivative(double curvature, double dCurvature) {
-		double divisor = (1+plantWidth*Math.abs(curvature));
-		double maxVel = robotMaxVel/divisor;
-		return Tuple(maxVel, (robotMaxAccel-plantWidth*maxVel*dCurvature)/divisor);
+	public Tuple<Double, Double> calcMaxAccelFromCurvatureAndDerivative(double curvature, double dCurvature) {
+		double divisor = (1 + plantWidth * Math.abs(curvature));
+		double maxVel = robotMaxVel / divisor;
+		return Tuple(maxVel, (robotMaxAccel - plantWidth * maxVel * dCurvature) / divisor);
 	}
-	
+
 	public double calcMaxSpeed(double s) {
 		return calcMaxSpeedFromCurvature(splineGenerator.calcCurvature(s));
 	}
@@ -104,8 +103,9 @@ strictfp public class MotionTrajectory {
 	public double calcMaxAngularVel(double s) {
 		return calcMaxAngularVelFromCurvature(splineGenerator.calcCurvature(s));
 	}
+
 	public double calcMaxAngularVelFromCurvature(double curvature) {
-		return  calcAngularVel(calcMaxSpeedFromCurvature(curvature), curvature);
+		return calcAngularVel(calcMaxSpeedFromCurvature(curvature), curvature);
 	}
 
 	public double calcAngularVel(double speed, double curvature) {
