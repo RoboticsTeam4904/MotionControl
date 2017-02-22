@@ -30,7 +30,7 @@ strictfp public class MotionTrajectory {
 	 */
 	public MotionTrajectory(SplineGenerator splineGenerator, double plantWidth, double tickTime, double tickTotal) {
 		this.splineGenerator = splineGenerator;
-		this.plantWidth = plantWidth;
+		this.plantWidth = plantWidth/2.0;
 		this.tickTime = tickTime;
 		this.tickTotal = tickTotal;
 		// TODO: Update the threshold to reflect a real value.
@@ -44,8 +44,19 @@ strictfp public class MotionTrajectory {
 	
 	public LinkedList<MotionTrajectorySegment> generateIsolatedSegments(LinkedList<SplineSegment> featureSegments) {
 		LinkedList<MotionTrajectorySegment> trajectorySegments = new LinkedList<>();
-		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(0);
-		return trajectorySegments;
+		SplineSegment featureSegment = featureSegments.get(0);
+		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(featureSegment.length, 0.0);
+		for (int i = 0; i < featureSegments.size(); i++) {
+			Tuple<Double,Double> VelAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegment.maxCurvature, featureSegment.maxDCurvature);
+			lastSegment.maxVel = VelAndAccel.getX();
+			lastSegment.maxAccel = VelAndAccel.getY();
+			lastSegment.finVel = Math.min(lastSegment.calcReachableEndVel(), Math.min(lastSegment.maxVel, newMaxVel));
+			trajectorySegments.add(lastSegment);
+			if (i != featureSegments.size() - 1) {
+				featureSegment = featureSegments.get(i);
+				lastSegment = new MotionTrajectorySegment(featureSegment.length, lastSegment.finVel);
+			}
+		}
 	}
 
 	/**
@@ -66,8 +77,8 @@ strictfp public class MotionTrajectory {
 			rightWheelTick.getY().findSetPoint(rightWheelTick.getX(), tick));
 	}
 
-	public double calcMaxAccel(double s) {
-		return max
+	public double calcMaxAccelFromCurvatureAndDerivative(double curvature, double dCurvature) {
+		return (maxAccel-dCurvature)/(1+plantWidth*Math.abs(curvature));
 	}
 	
 	public double calcMaxSpeed(double s) {
@@ -79,11 +90,14 @@ strictfp public class MotionTrajectory {
 	}
 
 	public double calcMaxAngularVel(double s) {
-		return calcTurning(s, calcMaxSpeed(s)) * plantWidth; // = theta/second * circumference/2pi = distance / second
+		return calcMaxAngularVelFromCurvature(splineGenerator.calcCurvature(s));
+	}
+	public double calcMaxAngularVelFromCurvature(double curvature) {
+		return  calcAngularVel(calcMaxSpeedFromCurvature(curvature), curvature);
 	}
 
 	public double calcAngularVel(double speed, double curvature) {
-		return curvature * speed * plantWidth; // = theta/second * circumference/2pi = distance / second
+		return curvature * speed * plantWidth; // = theta/meter * meter/second * circumference/2pi = distance / second
 	}
 
 	protected double calcTurning(double s, double speed) {

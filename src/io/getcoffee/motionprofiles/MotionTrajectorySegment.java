@@ -4,7 +4,6 @@ public class MotionTrajectorySegment {
 	protected double initVel;
 	protected double finVel;
 	protected double length;
-	protected double maxCurve;
 	protected double maxVel;
 	protected double maxAccel;
 	protected double duration;
@@ -18,15 +17,19 @@ public class MotionTrajectorySegment {
 	public AbsoluteSegmentContext context;
 
 	public MotionTrajectorySegment(double initVel, double finVel,
-		double maxVel, double maxAccel, double maxCurve, double length) {
+		double maxVel, double maxAccel, double length) {
 		this.initVel = initVel;
 		this.finVel = finVel;
 		this.maxVel = maxVel;
 		this.maxAccel = maxAccel;
-		this.maxCurve = maxCurve;
 		this.length = length;
 	}
 
+	public MotionTrajectorySegment(double length, double initVel) {
+		this.length = length;
+		this.initVel = initVel;
+	}
+	
 	public MotionTrajectorySegment() {}
 
 	public double calcVelFromFrontAndBack(double distance) {

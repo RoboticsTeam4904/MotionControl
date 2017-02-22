@@ -18,7 +18,7 @@ strictfp public abstract class SplineGenerator {
 		LinkedList<SplineSegment> featureSegments = new LinkedList<>();
 		double lastPercentage = 0.0;
 		// Hopefully the curvature is never non-zero at the initial position of the arc.
-		double lastCurve = 0.0;
+		double lastCurve = calcCurvature(0.0);
 		double maxCurve = lastCurve;
 		SplineSegment lastFeature = new SplineSegment(0);
 		for (double i = 0; i < 1; i += 1 / granularity) {
@@ -99,6 +99,7 @@ strictfp public abstract class SplineGenerator {
 		Tuple<Double, Double> vel = calcVel(s);
 		Tuple<Double, Double> acc = calcAcc(s);
 		double speed = calcSpeed(s);
+		// if speed == 0: use jerk and acc instead of acc and vel. if acc == 0, just return 0 or go deeper or something
 		// System.out.println(speed);
 		return (vel.getX() * acc.getY() - vel.getY() * acc.getX()) / (speed * speed * speed);
 	}
