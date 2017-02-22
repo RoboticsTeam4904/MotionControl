@@ -6,7 +6,8 @@ import java.util.Map;
 import io.getcoffee.motionprofiles.WheelTrajectory.Wheel;
 
 strictfp public class MotionTrajectory {
-	public static final double maxVel = 5;
+	public static final double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;
+	public static final double robotMaxAccel = MotionTrajectoryExecutor.robotMaxAccel;
 	protected final SplineGenerator splineGenerator;
 	protected final double plantWidth;
 	protected final double tickTime, tickTotal;
@@ -44,17 +45,18 @@ strictfp public class MotionTrajectory {
 	
 	public LinkedList<MotionTrajectorySegment> generateIsolatedSegments(LinkedList<SplineSegment> featureSegments) {
 		LinkedList<MotionTrajectorySegment> trajectorySegments = new LinkedList<>();
-		SplineSegment featureSegment = featureSegments.get(0);
-		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(featureSegment.length, 0.0);
+		SplineSegment featureSegment = featureSegments.get(0); // The only(ish) reason for initializing a segment before the for loop is to set the initial velocity to 0 
+		Tuple<Double,Double> velAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegment.maxCurvature, featureSegment.maxDCurvature);
+		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(featureSegment.length, 0.0, velAndAccel.getX(), velAndAccel.getY());
 		for (int i = 0; i < featureSegments.size(); i++) {
-			Tuple<Double,Double> VelAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegment.maxCurvature, featureSegment.maxDCurvature);
-			lastSegment.maxVel = VelAndAccel.getX();
-			lastSegment.maxAccel = VelAndAccel.getY();
+			velAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegment.maxCurvature, featureSegment.maxDCurvature);
+			double newMaxVel = velAndAccel.getX();
+			double newMaxAccel = velAndAccel.getY();
 			lastSegment.finVel = Math.min(lastSegment.calcReachableEndVel(), Math.min(lastSegment.maxVel, newMaxVel));
 			trajectorySegments.add(lastSegment);
 			if (i != featureSegments.size() - 1) {
 				featureSegment = featureSegments.get(i);
-				lastSegment = new MotionTrajectorySegment(featureSegment.length, lastSegment.finVel);
+				lastSegment = new MotionTrajectorySegment(featureSegment.length, lastSegment.finVel, velAndAccel.getX(), velAndAccel.getY());
 			}
 		}
 	}
@@ -77,8 +79,18 @@ strictfp public class MotionTrajectory {
 			rightWheelTick.getY().findSetPoint(rightWheelTick.getX(), tick));
 	}
 
-	public double calcMaxAccelFromCurvatureAndDerivative(double curvature, double dCurvature) {
-		return (maxAccel-dCurvature)/(1+plantWidth*Math.abs(curvature));
+	/**
+	 * Super constraining right now. Uses maxVel, maxCurvature and maxCurvatureD.
+ 	 * It would ideally find the minAccel given the maxCurvature and maxCurvatureD at every point
+ 	 * As well as vel at that point as a function of maxVel and accel itself (simultaneous calculation possible?)
+	 * @param curvature
+	 * @param dCurvature
+	 * @return
+	 */
+	public Tuple<Double,Double> calcMaxAccelFromCurvatureAndDerivative(double curvature, double dCurvature) {
+		double divisor = (1+plantWidth*Math.abs(curvature));
+		double maxVel = robotMaxVel/divisor;
+		return Tuple(maxVel, (robotMaxAccel-plantWidth*maxVel*dCurvature)/divisor);
 	}
 	
 	public double calcMaxSpeed(double s) {
@@ -98,10 +110,6 @@ strictfp public class MotionTrajectory {
 
 	public double calcAngularVel(double speed, double curvature) {
 		return curvature * speed * plantWidth; // = theta/meter * meter/second * circumference/2pi = distance / second
-	}
-
-	protected double calcTurning(double s, double speed) {
-		return splineGenerator.calcCurvature(s) * speed;
 	}
 
 	public Tuple<Tuple<Double, Double>, Tuple<Double, Double>> calcPerpDerivativeAndSpeed(double s) {

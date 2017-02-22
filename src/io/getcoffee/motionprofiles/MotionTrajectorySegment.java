@@ -16,21 +16,12 @@ public class MotionTrajectorySegment {
 	protected double cruiseTime;
 	public AbsoluteSegmentContext context;
 
-	public MotionTrajectorySegment(double initVel, double finVel,
-		double maxVel, double maxAccel, double length) {
+	public MotionTrajectorySegment(double length, double initVel, double maxVel, double maxAccel) {
+		this.length = length;
 		this.initVel = initVel;
-		this.finVel = finVel;
 		this.maxVel = maxVel;
 		this.maxAccel = maxAccel;
-		this.length = length;
 	}
-
-	public MotionTrajectorySegment(double length, double initVel) {
-		this.length = length;
-		this.initVel = initVel;
-	}
-	
-	public MotionTrajectorySegment() {}
 
 	public double calcVelFromFrontAndBack(double distance) {
 		return Math.min(maxVel, Math.min(maxReachableVel(length, initVel), maxReachableVel(length - distance, initVel)));
