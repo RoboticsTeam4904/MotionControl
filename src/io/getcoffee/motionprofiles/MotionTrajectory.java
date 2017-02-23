@@ -36,38 +36,50 @@ strictfp public class MotionTrajectory {
 		tickMap = generateFullTickMap(trajectorySegments);
 	}
 
+	/**
+	 * Generates a set of ideal segments which do not yet account for true forwards
+	 * or backwards consistency between the previous or future segments given feature
+	 * segments of the spline.
+	 *
+	 * This calculates
+	 * the fastest possible velocity and acceleration for segment P<sub>i</sub>, then
+	 * moves onto the segment P<sub>i + 1</sub> and calculates the fastest possible velocity
+	 * and acceleration. Then to ensure that the transition between the two segments is
+	 * physically possible, sets the exit velocity of P<sub>i</sub> to the lowest
+	 * value between the P<sub>i</sub> and P<sub>i + 1</sub>'s maximum velocities.
+	 *
+	 * @param featureSegments
+	 * @return
+	 */
 	public LinkedList<MotionTrajectorySegment> generateIsolatedSegments(LinkedList<SplineSegment> featureSegments) {
 		LinkedList<MotionTrajectorySegment> trajectorySegments = new LinkedList<>();
-		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(0.0);
-		Tuple<Double, Double> maxVelAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegments.get(0).maxCurve,
-			featureSegments.get(0).maxCurveDerivative);
-		for (SplineSegment featureSegment : featureSegments) {
-			lastSegment = new MotionTrajectorySegment(featureSegment.length, lastSegment.finVel, maxVelAndAccel.getX(),
-				maxVelAndAccel.getY());
-			maxVelAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegment.maxCurve,
-				featureSegment.maxCurveDerivative);
-			lastSegment.finVel = Math.min(lastSegment.maxVel, maxVelAndAccel.getX());
-			trajectorySegments.add(lastSegment);
+		double maxVel = calcMaxVel(featureSegments.get(0).maxCurve);
+		double maxAcc = calcMaxAcc(featureSegments.get(0).maxCurve, featureSegments.get(0).maxCurveDerivative);
+		double lastFinVel = 0.0;
+		for(SplineSegment featureSegment : featureSegments) {
+			MotionTrajectorySegment segment = new MotionTrajectorySegment(featureSegment.length, lastFinVel, maxVel,
+					maxAcc);
+			maxVel = calcMaxVel(featureSegment.maxCurve);
+			maxAcc = calcMaxAcc(featureSegment.maxCurve, featureSegment.maxCurveDerivative);
+			segment.finVel = Math.min(segment.maxVel, maxVel);
+			trajectorySegments.add(segment);
+			lastFinVel = segment.finVel;
 		}
-		lastSegment.finVel = 0;
 		return trajectorySegments;
 	}
 
 	/**
-	 * Generates a 'forward consistent' set of segments for each spline feature segment. This ensures that
-	 * the movement follows the acceleration constraints of both the robot and path.
-	 * 
-	 * The segments that this returns are not ready to be used and should be run through the backward consistency
-	 * filter and afterwards finalized.
+	 * Adjusts the provided trajectory segments to ensure forward consistency between them.
+	 * This is done by lowering the final velocity to fit acceleration constraints, making
+	 * the transition between segments possible.
 	 * 
 	 * @see {@link MotionTrajectory#applyBackwardConsistency}
 	 * @see {@link MotionTrajectory#finalizeSegments}
 	 * 
-	 * @param featureSegments
+	 * @param trajectorySegments
 	 * @return ordered right/left trajectory segments that are forward consistent.
 	 */
-	public LinkedList<MotionTrajectorySegment> applyForwardConsistency(
-		LinkedList<MotionTrajectorySegment> trajectorySegments) {
+	public LinkedList<MotionTrajectorySegment> applyForwardConsistency(LinkedList<MotionTrajectorySegment> trajectorySegments) {
 		double lastFinVel = 0.0;
 		for (MotionTrajectorySegment segment : trajectorySegments) {
 			segment.initVel = lastFinVel;
@@ -78,15 +90,18 @@ strictfp public class MotionTrajectory {
 	}
 
 	/**
-	 * Generates a 'backward consistent' set of segments from a 'forward consistent' set of segments. Establishing
-	 * backwards consistency ensures the segments obey deceleration constraints.
-	 * 
+	 * Adjusts the provided trajectory segments to ensure backward consistency between them.
+	 * This is done by lowering the initial velocity to fit deceleration constraints, making
+	 * the transition between segments possible.
+	 *
+	 * @see {@link MotionTrajectory#applyForwardConsistency}
+	 * @see {@link MotionTrajectory#finalizeSegments}
+	 *
 	 * @param trajectorySegments
 	 *        ordered segments that are forward consistent
 	 * @return ordered right/left trajectory segments that are forward and backward consistent.
 	 */
-	public LinkedList<MotionTrajectorySegment> applyBackwardConsistency(
-		LinkedList<MotionTrajectorySegment> trajectorySegments) {
+	public LinkedList<MotionTrajectorySegment> applyBackwardConsistency(LinkedList<MotionTrajectorySegment> trajectorySegments) {
 		double lastInitVel = 0.0;
 		for (int i = trajectorySegments.size() - 1; i > 0; i--) {
 			MotionTrajectorySegment trajectorySegment = trajectorySegments.get(i);
