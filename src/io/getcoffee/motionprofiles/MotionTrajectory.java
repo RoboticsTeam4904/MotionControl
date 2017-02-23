@@ -42,6 +42,15 @@ strictfp public class MotionTrajectory {
 		generateTickMap();
 	}
 
+	public LinkedList<MotionTrajectorySegment> generateIsolatedSegments(LinkedList<SplineSegment> featureSegments) {
+		LinkedList<MotionTrajectorySegment> trajectorySegments = new LinkedList<>();
+		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(0.0);
+		for(SplineSegment featureSegment : featureSegments) {
+			last
+		}
+		return trajectorySegments;
+	}
+	
 	/**
 	 * Generates a 'forward consistent' set of segments for each spline feature segment. This ensures that
 	 * the movement follows the acceleration constraints of both the robot and path.
@@ -128,7 +137,7 @@ strictfp public class MotionTrajectory {
 	}
 
 	/**
-	 * Finalize segments and generate map from tucks to set-points
+	 * Finalize segments and generate map from ticks to set-points
 	 * 
 	 * @param trajectorySegments
 	 * @return

@@ -20,29 +20,37 @@ strictfp public abstract class SplineGenerator {
 		// Hopefully the curvature is never non-zero at the initial position of the arc.
 		double lastCurve = calcCurvature(0.0);
 		double maxCurve = lastCurve;
+		double maxCurveDerivative = 0.0;
 		SplineSegment lastFeature = new SplineSegment(0);
 		for (double i = 0; i < 1; i += 1 / granularity) {
 			double instantCurve = calcCurvature(i);
+			double instantCurveDerivative = Math.abs(lastCurve - instantCurve);
 			if(instantCurve > maxCurve) {
 				maxCurve = instantCurve;
 			}
-			if (Math.abs(lastCurve - instantCurve) > curveThreshold) {
+			if(instantCurveDerivative > maxCurveDerivative) {
+				maxCurveDerivative = instantCurveDerivative;
+			}
+			if (instantCurveDerivative > curveThreshold) {
 				double curveLen = calcLength(lastPercentage, i + 1 / granularity);
 				lastPercentage = i;
-				lastCurve = instantCurve;
 				lastFeature.finCurve = instantCurve;
 				lastFeature.length = curveLen;
 				lastFeature.finPercentage = lastPercentage;
 				lastFeature.maxCurve = maxCurve;
+				lastFeature.maxCurveDerivative = maxCurveDerivative;
 				featureSegments.add(lastFeature);
 				maxCurve = instantCurve;
+				maxCurveDerivative = 0.0;
 				lastFeature = new SplineSegment(instantCurve, lastPercentage);
 			}
+			lastCurve = instantCurve;
 		}
 		lastFeature.finCurve = calcCurvature(1);
 		lastFeature.length = calcLength(lastPercentage, 1);
 		lastFeature.finPercentage = 1;
 		lastFeature.maxCurve = maxCurve;
+		lastFeature.maxCurveDerivative = maxCurveDerivative;
 		featureSegments.add(lastFeature);
 		return featureSegments;
 	}
