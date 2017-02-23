@@ -24,7 +24,7 @@ strictfp public abstract class SplineGenerator {
 		SplineSegment lastFeature = new SplineSegment(0);
 		for (double i = 0; i < 1; i += 1 / granularity) {
 			double instantCurve = calcCurvature(i);
-			double instantCurveDerivative = Math.abs(lastCurve - instantCurve);
+			double instantCurveDerivative = Math.abs(lastCurve - instantCurve) * granularity;
 			if(instantCurve > maxCurve) {
 				maxCurve = instantCurve;
 			}

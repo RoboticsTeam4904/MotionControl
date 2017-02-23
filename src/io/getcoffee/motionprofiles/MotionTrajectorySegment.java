@@ -24,10 +24,6 @@ public class MotionTrajectorySegment {
 		this.maxAccel = maxAccel;
 	}
 
-	public MotionTrajectorySegment(double finVel) {
-		this.finVel = finVel;
-	}
-
 	public double calcVelFromFrontAndBack(double distance) {
 		return Math.min(maxVel, Math.min(maxReachableVel(length, initVel), maxReachableVel(length - distance, initVel)));
 	}

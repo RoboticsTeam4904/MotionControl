@@ -15,11 +15,6 @@ strictfp public class MotionTrajectory {
 	protected final LinkedList<MotionTrajectorySegment> trajectorySegments;
 	protected final Map<Integer, MotionTrajectoryPoint> tickMap;
 	protected int tickTotal;
-	/**
-	 * Maps a tick to a left/right-specific segment, and the time that the tick occurs at relative to
-	 * the beginning time of the segment.
-	 */
-	protected final Map<Integer, Tuple<Double, WheelTrajectorySegment>> leftWheelTickMap, rightWheelTickMap;
 
 	/**
 	 * 
@@ -28,8 +23,6 @@ strictfp public class MotionTrajectory {
 	 *        the width of whatever system we will be moving (in our case the robot)
 	 * @param tickTime
 	 *        the time that passes during a tick (in milliseconds)
-	 * @param tickTotal
-	 *        the total number of ticks that occur during our trajectory
 	 */
 	public MotionTrajectory(SplineGenerator splineGenerator, double plantWidth, double tickTime) {
 		this.splineGenerator = splineGenerator;
@@ -38,16 +31,24 @@ strictfp public class MotionTrajectory {
 		// TODO: Update the threshold to reflect a real value.
 		featureSegments = splineGenerator.generateFeatureSegments(0.1);
 		trajectorySegments = finalizeSegments(
-			generateBackwardConsistency(generateSegmentsAndForwardConsistency(featureSegments)));
+			applyBackwardConsistency(applyForwardConsistency(featureSegments)));
 		tickMap = generateFullTickMap(trajectorySegments);
 	}
 
 	public LinkedList<MotionTrajectorySegment> generateIsolatedSegments(LinkedList<SplineSegment> featureSegments) {
 		LinkedList<MotionTrajectorySegment> trajectorySegments = new LinkedList<>();
 		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(0.0);
+		Tuple<Double, Double> maxVelAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegments.get(0).maxCurve,
+				featureSegments.get(0).maxCurveDerivative);
 		for(SplineSegment featureSegment : featureSegments) {
-			last
+			lastSegment = new MotionTrajectorySegment(featureSegment.length, lastSegment.finVel, maxVelAndAccel.getX(),
+					maxVelAndAccel.getY());
+			maxVelAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegment.maxCurve,
+					featureSegment.maxCurveDerivative);
+			lastSegment.finVel = Math.min(lastSegment.maxVel, maxVelAndAccel.getX());
+			trajectorySegments.add(lastSegment);
 		}
+		lastSegment.finVel = 0;
 		return trajectorySegments;
 	}
 	
@@ -58,28 +59,21 @@ strictfp public class MotionTrajectory {
 	 * The segments that this returns are not ready to be used and should be run through the backward consistency
 	 * filter and afterwards finalized.
 	 * 
-	 * @see {@link MotionTrajectory#generateBackwardConsistency}
+	 * @see {@link MotionTrajectory#applyBackwardConsistency}
 	 * @see {@link MotionTrajectory#finalizeSegments}
 	 * 
 	 * @param featureSegments
 	 * @return ordered right/left trajectory segments that are forward consistent.
 	 */
-	public LinkedList<MotionTrajectorySegment> generateSegmentsAndForwardConsistency(
-		LinkedList<SplineSegment> featureSegments) {
-		LinkedList<MotionTrajectorySegment> trajectorySegments = new LinkedList<>();
-		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(0.0); // Initialize velocity at 0
-		Tuple<Double, Double> maxVelAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegments.get(0).maxCurve,
-			featureSegments.get(0).maxCurveDerivative);
-		for (SplineSegment featureSegment : featureSegments) {
-			lastSegment = new MotionTrajectorySegment(featureSegment.length, lastSegment.finVel, maxVelAndAccel.getX(),
-				maxVelAndAccel.getY());
-			maxVelAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegment.maxCurve,
-				featureSegment.maxCurveDerivative);
-			lastSegment.finVel = Math.min(lastSegment.calcReachableEndVel(),
-				Math.min(lastSegment.maxVel, maxVelAndAccel.getX()));
-			trajectorySegments.add(lastSegment);
+	public LinkedList<MotionTrajectorySegment> applyForwardConsistency(
+		LinkedList<MotionTrajectorySegment> trajectorySegments) {
+		double lastFinVel = 0.0;
+		for(MotionTrajectorySegment segment : trajectorySegments) {
+			segment.initVel = lastFinVel;
+			segment.finVel = Math.min(segment.calcReachableEndVel(), segment.finVel);
+			lastFinVel = segment.finVel;
 		}
-		lastSegment.finVel = 0;
+		return trajectorySegments;
 	}
 
 	/**
@@ -90,11 +84,14 @@ strictfp public class MotionTrajectory {
 	 *        ordered segments that are forward consistent
 	 * @return ordered right/left trajectory segments that are forward and backward consistent.
 	 */
-	public LinkedList<MotionTrajectorySegment> generateBackwardConsistency(
+	public LinkedList<MotionTrajectorySegment> applyBackwardConsistency(
 		LinkedList<MotionTrajectorySegment> trajectorySegments) {
+		double lastInitVel = 0.0;
 		for (int i = trajectorySegments.size() - 1; i > 0; i--) {
 			MotionTrajectorySegment trajectorySegment = trajectorySegments.get(i);
+			trajectorySegment.finVel = lastInitVel;
 			trajectorySegment.initVel = Math.min(trajectorySegment.calcReachableStartVel(), trajectorySegment.initVel);
+			lastInitVel = trajectorySegment.initVel;
 		}
 		return trajectorySegments;
 	}
@@ -132,7 +129,7 @@ strictfp public class MotionTrajectory {
 		for (; tickCount < trajectorySegments.size(); tickCount++) {
 			MotionTrajectorySegment segment = trajectorySegments.get(tickCount);
 			segment.dividePath();
-			for (;timeOverSegment < segment.duration; timeOverSegment += tickTime) {
+			for (; timeOverSegment < segment.duration; timeOverSegment += tickTime) {
 				map.put(tickCount, segment.calcOffsetSetpoint(timeOverSegment, tickCount, distanceTraveled));
 			}
 			timeOverSegment -= segment.duration;
@@ -197,18 +194,6 @@ strictfp public class MotionTrajectory {
 
 	public double calcAngularVel(double speed, double curvature) {
 		return curvature * speed * plantWidth; // = theta/meter * meter/second * circumference/2pi = distance / second
-	}
-
-	public Tuple<Tuple<Double, Double>, Tuple<Double, Double>> calcPerpDerivativeAndSpeed(double s) {
-		Tuple<Double, Double> splineVel = splineGenerator.calcVel(s);
-		Tuple<Double, Double> splineAcc = splineGenerator.calcAcc(s);
-		double splineSpeed = Math.sqrt(splineVel.getX() * splineVel.getX() + splineVel.getY() * splineVel.getY());
-		double splineSpeedD = (splineAcc.getX() * splineVel.getX() + splineAcc.getY() * splineVel.getY())
-			/ (splineSpeed * splineSpeed); // The derivative of the speed of the spline / v
-		Tuple<Double, Double> perpDerivative = new Tuple<>(
-			(splineVel.getY() * splineSpeedD - splineAcc.getY()) / splineSpeed * plantWidth / 2.0,
-			(splineAcc.getX() - splineVel.getX() * splineSpeedD) / splineSpeed * plantWidth / 2.0);
-		return new Tuple<>(perpDerivative, splineVel);
 	}
 
 	public int getTickTotal() {
