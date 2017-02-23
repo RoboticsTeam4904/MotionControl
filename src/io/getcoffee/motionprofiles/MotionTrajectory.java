@@ -39,19 +39,19 @@ strictfp public class MotionTrajectory {
 		LinkedList<MotionTrajectorySegment> trajectorySegments = new LinkedList<>();
 		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(0.0);
 		Tuple<Double, Double> maxVelAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegments.get(0).maxCurve,
-				featureSegments.get(0).maxCurveDerivative);
-		for(SplineSegment featureSegment : featureSegments) {
+			featureSegments.get(0).maxCurveDerivative);
+		for (SplineSegment featureSegment : featureSegments) {
 			lastSegment = new MotionTrajectorySegment(featureSegment.length, lastSegment.finVel, maxVelAndAccel.getX(),
-					maxVelAndAccel.getY());
+				maxVelAndAccel.getY());
 			maxVelAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegment.maxCurve,
-					featureSegment.maxCurveDerivative);
+				featureSegment.maxCurveDerivative);
 			lastSegment.finVel = Math.min(lastSegment.maxVel, maxVelAndAccel.getX());
 			trajectorySegments.add(lastSegment);
 		}
 		lastSegment.finVel = 0;
 		return trajectorySegments;
 	}
-	
+
 	/**
 	 * Generates a 'forward consistent' set of segments for each spline feature segment. This ensures that
 	 * the movement follows the acceleration constraints of both the robot and path.
@@ -68,7 +68,7 @@ strictfp public class MotionTrajectory {
 	public LinkedList<MotionTrajectorySegment> applyForwardConsistency(
 		LinkedList<MotionTrajectorySegment> trajectorySegments) {
 		double lastFinVel = 0.0;
-		for(MotionTrajectorySegment segment : trajectorySegments) {
+		for (MotionTrajectorySegment segment : trajectorySegments) {
 			segment.initVel = lastFinVel;
 			segment.finVel = Math.min(segment.calcReachableEndVel(), segment.finVel);
 			lastFinVel = segment.finVel;
@@ -151,13 +151,14 @@ strictfp public class MotionTrajectory {
 	 * @return
 	 */
 	public Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> calcPoint(int tick) {
-		Tuple<Double, MotionTrajectorySegment> leftWheelTick = map.get(tick);
 		MotionTrajectoryPoint generalSetpoint = tickMap.get(tick);
-		splineGenerator.calcCurvature(generalSetpoint.pos);
+		double s = splineGenerator.calcPercentageFromPos(generalSetpoint.pos);
+		double offSet = plantWidth * splineGenerator.calcCurvature(s);
+		double accelOffSet = plantWidth * generalSetpoint.vel * splineGenerator.calcCurvatureDerivative(s);
+		double wheelVel = generalSetpoint.vel * (1 + wheelModifier * offSet);
+		double wheelAccel = generalSetpoint.accel * (1 + wheelModifier * offSet) + wheelModifier * accelOffSet;
 		// Calc w by finding curvature(pos) where pos is arclength and multiplying by width and v. v is setpoint in fullmap. calc indiv wheel vels from this?
-
-		return new Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint>(
-			leftWheelTick.getY().findSetPoint(leftWheelTick.getX(), tick),
+		return new Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint>(new MotionTrajectoryPoint(tick, pos, )
 			rightWheelTick.getY().findSetPoint(rightWheelTick.getX(), tick));
 	}
 
