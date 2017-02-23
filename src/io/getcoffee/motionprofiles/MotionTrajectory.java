@@ -30,8 +30,7 @@ strictfp public class MotionTrajectory {
 		this.tickTime = tickTime;
 		// TODO: Update the threshold to reflect a real value.
 		featureSegments = splineGenerator.generateFeatureSegments(0.1);
-		trajectorySegments = finalizeSegments(
-			applyBackwardConsistency(applyForwardConsistency(featureSegments)));
+		trajectorySegments = finalizeSegments(applyBackwardConsistency(applyForwardConsistency(generateIsolatedSegments(featureSegments))));
 		tickMap = generateFullTickMap(trajectorySegments);
 	}
 
@@ -162,19 +161,16 @@ strictfp public class MotionTrajectory {
 			rightWheelTick.getY().findSetPoint(rightWheelTick.getX(), tick));
 	}
 
-	/**
-	 * Super constraining right now. Uses maxVel, maxCurvature and maxCurvatureD.
-	 * It would ideally find the minAccel given the maxCurvature and maxCurvatureD at every point
-	 * As well as vel at that point as a function of maxVel and accel itself (simultaneous calculation possible?)
-	 * 
-	 * @param curvature
-	 * @param dCurvature
-	 * @return
-	 */
-	public Tuple<Double, Double> calcMaxAccelFromCurvatureAndDerivative(double curvature, double dCurvature) {
-		double divisor = (1 + plantWidth * Math.abs(curvature));
-		double maxVel = robotMaxVel / divisor;
-		return new Tuple<>(maxVel, (robotMaxAccel - plantWidth * maxVel * dCurvature) / divisor);
+	public double calcMaxAcc(double curvature, double curveDerivative) {
+		return (robotMaxAccel - plantWidth * calcMaxVel(curvature) * curveDerivative) / calcDivisor(curvature);
+	}
+
+	public double calcMaxVel(double curvature) {
+		return robotMaxVel / calcDivisor(curvature);
+	}
+
+	private double calcDivisor(double curvature) {
+		return 1 + plantWidth * Math.abs(curvature);
 	}
 
 	public double calcMaxSpeed(double s) {
