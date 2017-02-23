@@ -69,17 +69,22 @@ public class MotionTrajectorySegment {
 		duration = rampUpTime + rampDownTime + cruiseTime;
 	}
 
-	protected MotionTrajectoryPoint calcSetPoint(double t, int tick, double absoluteDistance) {
-		double[] point = calcSetPoint(t);
-		return new MotionTrajectoryPoint(tick, absoluteDistance + point[0], point[1], point[2]);
+	/**
+	 * Calculates the setpoint for a tick and time
+	 *
+	 * @param t
+	 * @param tick
+	 * @param posOffset
+	 * 		  the amount to offset the position of the setpoint by
+	 * @return Relative setpoint with position offset by absolute context's distance.
+	 */
+	protected MotionTrajectoryPoint calcOffsetSetpoint(double t, int tick, double posOffset) {
+		MotionTrajectoryPoint relativeSetPoint = calcSetpoint(t, tick);
+		relativeSetPoint.pos+=posOffset;
+		return relativeSetPoint;
 	}
 
-	protected MotionTrajectoryPoint calcSetPoint(double t, int tick) {
-		double[] point = calcSetPoint(t);
-		return new MotionTrajectoryPoint(tick, context.absoluteDistance + point[0], point[1], point[2]);
-	}
-
-	protected double[] calcSetPoint(double t) {
+	protected MotionTrajectoryPoint calcSetpoint(double t, int tick) {
 		double pos;
 		double vel;
 		double accel;
@@ -100,7 +105,7 @@ public class MotionTrajectorySegment {
 		}
 		vel = Vel(t, vel, accel);
 		pos += Pos(t, vel, accel);
-		return new double[] {pos, vel, accel};
+		return new MotionTrajectoryPoint(tick, pos, vel, accel);
 	}
 
 	@Override

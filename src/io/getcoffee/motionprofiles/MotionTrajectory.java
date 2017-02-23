@@ -10,9 +10,11 @@ strictfp public class MotionTrajectory {
 	public static final double robotMaxAccel = MotionTrajectoryExecutor.robotMaxAccel;
 	protected final SplineGenerator splineGenerator;
 	protected final double plantWidth;
-	protected final double tickTime, tickTotal;
+	protected final double tickTime;
 	protected final LinkedList<SplineSegment> featureSegments;
 	protected final LinkedList<MotionTrajectorySegment> trajectorySegments;
+	protected final Map<Integer, MotionTrajectoryPoint> tickMap;
+	protected int tickTotal;
 	/**
 	 * Maps a tick to a left/right-specific segment, and the time that the tick occurs at relative to
 	 * the beginning time of the segment.
@@ -29,17 +31,15 @@ strictfp public class MotionTrajectory {
 	 * @param tickTotal
 	 *        the total number of ticks that occur during our trajectory
 	 */
-	public MotionTrajectory(SplineGenerator splineGenerator, double plantWidth, double tickTime, double tickTotal) {
+	public MotionTrajectory(SplineGenerator splineGenerator, double plantWidth, double tickTime) {
 		this.splineGenerator = splineGenerator;
 		this.plantWidth = plantWidth / 2.0;
 		this.tickTime = tickTime;
-		this.tickTotal = tickTotal;
 		// TODO: Update the threshold to reflect a real value.
 		featureSegments = splineGenerator.generateFeatureSegments(0.1);
 		trajectorySegments = finalizeSegments(
 			generateBackwardConsistency(generateSegmentsAndForwardConsistency(featureSegments)));
-		System.out.println(featureSegments.size());
-		generateTickMap();
+		tickMap = generateFullTickMap(trajectorySegments);
 	}
 
 	public LinkedList<MotionTrajectorySegment> generateIsolatedSegments(LinkedList<SplineSegment> featureSegments) {
@@ -68,13 +68,13 @@ strictfp public class MotionTrajectory {
 		LinkedList<SplineSegment> featureSegments) {
 		LinkedList<MotionTrajectorySegment> trajectorySegments = new LinkedList<>();
 		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(0.0); // Initialize velocity at 0
-		Tuple<Double, Double> maxVelAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegments.get(0).maxCurvature,
-			featureSegments.get(0).maxDCurvature);
+		Tuple<Double, Double> maxVelAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegments.get(0).maxCurve,
+			featureSegments.get(0).maxCurveDerivative);
 		for (SplineSegment featureSegment : featureSegments) {
 			lastSegment = new MotionTrajectorySegment(featureSegment.length, lastSegment.finVel, maxVelAndAccel.getX(),
 				maxVelAndAccel.getY());
-			maxVelAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegment.maxCurvature,
-				featureSegment.maxDCurvature);
+			maxVelAndAccel = calcMaxVelAndAccFromCurvatureAndDerivative(featureSegment.maxCurve,
+				featureSegment.maxCurveDerivative);
 			lastSegment.finVel = Math.min(lastSegment.calcReachableEndVel(),
 				Math.min(lastSegment.maxVel, maxVelAndAccel.getX()));
 			trajectorySegments.add(lastSegment);
@@ -118,24 +118,6 @@ strictfp public class MotionTrajectory {
 		return trajectorySegments;
 	}
 
-	public Map<Integer, Tuple<Double, MotionTrajectorySegment>> generateTickMap() {
-		HashMap<Integer, Tuple<Double, MotionTrajectorySegment>> map = new HashMap<Integer, Tuple<Double, MotionTrajectorySegment>>();
-		int currentSegmentIndex = 0;
-		double currentSegmentDuration = trajectorySegments.get(currentSegmentIndex).duration;
-		double timeOverSegment = 0.0;
-		for (int i = 0; i < tickTotal; i++) {
-			double timeDiff = (timeOverSegment += tickTime) - currentSegmentDuration;
-			if (timeDiff > 0) {
-				timeOverSegment = timeDiff;
-				currentSegmentIndex++;
-				currentSegmentDuration = trajectorySegments.get(currentSegmentIndex).duration;
-			}
-			map.put(i,
-				new Tuple<Double, MotionTrajectorySegment>(timeOverSegment, trajectorySegments.get(currentSegmentIndex)));
-		}
-		return map;
-	}
-
 	/**
 	 * Finalize segments and generate map from ticks to set-points
 	 * 
@@ -143,21 +125,20 @@ strictfp public class MotionTrajectory {
 	 * @return
 	 */
 	public Map<Integer, MotionTrajectoryPoint> generateFullTickMap(LinkedList<MotionTrajectorySegment> trajectorySegments) {
-		HashMap<Integer, MotionTrajectoryPoint> map = new HashMap<Integer, MotionTrajectoryPoint>();
+		HashMap<Integer, MotionTrajectoryPoint> map = new HashMap<>();
 		double timeOverSegment = 0.0;
 		double distanceTraveled = 0.0;
-		int tickIndex = 0;
-		for (MotionTrajectorySegment segment : trajectorySegments) {
+		int tickCount = 0;
+		for (; tickCount < trajectorySegments.size(); tickCount++) {
+			MotionTrajectorySegment segment = trajectorySegments.get(tickCount);
 			segment.dividePath();
-			double duration = segment.duration;
-			while (timeOverSegment < duration) {
-				map.put(tickIndex, segment.calcSetPoint(timeOverSegment, tickIndex, distanceTraveled));
-				timeOverSegment += tickTime;
-				tickIndex++;
+			for (;timeOverSegment < segment.duration; timeOverSegment += tickTime) {
+				map.put(tickCount, segment.calcOffsetSetpoint(timeOverSegment, tickCount, distanceTraveled));
 			}
-			timeOverSegment -= duration;
+			timeOverSegment -= segment.duration;
 			distanceTraveled += segment.length;
 		}
+		this.tickTotal = tickCount;
 		return map;
 	}
 
@@ -174,7 +155,10 @@ strictfp public class MotionTrajectory {
 	 */
 	public Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> calcPoint(int tick) {
 		Tuple<Double, MotionTrajectorySegment> leftWheelTick = map.get(tick);
+		MotionTrajectoryPoint generalSetpoint = tickMap.get(tick);
+		splineGenerator.calcCurvature(generalSetpoint.pos);
 		// Calc w by finding curvature(pos) where pos is arclength and multiplying by width and v. v is setpoint in fullmap. calc indiv wheel vels from this?
+
 		return new Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint>(
 			leftWheelTick.getY().findSetPoint(leftWheelTick.getX(), tick),
 			rightWheelTick.getY().findSetPoint(rightWheelTick.getX(), tick));
@@ -192,7 +176,7 @@ strictfp public class MotionTrajectory {
 	public Tuple<Double, Double> calcMaxAccelFromCurvatureAndDerivative(double curvature, double dCurvature) {
 		double divisor = (1 + plantWidth * Math.abs(curvature));
 		double maxVel = robotMaxVel / divisor;
-		return new Tuple<Double, Double>(maxVel, (robotMaxAccel - plantWidth * maxVel * dCurvature) / divisor);
+		return new Tuple<>(maxVel, (robotMaxAccel - plantWidth * maxVel * dCurvature) / divisor);
 	}
 
 	public double calcMaxSpeed(double s) {
@@ -221,9 +205,13 @@ strictfp public class MotionTrajectory {
 		double splineSpeed = Math.sqrt(splineVel.getX() * splineVel.getX() + splineVel.getY() * splineVel.getY());
 		double splineSpeedD = (splineAcc.getX() * splineVel.getX() + splineAcc.getY() * splineVel.getY())
 			/ (splineSpeed * splineSpeed); // The derivative of the speed of the spline / v
-		Tuple<Double, Double> perpDerivative = new Tuple<Double, Double>(
+		Tuple<Double, Double> perpDerivative = new Tuple<>(
 			(splineVel.getY() * splineSpeedD - splineAcc.getY()) / splineSpeed * plantWidth / 2.0,
 			(splineAcc.getX() - splineVel.getX() * splineSpeedD) / splineSpeed * plantWidth / 2.0);
-		return new Tuple<Tuple<Double, Double>, Tuple<Double, Double>>(perpDerivative, splineVel);
+		return new Tuple<>(perpDerivative, splineVel);
+	}
+
+	public int getTickTotal() {
+		return tickTotal;
 	}
 }
