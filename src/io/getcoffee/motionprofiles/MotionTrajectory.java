@@ -65,7 +65,7 @@ strictfp public class MotionTrajectory {
 		}
 		return trajectorySegments;
 	}
-	
+
 	/**
 	 * Adjusts the provided trajectory segments to ensure forward consistency between them.
 	 * This is done by lowering the final velocity to fit acceleration constraints, making
@@ -79,7 +79,7 @@ strictfp public class MotionTrajectory {
 	 */
 	public LinkedList<MotionTrajectorySegment> applyForwardConsistency(LinkedList<MotionTrajectorySegment> trajectorySegments) {
 		double lastFinVel = 0.0;
-		for(MotionTrajectorySegment segment : trajectorySegments) {
+		for (MotionTrajectorySegment segment : trajectorySegments) {
 			segment.initVel = lastFinVel;
 			segment.finVel = Math.min(segment.calcReachableEndVel(), segment.finVel);
 			lastFinVel = segment.finVel;
@@ -166,11 +166,13 @@ strictfp public class MotionTrajectory {
 	 */
 	public Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> calcPoint(int tick) {
 		MotionTrajectoryPoint generalSetpoint = tickMap.get(tick);
-		splineGenerator.calcCurvature(generalSetpoint.pos);
+		double s = splineGenerator.calcPercentageFromPos(generalSetpoint.pos);
+		double offSet = plantWidth * splineGenerator.calcCurvature(s);
+		double accelOffSet = plantWidth * generalSetpoint.vel * splineGenerator.calcCurvatureDerivative(s);
+		double wheelVel = generalSetpoint.vel * (1 + wheelModifier * offSet);
+		double wheelAccel = generalSetpoint.accel * (1 + wheelModifier * offSet) + wheelModifier * accelOffSet;
 		// Calc w by finding curvature(pos) where pos is arclength and multiplying by width and v. v is setpoint in fullmap. calc indiv wheel vels from this?
-
-		return new Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint>(
-			leftWheelTick.getY().findSetPoint(leftWheelTick.getX(), tick),
+		return new Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint>(new MotionTrajectoryPoint(tick, pos, )
 			rightWheelTick.getY().findSetPoint(rightWheelTick.getX(), tick));
 	}
 
