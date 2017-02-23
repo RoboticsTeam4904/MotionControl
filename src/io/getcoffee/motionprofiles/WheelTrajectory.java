@@ -107,17 +107,20 @@ strictfp public class WheelTrajectory {
 	 * 
 	 * @return Map<Tick, Tuple<Time of tick occurrence, Trajectory Segment that the tick happens during>>
 	 */
-	public Map<Integer, Tuple<Double, WheelTrajectorySegment>> generateTickMap() {
-		HashMap<Integer, Tuple<Double, WheelTrajectorySegment>> map = new HashMap<>();
-		int currentSegmentIndex = 0;
+	public Map<Integer, Tuple<Double, MotionTrajectorySegment>> generateTickMap() {
+		HashMap<Integer, Tuple<Double, MotionTrajectorySegment>> map = new HashMap<Integer, Tuple<Double, MotionTrajectorySegment>>();
+		Integer currentSegmentIndex = 0;
+		double currentSegmentDuration = trajectorySegments.get(currentSegmentIndex).duration;
 		double timeOverSegment = 0.0;
-		for (int i = 0; i < tickTotal; i++) {
-			double timeDiff = (timeOverSegment += tickTime) - trajectorySegments.get(currentSegmentIndex).duration;
+		for (Integer i = 0; i < tickTotal; i++) {
+			double timeDiff = (timeOverSegment += tickTime) - currentSegmentDuration;
 			if (timeDiff > 0) {
 				timeOverSegment = timeDiff;
 				currentSegmentIndex++;
+				currentSegmentDuration = trajectorySegments.get(currentSegmentIndex).duration;
 			}
-			map.put(i, new Tuple<Double, WheelTrajectorySegment>(timeOverSegment, trajectorySegments.get(currentSegmentIndex)));
+			map.put(i,
+				new Tuple<Double, MotionTrajectorySegment>(timeOverSegment, trajectorySegments.get(currentSegmentIndex)));
 		}
 		return map;
 	}
@@ -136,11 +139,11 @@ strictfp public class WheelTrajectory {
 	public double calcAcc(double s, MotionTrajectoryPoint lastPoint) {
 		return (calcMaxVel(s) - lastPoint.vel) / (1 / tickTotal);
 	}
-	
+
 	public double calcBadLength(double length, double curvature) {
 		return length * ((curvature * motionTrajectoryProfile.plantWidth + wheel.getModifier()) / 2);
 	}
-	
+
 	public double calcLength(double a, double b, double granularity) {
 		double arcSum = 0;
 		for (double i = a; i < b; i += 1 / granularity) {
@@ -150,7 +153,7 @@ strictfp public class WheelTrajectory {
 	}
 
 	public double calcLength(double a, double b) {
-		return calcLength(a, b, SplineGenerator.INTEGRATION_GRANULARITY * 2 );
+		return calcLength(a, b, SplineGenerator.INTEGRATION_GRANULARITY * 2);
 	}
 
 	public double calcPathSpeed(double s) {

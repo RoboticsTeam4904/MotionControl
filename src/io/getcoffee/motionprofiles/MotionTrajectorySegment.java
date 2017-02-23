@@ -69,7 +69,17 @@ public class MotionTrajectorySegment {
 		duration = rampUpTime + rampDownTime + cruiseTime;
 	}
 
-	protected MotionTrajectoryPoint findSetPoint(double t, int tick) {
+	protected MotionTrajectoryPoint calcSetPoint(double t, int tick, double absoluteDistance) {
+		double[] point = calcSetPoint(t);
+		return new MotionTrajectoryPoint(tick, absoluteDistance + point[0], point[1], point[2]);
+	}
+
+	protected MotionTrajectoryPoint calcSetPoint(double t, int tick) {
+		double[] point = calcSetPoint(t);
+		return new MotionTrajectoryPoint(tick, context.absoluteDistance + point[0], point[1], point[2]);
+	}
+
+	protected double[] calcSetPoint(double t) {
 		double pos;
 		double vel;
 		double accel;
@@ -90,7 +100,7 @@ public class MotionTrajectorySegment {
 		}
 		vel = Vel(t, vel, accel);
 		pos += Pos(t, vel, accel);
-		return new MotionTrajectoryPoint(tick, context.absoluteDistance + pos, vel, accel);
+		return new double[] {pos, vel, accel};
 	}
 
 	@Override

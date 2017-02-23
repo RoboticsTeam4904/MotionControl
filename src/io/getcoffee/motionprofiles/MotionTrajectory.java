@@ -1,6 +1,7 @@
 package io.getcoffee.motionprofiles;
 
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -10,7 +11,6 @@ strictfp public class MotionTrajectory {
 	protected final SplineGenerator splineGenerator;
 	protected final double plantWidth;
 	protected final double tickTime, tickTotal;
-	protected final WheelTrajectory leftWheel, rightWheel;
 	protected final LinkedList<SplineSegment> featureSegments;
 	protected final LinkedList<MotionTrajectorySegment> trajectorySegments;
 	/**
@@ -70,6 +70,7 @@ strictfp public class MotionTrajectory {
 				Math.min(lastSegment.maxVel, maxVelAndAccel.getX()));
 			trajectorySegments.add(lastSegment);
 		}
+		lastSegment.finVel = 0;
 	}
 
 	/**
@@ -108,6 +109,49 @@ strictfp public class MotionTrajectory {
 		return trajectorySegments;
 	}
 
+	public Map<Integer, Tuple<Double, MotionTrajectorySegment>> generateTickMap() {
+		HashMap<Integer, Tuple<Double, MotionTrajectorySegment>> map = new HashMap<Integer, Tuple<Double, MotionTrajectorySegment>>();
+		int currentSegmentIndex = 0;
+		double currentSegmentDuration = trajectorySegments.get(currentSegmentIndex).duration;
+		double timeOverSegment = 0.0;
+		for (int i = 0; i < tickTotal; i++) {
+			double timeDiff = (timeOverSegment += tickTime) - currentSegmentDuration;
+			if (timeDiff > 0) {
+				timeOverSegment = timeDiff;
+				currentSegmentIndex++;
+				currentSegmentDuration = trajectorySegments.get(currentSegmentIndex).duration;
+			}
+			map.put(i,
+				new Tuple<Double, MotionTrajectorySegment>(timeOverSegment, trajectorySegments.get(currentSegmentIndex)));
+		}
+		return map;
+	}
+
+	/**
+	 * Finalize segments and generate map from tucks to set-points
+	 * 
+	 * @param trajectorySegments
+	 * @return
+	 */
+	public Map<Integer, MotionTrajectoryPoint> generateFullTickMap(LinkedList<MotionTrajectorySegment> trajectorySegments) {
+		HashMap<Integer, MotionTrajectoryPoint> map = new HashMap<Integer, MotionTrajectoryPoint>();
+		double timeOverSegment = 0.0;
+		double distanceTraveled = 0.0;
+		int tickIndex = 0;
+		for (MotionTrajectorySegment segment : trajectorySegments) {
+			segment.dividePath();
+			double duration = segment.duration;
+			while (timeOverSegment < duration) {
+				map.put(tickIndex, segment.calcSetPoint(timeOverSegment, tickIndex, distanceTraveled));
+				timeOverSegment += tickTime;
+				tickIndex++;
+			}
+			timeOverSegment -= duration;
+			distanceTraveled += segment.length;
+		}
+		return map;
+	}
+
 	/**
 	 * Calculate the right/left motion trajectory points at a given tick. For ease of calculations,
 	 * a map from ticks to the trajectory segment and time at which the tick occurs is pre-generated.
@@ -120,8 +164,8 @@ strictfp public class MotionTrajectory {
 	 * @return
 	 */
 	public Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> calcPoint(int tick) {
-		Tuple<Double, WheelTrajectorySegment> leftWheelTick = leftWheelTickMap.get(tick);
-		Tuple<Double, WheelTrajectorySegment> rightWheelTick = rightWheelTickMap.get(tick);
+		Tuple<Double, MotionTrajectorySegment> leftWheelTick = map.get(tick);
+		// Calc w by finding curvature(pos) where pos is arclength and multiplying by width and v. v is setpoint in fullmap. calc indiv wheel vels from this?
 		return new Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint>(
 			leftWheelTick.getY().findSetPoint(leftWheelTick.getX(), tick),
 			rightWheelTick.getY().findSetPoint(rightWheelTick.getX(), tick));
