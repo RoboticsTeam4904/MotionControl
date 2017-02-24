@@ -18,12 +18,13 @@ public class SplineSegment {
 		this.length = length;
 	}
 
-	public SplineSegment(double initCurve) {
-		this.initCurve = initCurve;
-	}
-
 	public SplineSegment(double initCurve, double initPercentage) {
 		this.initCurve = initCurve;
 		this.initPercentage = initPercentage;
 	}
+
+	public SplineSegment(double initCurve) {
+		this.initCurve = initCurve;
+	}
+
 }

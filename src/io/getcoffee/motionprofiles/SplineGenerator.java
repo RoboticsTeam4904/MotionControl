@@ -1,28 +1,37 @@
 package io.getcoffee.motionprofiles;
 
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 strictfp public abstract class SplineGenerator {
 	public static double INTEGRATION_GRANULARITY = 100;
+	public LinkedList<SplineSegment> featureSegments;
+	public Map<Double, Double> lengthPercentageTable;
 
 	/**
 	 * Generates an ordered list of distinct features of the spline. Distinct features are
 	 * defined as a sudden change in curvature above the provided curve threshold.
-	 * @param curveThreshold
+	 * @param curveDerivativeThreshold
 	 * @param granularity
 	 * 
 	 * @return ordered list of distinct features of the generated spline
 	 */
-	public LinkedList<SplineSegment> generateFeatureSegments(double curveThreshold, double granularity) {
-		LinkedList<SplineSegment> featureSegments = new LinkedList<>();
+	public void initialize(double curveDerivativeThreshold, double granularity) {
+		featureSegments = new LinkedList<>();
+		lengthPercentageTable = new HashMap<>();
 		double lastPercentage = 0.0;
-		// Hopefully the curvature is never non-zero at the initial position of the arc.
+		// Hopefully the curvature is never non-zero at the initial position of the arc. (It really shouldn't be)
 		double lastCurve = calcCurvature(0.0);
 		double maxCurve = lastCurve;
 		double maxCurveDerivative = 0.0;
+		double absoluteArcSum = 0.0;
+		double arcSum = 0.0;
 		SplineSegment lastFeature = new SplineSegment(0);
 		for (double i = 0; i < 1; i += 1 / granularity) {
+			arcSum += calcSpeed(i);
+			lengthPercentageTable.put(absoluteArcSum + arcSum, i);
 			double instantCurve = calcCurvature(i);
 			double instantCurveDerivative = Math.abs(lastCurve - instantCurve) * granularity;
 			if(instantCurve > maxCurve) {
@@ -31,32 +40,25 @@ strictfp public abstract class SplineGenerator {
 			if(instantCurveDerivative > maxCurveDerivative) {
 				maxCurveDerivative = instantCurveDerivative;
 			}
-			if (instantCurveDerivative > curveThreshold) {
-				double curveLen = calcLength(lastPercentage, i + 1 / granularity);
+			if (instantCurveDerivative > curveDerivativeThreshold) {
 				lastPercentage = i;
-				lastFeature.finCurve = instantCurve;
-				lastFeature.length = curveLen;
-				lastFeature.finPercentage = lastPercentage;
-				lastFeature.maxCurve = maxCurve;
-				lastFeature.maxCurveDerivative = maxCurveDerivative;
+				lastFeature = new SplineSegment(lastFeature.initCurve, instantCurve, maxCurve, maxCurveDerivative, arcSum);
 				featureSegments.add(lastFeature);
 				maxCurve = instantCurve;
 				maxCurveDerivative = 0.0;
+				absoluteArcSum += arcSum;
+				arcSum = 0.0;
 				lastFeature = new SplineSegment(instantCurve, lastPercentage);
 			}
 			lastCurve = instantCurve;
 		}
-		lastFeature.finCurve = calcCurvature(1);
-		lastFeature.length = calcLength(lastPercentage, 1);
-		lastFeature.finPercentage = 1;
-		lastFeature.maxCurve = maxCurve;
-		lastFeature.maxCurveDerivative = maxCurveDerivative;
+		lastFeature = new SplineSegment(lastFeature.initCurve, calcCurvature(1),
+				maxCurve, maxCurveDerivative, calcLength(lastPercentage, 1));
 		featureSegments.add(lastFeature);
-		return featureSegments;
 	}
 	
-	public LinkedList<SplineSegment> generateFeatureSegments(double curveThreshold) {
-		return generateFeatureSegments(curveThreshold, INTEGRATION_GRANULARITY);
+	public void initialize(double curveThreshold) {
+		initialize(curveThreshold, SplineGenerator.INTEGRATION_GRANULARITY);
 	}
 
 	/**
@@ -90,6 +92,14 @@ strictfp public abstract class SplineGenerator {
 
 	protected double calcAbsoluteLength(double granularity) {
 		return calcLength(0.0, 1.0, granularity);
+	}
+
+	protected Map<Integer, Map<Double, Double>> generatePercentageLengthTable(double granularity) {
+		double arcSum = 0.0;
+		for(double i = 0; i < 1; i += 1 / granularity) {
+
+			arcSum += calcSpeed(i);
+		}
 	}
 
 	protected double calcAbsoluteLength() {

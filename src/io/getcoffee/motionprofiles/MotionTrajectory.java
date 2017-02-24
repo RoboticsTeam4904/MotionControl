@@ -29,8 +29,7 @@ strictfp public class MotionTrajectory {
 		this.plantWidth = plantWidth / 2.0;
 		this.tickTime = tickTime;
 		// TODO: Update the threshold to reflect a real value.
-		featureSegments = splineGenerator.generateFeatureSegments(0.1);
-		trajectorySegments = finalizeSegments(applyBackwardConsistency(applyForwardConsistency(generateIsolatedSegments(featureSegments))));
+		trajectorySegments = finalizeSegments(applyBackwardConsistency(applyForwardConsistency(generateIsolatedSegments(splineGenerator.featureSegments))));
 		tickMap = generateFullTickMap(trajectorySegments);
 	}
 
