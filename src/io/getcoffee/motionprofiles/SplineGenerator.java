@@ -22,7 +22,8 @@ strictfp public abstract class SplineGenerator {
 		double maxCurve = lastCurve;
 		double maxCurveDerivative = 0.0;
 		SplineSegment lastFeature = new SplineSegment(0);
-		for (double i = 0; i < 1; i += 1 / granularity) {
+		for (double j = 0; j < granularity; j++) {
+			double i = j / granularity;
 			double instantCurve = calcCurvature(i);
 			double instantCurveDerivative = Math.abs(lastCurve - instantCurve) * granularity;
 			if(instantCurve > maxCurve) {
@@ -32,7 +33,7 @@ strictfp public abstract class SplineGenerator {
 				maxCurveDerivative = instantCurveDerivative;
 			}
 			if (instantCurveDerivative > curveThreshold) {
-				double curveLen = calcLength(lastPercentage, i + 1 / granularity);
+				double curveLen = calcLength(lastPercentage, (j + 1) / granularity);
 				lastPercentage = i;
 				lastFeature.finCurve = instantCurve;
 				lastFeature.length = curveLen;
