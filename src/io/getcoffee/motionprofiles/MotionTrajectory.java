@@ -179,7 +179,7 @@ strictfp public class MotionTrajectory {
 			generalSetpoint.accel * rightOffSet + accOffSet);
 		MotionTrajectoryPoint leftPoint = new MotionTrajectoryPoint(tick, lastLeftPos + leftVel * tickTime, leftVel,
 			generalSetpoint.accel * leftOffSet - accOffSet);
-		return new Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint>(rightPoint, leftPoint);
+		return new Tuple<>(rightPoint, leftPoint);
 	}
 
 	public double calcMaxAcc(double curvature, double curveDerivative) {

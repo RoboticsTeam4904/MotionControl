@@ -108,7 +108,7 @@ strictfp public class WheelTrajectory {
 	 * @return Map<Tick, Tuple<Time of tick occurrence, Trajectory Segment that the tick happens during>>
 	 */
 	public Map<Integer, Tuple<Double, MotionTrajectorySegment>> generateTickMap() {
-		HashMap<Integer, Tuple<Double, MotionTrajectorySegment>> map = new HashMap<Integer, Tuple<Double, MotionTrajectorySegment>>();
+		HashMap<Integer, Tuple<Double, MotionTrajectorySegment>> map = new HashMap<>();
 		Integer currentSegmentIndex = 0;
 		double currentSegmentDuration = trajectorySegments.get(currentSegmentIndex).duration;
 		double timeOverSegment = 0.0;
@@ -119,8 +119,7 @@ strictfp public class WheelTrajectory {
 				currentSegmentIndex++;
 				currentSegmentDuration = trajectorySegments.get(currentSegmentIndex).duration;
 			}
-			map.put(i,
-				new Tuple<Double, MotionTrajectorySegment>(timeOverSegment, trajectorySegments.get(currentSegmentIndex)));
+			map.put(i, new Tuple<>(timeOverSegment, trajectorySegments.get(currentSegmentIndex)));
 		}
 		return map;
 	}
