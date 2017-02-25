@@ -10,7 +10,7 @@ public class MotionTrajectoryQueue {
 
 	public MotionTrajectoryQueue(MotionTrajectory trajectory) {
 		this.trajectory = trajectory;
-		pointQueue = new LinkedBlockingDeque<Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint>>();
+		pointQueue = new LinkedBlockingDeque<>();
 	}
 
 	public MotionTrajectory getTrajectory() {
@@ -33,8 +33,7 @@ public class MotionTrajectoryQueue {
 
 		@Override
 		public void run() {
-			Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> point = trajectory.calcPoint(tickNum += 1);
-			queue.add(point);
+			queue.add(trajectory.calcPoint(tickNum += 1));
 		}
 	}
 }
