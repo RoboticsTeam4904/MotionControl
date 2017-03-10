@@ -11,7 +11,6 @@ strictfp public class MotionTrajectory {
 	protected final SplineGenerator splineGenerator;
 	protected final double plantWidth;
 	protected final double tickTime;
-	protected final LinkedList<SplineSegment> featureSegments;
 	protected final LinkedList<MotionTrajectorySegment> trajectorySegments;
 	protected final Map<Integer, MotionTrajectoryPoint> tickMap;
 	protected int tickTotal;
@@ -53,9 +52,9 @@ strictfp public class MotionTrajectory {
 		double maxVel = calcMaxVel(featureSegments.get(0).maxCurve);
 		double maxAcc = calcMaxAcc(featureSegments.get(0).maxCurve, featureSegments.get(0).maxCurveDerivative);
 		double lastFinVel = 0.0;
-		for(SplineSegment featureSegment : featureSegments) {
+		for (SplineSegment featureSegment : featureSegments) {
 			MotionTrajectorySegment segment = new MotionTrajectorySegment(featureSegment.length, lastFinVel, maxVel,
-					maxAcc);
+				maxAcc);
 			maxVel = calcMaxVel(featureSegment.maxCurve);
 			maxAcc = calcMaxAcc(featureSegment.maxCurve, featureSegment.maxCurveDerivative);
 			segment.finVel = Math.min(segment.maxVel, maxVel);
@@ -98,7 +97,8 @@ strictfp public class MotionTrajectory {
 	 *        ordered segments that are forward consistent
 	 * @return ordered right/left trajectory segments that are forward and backward consistent.
 	 */
-	public LinkedList<MotionTrajectorySegment> applyBackwardConsistency(LinkedList<MotionTrajectorySegment> trajectorySegments) {
+	public LinkedList<MotionTrajectorySegment> applyBackwardConsistency(
+		LinkedList<MotionTrajectorySegment> trajectorySegments) {
 		double lastInitVel = 0.0;
 		for (int i = trajectorySegments.size() - 1; i > 0; i--) {
 			MotionTrajectorySegment trajectorySegment = trajectorySegments.get(i);
@@ -165,14 +165,18 @@ strictfp public class MotionTrajectory {
 	 */
 	public Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> calcPoint(int tick) {
 		MotionTrajectoryPoint generalSetpoint = tickMap.get(tick);
-		double s = splineGenerator.calcPercentageFromPos(generalSetpoint.pos);
+		double s = splineGenerator.calcSFromPosAndSegment(generalSetpoint.pos, );
 		double offSet = plantWidth * splineGenerator.calcCurvature(s);
-		double accelOffSet = plantWidth * generalSetpoint.vel * splineGenerator.calcCurvatureDerivative(s);
-		double wheelVel = generalSetpoint.vel * (1 + wheelModifier * offSet);
-		double wheelAccel = generalSetpoint.accel * (1 + wheelModifier * offSet) + wheelModifier * accelOffSet;
-		// Calc w by finding curvature(pos) where pos is arclength and multiplying by width and v. v is setpoint in fullmap. calc indiv wheel vels from this?
-		return new Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint>(new MotionTrajectoryPoint(tick, pos, )
-			rightWheelTick.getY().findSetPoint(rightWheelTick.getX(), tick));
+		double accOffSet = plantWidth * generalSetpoint.vel * splineGenerator.calcCurvatureDerivative(s);
+		double rightOffSet = 1 + offSet;
+		double leftOffSet = 1 - offSet;
+		double rightVel = generalSetpoint.vel * rightOffSet;
+		double leftVel = generalSetpoint.vel * leftOffSet;
+		MotionTrajectoryPoint rightPoint = new MotionTrajectoryPoint(tick, lastRightPos + rightVel * tickTime, rightVel,
+			generalSetpoint.accel * rightOffSet + accOffSet);
+		MotionTrajectoryPoint leftPoint = new MotionTrajectoryPoint(tick, lastLeftPos + leftVel * tickTime, leftVel,
+			generalSetpoint.accel * leftOffSet - accOffSet);
+		return new Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint>(rightPoint, leftPoint);
 	}
 
 	public double calcMaxAcc(double curvature, double curveDerivative) {

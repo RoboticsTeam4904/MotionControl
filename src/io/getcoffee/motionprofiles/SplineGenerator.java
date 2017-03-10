@@ -4,11 +4,12 @@ package io.getcoffee.motionprofiles;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.TreeMap;
 
 strictfp public abstract class SplineGenerator {
 	public static double INTEGRATION_GRANULARITY = 100;
-	public LinkedList<SplineSegment> featureSegments;
-	public Map<Double, Double> lengthPercentageTable;
+	public LinkedList<SplineSegment> featureSegments = new LinkedList<>();
+	public TreeMap<Double, SplinePoint> lengthMap = new TreeMap<>();
 
 	/**
 	 * Generates an ordered list of distinct features of the spline. Distinct features are
@@ -19,8 +20,6 @@ strictfp public abstract class SplineGenerator {
 	 * @return ordered list of distinct features of the generated spline
 	 */
 	public void initialize(double curveDerivativeThreshold, double granularity) {
-		featureSegments = new LinkedList<>();
-		lengthPercentageTable = new HashMap<>();
 		double lastPercentage = 0.0;
 		// Hopefully the curvature is never non-zero at the initial position of the arc. (It really shouldn't be)
 		double lastCurve = calcCurvature(0.0);
@@ -31,7 +30,7 @@ strictfp public abstract class SplineGenerator {
 		SplineSegment lastFeature = new SplineSegment(0);
 		for (double i = 0; i < 1; i += 1 / granularity) {
 			arcSum += calcSpeed(i);
-			lengthPercentageTable.put(absoluteArcSum + arcSum, i);
+			lengthMap.put(absoluteArcSum + arcSum, i);
 			double instantCurve = calcCurvature(i);
 			double instantCurveDerivative = Math.abs(lastCurve - instantCurve) * granularity;
 			if(instantCurve > maxCurve) {
@@ -176,4 +175,16 @@ strictfp public abstract class SplineGenerator {
 	protected abstract double AccX(double s);
 
 	protected abstract double AccY(double s);
+
+	public SplinePoint findNearestPoint(double distance) {
+		Map.Entry<Double, SplinePoint> lowPoint = lengthMap.floorEntry(distance);;
+		Map.Entry<Double, SplinePoint> highPoint = lengthMap.ceilingEntry(distance);;
+		if(lowPoint == null || highPoint == null) {
+			return (lowPoint != null ? lowPoint.getValue() : highPoint.getValue());
+		}
+		if (Math.abs(distance - lowPoint.getKey()) < Math.abs(distance - highPoint.getKey())) {
+				return lowPoint.getValue();
+		}
+		return highPoint.getValue();
+	}
 }
