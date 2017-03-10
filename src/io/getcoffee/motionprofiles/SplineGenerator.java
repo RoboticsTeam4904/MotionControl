@@ -1,15 +1,13 @@
 package io.getcoffee.motionprofiles;
 
 
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.TreeMap;
 
 strictfp public abstract class SplineGenerator {
 	public static double INTEGRATION_GRANULARITY = 100;
 	public LinkedList<SplineSegment> featureSegments = new LinkedList<>();
-	public TreeMap<Double, SplinePoint> lengthMap = new TreeMap<>();
+	public TreeMap<Double, SplineSegment> absoluteLengthMap = new TreeMap<>();
 
 	/**
 	 * Generates an ordered list of distinct features of the spline. Distinct features are
@@ -28,10 +26,12 @@ strictfp public abstract class SplineGenerator {
 		double absoluteArcSum = 0.0;
 		double arcSum = 0.0;
 		SplineSegment lastFeature = new SplineSegment(0);
-		for (double i = 0; i < 1; i += 1 / granularity) {
-			arcSum += calcSpeed(i);
-			lengthMap.put(absoluteArcSum + arcSum, i);
-			double instantCurve = calcCurvature(i);
+		TreeMap<Double, SplinePoint> localLengthMap = new TreeMap<>();
+		for (double j = 0; j < granularity; j++) {
+			double percentage = j / granularity;
+			arcSum += calcSpeed(percentage);
+			localLengthMap.put(absoluteArcSum, new SplinePoint(arcSum, percentage));
+			double instantCurve = calcCurvature(percentage);
 			double instantCurveDerivative = Math.abs(lastCurve - instantCurve) * granularity;
 			if(instantCurve > maxCurve) {
 				maxCurve = instantCurve;
@@ -40,20 +40,23 @@ strictfp public abstract class SplineGenerator {
 				maxCurveDerivative = instantCurveDerivative;
 			}
 			if (instantCurveDerivative > curveDerivativeThreshold) {
-				lastPercentage = i;
-				lastFeature = new SplineSegment(lastFeature.initCurve, instantCurve, maxCurve, maxCurveDerivative, arcSum);
+				lastPercentage = percentage;
+				lastFeature = new SplineSegment(lastFeature.initCurve, instantCurve, maxCurve, maxCurveDerivative, arcSum, localLengthMap);
 				featureSegments.add(lastFeature);
+				absoluteLengthMap.put(absoluteArcSum, lastFeature);
 				maxCurve = instantCurve;
 				maxCurveDerivative = 0.0;
 				absoluteArcSum += arcSum;
 				arcSum = 0.0;
-				lastFeature = new SplineSegment(instantCurve, lastPercentage);
+				lastFeature = new SplineSegment(instantCurve);
+				localLengthMap = new TreeMap<>();
 			}
 			lastCurve = instantCurve;
 		}
 		lastFeature = new SplineSegment(lastFeature.initCurve, calcCurvature(1),
-				maxCurve, maxCurveDerivative, calcLength(lastPercentage, 1));
+				maxCurve, maxCurveDerivative, calcLength(lastPercentage, 1), localLengthMap);
 		featureSegments.add(lastFeature);
+		absoluteLengthMap.put(absoluteArcSum, lastFeature);
 	}
 	
 	public void initialize(double curveThreshold) {
@@ -91,14 +94,6 @@ strictfp public abstract class SplineGenerator {
 
 	protected double calcAbsoluteLength(double granularity) {
 		return calcLength(0.0, 1.0, granularity);
-	}
-
-	protected Map<Integer, Map<Double, Double>> generatePercentageLengthTable(double granularity) {
-		double arcSum = 0.0;
-		for(double i = 0; i < 1; i += 1 / granularity) {
-
-			arcSum += calcSpeed(i);
-		}
 	}
 
 	protected double calcAbsoluteLength() {
@@ -175,16 +170,4 @@ strictfp public abstract class SplineGenerator {
 	protected abstract double AccX(double s);
 
 	protected abstract double AccY(double s);
-
-	public SplinePoint findNearestPoint(double distance) {
-		Map.Entry<Double, SplinePoint> lowPoint = lengthMap.floorEntry(distance);;
-		Map.Entry<Double, SplinePoint> highPoint = lengthMap.ceilingEntry(distance);;
-		if(lowPoint == null || highPoint == null) {
-			return (lowPoint != null ? lowPoint.getValue() : highPoint.getValue());
-		}
-		if (Math.abs(distance - lowPoint.getKey()) < Math.abs(distance - highPoint.getKey())) {
-				return lowPoint.getValue();
-		}
-		return highPoint.getValue();
-	}
 }

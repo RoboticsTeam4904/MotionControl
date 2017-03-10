@@ -165,7 +165,7 @@ strictfp public class MotionTrajectory {
 	 */
 	public Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> calcPoint(int tick) {
 		MotionTrajectoryPoint generalSetpoint = tickMap.get(tick);
-		double s = splineGenerator.calcSFromPosAndSegment(generalSetpoint.pos, );
+		double s = splineGenerator.calcSFromPosAndSegment(generalSetpoint.pos, generalSetpoint.segment); // relative position (currently absolute). Make intermediate class
 		double offSet = plantWidth * splineGenerator.calcCurvature(s);
 		double accOffSet = plantWidth * generalSetpoint.vel * splineGenerator.calcCurvatureDerivative(s);
 		double rightOffSet = 1 + offSet;
@@ -176,7 +176,7 @@ strictfp public class MotionTrajectory {
 			generalSetpoint.accel * rightOffSet + accOffSet);
 		MotionTrajectoryPoint leftPoint = new MotionTrajectoryPoint(tick, lastLeftPos + leftVel * tickTime, leftVel,
 			generalSetpoint.accel * leftOffSet - accOffSet);
-		return new Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint>(rightPoint, leftPoint);
+		return new Tuple<>(rightPoint, leftPoint);
 	}
 
 	public double calcMaxAcc(double curvature, double curveDerivative) {

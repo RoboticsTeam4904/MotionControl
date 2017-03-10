@@ -5,8 +5,12 @@ package io.getcoffee.motionprofiles;
  */
 public class SplinePoint {
 
-	public double distance;
+	public double length;
 	public double percentage;
-	public double speed;
+
+	public SplinePoint(double length, double percentage) {
+		this.length = length;
+		this.percentage = percentage;
+	}
 
 }
