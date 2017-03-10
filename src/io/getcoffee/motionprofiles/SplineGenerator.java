@@ -12,6 +12,7 @@ strictfp public abstract class SplineGenerator {
 	/**
 	 * Generates an ordered list of distinct features of the spline. Distinct features are
 	 * defined as a sudden change in curvature above the provided curve threshold.
+	 *
 	 * @param curveDerivativeThreshold
 	 * @param granularity
 	 * 
@@ -33,10 +34,10 @@ strictfp public abstract class SplineGenerator {
 			localLengthMap.put(absoluteArcSum, new SplinePoint(arcSum, percentage));
 			double instantCurve = calcCurvature(percentage);
 			double instantCurveDerivative = Math.abs(lastCurve - instantCurve) * granularity;
-			if(instantCurve > maxCurve) {
+			if (instantCurve > maxCurve) {
 				maxCurve = instantCurve;
 			}
-			if(instantCurveDerivative > maxCurveDerivative) {
+			if (instantCurveDerivative > maxCurveDerivative) {
 				maxCurveDerivative = instantCurveDerivative;
 			}
 			if (instantCurveDerivative > curveDerivativeThreshold) {
@@ -78,6 +79,29 @@ strictfp public abstract class SplineGenerator {
 			arcSum += calcSpeed(i);
 		}
 		return arcSum / granularity;
+	}
+
+	/**
+	 * Calculate a map from arclength (along segment) to s
+	 * Alternatively also record the speed of the spline (depracated)
+	 * 
+	 * @param a
+	 * @param b
+	 * @param granularity
+	 * @return
+	 */
+	public TreeMap<Double, Double> calcFeatureLengthMap(double a, double b, double granularity) {
+		TreeMap<Double, Double> map = new TreeMap<Double, Double>();
+		double length = 0;
+		for (double i = a; i < b; i += 1 / granularity) {
+			length += calcSpeed(i);
+			map.put(length, i);
+		}
+		return map;
+	}
+
+	public TreeMap<Double, Double> calcFeatureLengthMap(double a, double b) {
+		return calcFeatureLengthMap(a, b, INTEGRATION_GRANULARITY);
 	}
 
 	/**
