@@ -2,6 +2,7 @@ package io.getcoffee.motionprofiles;
 
 
 import java.util.LinkedList;
+import java.util.TreeMap;
 
 strictfp public abstract class SplineGenerator {
 	public static double INTEGRATION_GRANULARITY = 100;
@@ -9,6 +10,7 @@ strictfp public abstract class SplineGenerator {
 	/**
 	 * Generates an ordered list of distinct features of the spline. Distinct features are
 	 * defined as a sudden change in curvature above the provided curve threshold.
+	 * 
 	 * @param curveThreshold
 	 * @param granularity
 	 * 
@@ -26,10 +28,10 @@ strictfp public abstract class SplineGenerator {
 			double i = j / granularity;
 			double instantCurve = calcCurvature(i);
 			double instantCurveDerivative = Math.abs(lastCurve - instantCurve) * granularity;
-			if(instantCurve > maxCurve) {
+			if (instantCurve > maxCurve) {
 				maxCurve = instantCurve;
 			}
-			if(instantCurveDerivative > maxCurveDerivative) {
+			if (instantCurveDerivative > maxCurveDerivative) {
 				maxCurveDerivative = instantCurveDerivative;
 			}
 			if (instantCurveDerivative > curveThreshold) {
@@ -55,7 +57,7 @@ strictfp public abstract class SplineGenerator {
 		featureSegments.add(lastFeature);
 		return featureSegments;
 	}
-	
+
 	public LinkedList<SplineSegment> generateFeatureSegments(double curveThreshold) {
 		return generateFeatureSegments(curveThreshold, INTEGRATION_GRANULARITY);
 	}
@@ -75,6 +77,29 @@ strictfp public abstract class SplineGenerator {
 			arcSum += calcSpeed(i);
 		}
 		return arcSum / granularity;
+	}
+
+	/**
+	 * Calculate a map from arclength (along segment) to s
+	 * Alternatively also record the speed of the spline (depracated)
+	 * 
+	 * @param a
+	 * @param b
+	 * @param granularity
+	 * @return
+	 */
+	public TreeMap<Double, Double> calcFeatureLengthMap(double a, double b, double granularity) {
+		TreeMap<Double, Double> map = new TreeMap<Double, Double>();
+		double length = 0;
+		for (double i = a; i < b; i += 1 / granularity) {
+			length += calcSpeed(i);
+			map.put(length, i);
+		}
+		return map;
+	}
+
+	public TreeMap<Double, Double> calcFeatureLengthMap(double a, double b) {
+		return calcFeatureLengthMap(a, b, INTEGRATION_GRANULARITY);
 	}
 
 	/**
