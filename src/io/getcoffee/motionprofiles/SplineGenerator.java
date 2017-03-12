@@ -28,8 +28,8 @@ strictfp public abstract class SplineGenerator {
 		double arcSum = 0.0;
 		SplineSegment lastFeature = new SplineSegment(0);
 		TreeMap<Double, SplinePoint> localLengthMap = new TreeMap<>();
-		for (double j = 0; j < granularity; j++) {
-			double percentage = j / granularity;
+		for (double i = 0; i < granularity; i++) {
+			double percentage = i / granularity;
 			arcSum += calcSpeed(percentage);
 			localLengthMap.put(absoluteArcSum, new SplinePoint(arcSum, percentage));
 			double instantCurve = calcCurvature(percentage);

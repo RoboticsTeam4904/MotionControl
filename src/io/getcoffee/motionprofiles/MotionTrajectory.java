@@ -8,11 +8,11 @@ import java.util.Map;
 strictfp public class MotionTrajectory {
 	public static final double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;
 	public static final double robotMaxAccel = MotionTrajectoryExecutor.robotMaxAccel;
-	protected final SplineGenerator splineGenerator;
-	protected final double plantWidth;
-	protected final double tickTime;
-	protected final LinkedList<MotionTrajectorySegment> trajectorySegments;
-	protected final Map<Integer, MotionTrajectoryPoint> tickMap;
+	protected SplineGenerator splineGenerator;
+	protected double plantWidth;
+	protected double tickTime;
+	protected LinkedList<MotionTrajectorySegment> trajectorySegments;
+	protected Map<Integer, MotionTrajectoryPoint> tickMap;
 	protected int tickTotal;
 
 	/**
@@ -28,7 +28,7 @@ strictfp public class MotionTrajectory {
 		this.plantWidth = plantWidth / 2.0;
 		this.tickTime = tickTime;
 		// TODO: Update the threshold to reflect a real value.
-		trajectorySegments = finalizeSegments(applyBackwardConsistency(applyForwardConsistency(generateIsolatedSegments(splineGenerator.featureSegments))));
+		trajectorySegments = finalizeSegments(applyBackwardConsistency(applyForwardConsistency(generateIsolatedSegments(splineGenerator))));
 		tickMap = generateFullTickMap(trajectorySegments);
 	}
 
