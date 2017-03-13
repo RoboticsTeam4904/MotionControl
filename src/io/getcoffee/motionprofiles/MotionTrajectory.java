@@ -4,6 +4,7 @@ package io.getcoffee.motionprofiles;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.TreeMap;
 
 strictfp public class MotionTrajectory {
 	public static final double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;
@@ -28,7 +29,7 @@ strictfp public class MotionTrajectory {
 		this.plantWidth = plantWidth / 2.0;
 		this.tickTime = tickTime;
 		// TODO: Update the threshold to reflect a real value.
-		trajectorySegments = finalizeSegments(applyBackwardConsistency(applyForwardConsistency(generateIsolatedSegments(splineGenerator))));
+		trajectorySegments = finalizeSegments(applyBackwardConsistency(applyForwardConsistency(generateIsolatedSegments(splineGenerator.featureSegmentMap))));
 		tickMap = generateFullTickMap(trajectorySegments);
 	}
 
@@ -47,16 +48,16 @@ strictfp public class MotionTrajectory {
 	 * @param featureSegments
 	 * @return
 	 */
-	public LinkedList<MotionTrajectorySegment> generateIsolatedSegments(LinkedList<SplineSegment> featureSegments) {
+	public LinkedList<MotionTrajectorySegment> generateIsolatedSegments(TreeMap<Double, SplineSegment> featureSegments) {
 		LinkedList<MotionTrajectorySegment> trajectorySegments = new LinkedList<>();
 		double maxVel = calcMaxVel(featureSegments.get(0).maxCurve);
 		double maxAcc = calcMaxAcc(featureSegments.get(0).maxCurve, featureSegments.get(0).maxCurveDerivative);
 		double lastFinVel = 0.0;
-		for (SplineSegment featureSegment : featureSegments) {
-			MotionTrajectorySegment segment = new MotionTrajectorySegment(featureSegment.length, lastFinVel, maxVel,
+		for (Map.Entry<Double, SplineSegment> featureEntry : featureSegments.entrySet()) {
+			MotionTrajectorySegment segment = new MotionTrajectorySegment(featureEntry.getValue().length, lastFinVel, maxVel,
 				maxAcc);
-			maxVel = calcMaxVel(featureSegment.maxCurve);
-			maxAcc = calcMaxAcc(featureSegment.maxCurve, featureSegment.maxCurveDerivative);
+			maxVel = calcMaxVel(featureEntry.getValue().maxCurve);
+			maxAcc = calcMaxAcc(featureEntry.getValue().maxCurve, featureEntry.getValue().maxCurveDerivative);
 			segment.finVel = Math.min(segment.maxVel, maxVel);
 			trajectorySegments.add(segment);
 			lastFinVel = segment.finVel;
@@ -163,20 +164,20 @@ strictfp public class MotionTrajectory {
 	 * @param tick
 	 * @return
 	 */
-	public Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> calcPoint(int tick) {
+	public Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> calcPoint(int tick, Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> lastPoints) {
 		MotionTrajectoryPoint generalSetpoint = tickMap.get(tick);
-		Map.Entry<Double, SplineSegment> segmentEntry = splineGenerator.absoluteLengthMap.ceilingEntry(generalSetpoint.pos);
+		Map.Entry<Double, SplineSegment> segmentEntry = splineGenerator.featureSegmentMap.ceilingEntry(generalSetpoint.pos);
 		SplinePoint splinePoint = segmentEntry.getValue().findNearestPoint(generalSetpoint.pos - segmentEntry.getKey());
-		double offSet = plantWidth * splineGenerator.calcCurvature(splinePoint.percentage);
-		double accOffSet = plantWidth * generalSetpoint.vel * splineGenerator.calcCurvatureDerivative(s);
-		double rightOffSet = 1 + offSet;
-		double leftOffSet = 1 - offSet;
-		double rightVel = generalSetpoint.vel * rightOffSet;
-		double leftVel = generalSetpoint.vel * leftOffSet;
-		MotionTrajectoryPoint rightPoint = new MotionTrajectoryPoint(tick, lastRightPos + rightVel * tickTime, rightVel,
-			generalSetpoint.accel * rightOffSet + accOffSet);
-		MotionTrajectoryPoint leftPoint = new MotionTrajectoryPoint(tick, lastLeftPos + leftVel * tickTime, leftVel,
-			generalSetpoint.accel * leftOffSet - accOffSet);
+		double offset = plantWidth * splineGenerator.calcCurvature(splinePoint.percentage);
+		double accOffset = plantWidth * generalSetpoint.vel * splineGenerator.calcCurvatureDerivative(splinePoint.percentage);
+		double leftOffset = 1 - offset;
+		double rightOffset = 1 + offset;
+		double rightVel = generalSetpoint.vel * rightOffset;
+		double leftVel = generalSetpoint.vel * leftOffset;
+		MotionTrajectoryPoint leftPoint = new MotionTrajectoryPoint(tick, lastPoints.getX().pos + leftVel * tickTime, leftVel,
+				generalSetpoint.accel * leftOffset - accOffset);
+		MotionTrajectoryPoint rightPoint = new MotionTrajectoryPoint(tick, lastPoints.getY().pos + rightVel * tickTime, rightVel,
+			generalSetpoint.accel * rightOffset + accOffset);
 		return new Tuple<>(rightPoint, leftPoint);
 	}
 

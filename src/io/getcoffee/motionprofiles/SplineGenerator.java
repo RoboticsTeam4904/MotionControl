@@ -6,8 +6,7 @@ import java.util.TreeMap;
 
 strictfp public abstract class SplineGenerator {
 	public static double INTEGRATION_GRANULARITY = 100;
-	public LinkedList<SplineSegment> featureSegments = new LinkedList<>();
-	public TreeMap<Double, SplineSegment> absoluteLengthMap = new TreeMap<>();
+	public TreeMap<Double, SplineSegment> featureSegmentMap = new TreeMap<>();
 
 	/**
 	 * Generates an ordered list of distinct features of the spline. Distinct features are
@@ -43,8 +42,7 @@ strictfp public abstract class SplineGenerator {
 			if (instantCurveDerivative > curveDerivativeThreshold) {
 				lastPercentage = percentage;
 				lastFeature = new SplineSegment(lastFeature.initCurve, instantCurve, maxCurve, maxCurveDerivative, arcSum, localLengthMap);
-				featureSegments.add(lastFeature);
-				absoluteLengthMap.put(absoluteArcSum, lastFeature);
+				featureSegmentMap.put(absoluteArcSum, lastFeature);
 				maxCurve = instantCurve;
 				maxCurveDerivative = 0.0;
 				absoluteArcSum += arcSum;
@@ -56,8 +54,7 @@ strictfp public abstract class SplineGenerator {
 		}
 		lastFeature = new SplineSegment(lastFeature.initCurve, calcCurvature(1),
 				maxCurve, maxCurveDerivative, calcLength(lastPercentage, 1), localLengthMap);
-		featureSegments.add(lastFeature);
-		absoluteLengthMap.put(absoluteArcSum, lastFeature);
+		featureSegmentMap.put(absoluteArcSum, lastFeature);
 	}
 	
 	public void initialize(double curveThreshold) {
