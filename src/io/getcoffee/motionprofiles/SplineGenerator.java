@@ -2,53 +2,63 @@ package io.getcoffee.motionprofiles;
 
 
 import java.util.LinkedList;
+import java.util.TreeMap;
 
 strictfp public abstract class SplineGenerator {
 	public static double INTEGRATION_GRANULARITY = 100;
+	public TreeMap<Double, SplineSegment> featureSegmentMap = new TreeMap<>();
 
 	/**
 	 * Generates an ordered list of distinct features of the spline. Distinct features are
 	 * defined as a sudden change in curvature above the provided curve threshold.
-	 * @param curveThreshold
+	 *
+	 * @param curveDerivativeThreshold
 	 * @param granularity
 	 * 
 	 * @return ordered list of distinct features of the generated spline
 	 */
-	public LinkedList<SplineSegment> generateFeatureSegments(double curveThreshold, double granularity) {
-		LinkedList<SplineSegment> featureSegments = new LinkedList<>();
+	public void initialize(double curveDerivativeThreshold, double granularity) {
 		double lastPercentage = 0.0;
-		// Hopefully the curvature is never non-zero at the initial position of the arc.
-		double lastCurve = 0.0;
+		// Hopefully the curvature is never non-zero at the initial position of the arc. (It really shouldn't be)
+		double lastCurve = calcCurvature(0.0);
 		double maxCurve = lastCurve;
+		double maxCurveDerivative = 0.0;
+		double absoluteArcSum = 0.0;
+		double arcSum = 0.0;
 		SplineSegment lastFeature = new SplineSegment(0);
-		for (double i = 0; i < 1; i += 1 / granularity) {
-			double instantCurve = calcCurvature(i);
-			if(instantCurve > maxCurve) {
+		TreeMap<Double, SplinePoint> localLengthMap = new TreeMap<>();
+		for (double i = 0; i < granularity; i++) {
+			double percentage = i / granularity;
+			arcSum += calcSpeed(percentage);
+			localLengthMap.put(absoluteArcSum, new SplinePoint(arcSum, percentage));
+			double instantCurve = calcCurvature(percentage);
+			double instantCurveDerivative = Math.abs(lastCurve - instantCurve) * granularity;
+			if (instantCurve > maxCurve) {
 				maxCurve = instantCurve;
 			}
-			if (Math.abs(lastCurve - instantCurve) > curveThreshold) {
-				double curveLen = calcLength(lastPercentage, i + 1 / granularity);
-				lastPercentage = i;
-				lastCurve = instantCurve;
-				lastFeature.finCurve = instantCurve;
-				lastFeature.length = curveLen;
-				lastFeature.finPercentage = lastPercentage;
-				lastFeature.maxCurve = maxCurve;
-				featureSegments.add(lastFeature);
-				maxCurve = instantCurve;
-				lastFeature = new SplineSegment(instantCurve, lastPercentage);
+			if (instantCurveDerivative > maxCurveDerivative) {
+				maxCurveDerivative = instantCurveDerivative;
 			}
+			if (instantCurveDerivative > curveDerivativeThreshold) {
+				lastPercentage = percentage;
+				lastFeature = new SplineSegment(lastFeature.initCurve, instantCurve, maxCurve, maxCurveDerivative, arcSum, localLengthMap);
+				featureSegmentMap.put(absoluteArcSum, lastFeature);
+				maxCurve = instantCurve;
+				maxCurveDerivative = 0.0;
+				absoluteArcSum += arcSum;
+				arcSum = 0.0;
+				lastFeature = new SplineSegment(instantCurve);
+				localLengthMap = new TreeMap<>();
+			}
+			lastCurve = instantCurve;
 		}
-		lastFeature.finCurve = calcCurvature(1);
-		lastFeature.length = calcLength(lastPercentage, 1);
-		lastFeature.finPercentage = 1;
-		lastFeature.maxCurve = maxCurve;
-		featureSegments.add(lastFeature);
-		return featureSegments;
+		lastFeature = new SplineSegment(lastFeature.initCurve, calcCurvature(1),
+				maxCurve, maxCurveDerivative, calcLength(lastPercentage, 1), localLengthMap);
+		featureSegmentMap.put(absoluteArcSum, lastFeature);
 	}
 	
-	public LinkedList<SplineSegment> generateFeatureSegments(double curveThreshold) {
-		return generateFeatureSegments(curveThreshold, INTEGRATION_GRANULARITY);
+	public void initialize(double curveThreshold) {
+		initialize(curveThreshold, SplineGenerator.INTEGRATION_GRANULARITY);
 	}
 
 	/**
@@ -66,6 +76,29 @@ strictfp public abstract class SplineGenerator {
 			arcSum += calcSpeed(i);
 		}
 		return arcSum / granularity;
+	}
+
+	/**
+	 * Calculate a map from arclength (along segment) to s
+	 * Alternatively also record the speed of the spline (depracated)
+	 * 
+	 * @param a
+	 * @param b
+	 * @param granularity
+	 * @return
+	 */
+	public TreeMap<Double, Double> calcFeatureLengthMap(double a, double b, double granularity) {
+		TreeMap<Double, Double> map = new TreeMap<Double, Double>();
+		double length = 0;
+		for (double i = a; i < b; i += 1 / granularity) {
+			length += calcSpeed(i);
+			map.put(length, i);
+		}
+		return map;
+	}
+
+	public TreeMap<Double, Double> calcFeatureLengthMap(double a, double b) {
+		return calcFeatureLengthMap(a, b, INTEGRATION_GRANULARITY);
 	}
 
 	/**
@@ -99,6 +132,7 @@ strictfp public abstract class SplineGenerator {
 		Tuple<Double, Double> vel = calcVel(s);
 		Tuple<Double, Double> acc = calcAcc(s);
 		double speed = calcSpeed(s);
+		// if speed == 0: use jerk and acc instead of acc and vel. if acc == 0, just return 0 or go deeper or something
 		// System.out.println(speed);
 		return (vel.getX() * acc.getY() - vel.getY() * acc.getX()) / (speed * speed * speed);
 	}

@@ -1,10 +1,10 @@
 package io.getcoffee.motionprofiles;
 
+
 public class MotionTrajectorySegment {
 	protected double initVel;
 	protected double finVel;
 	protected double length;
-	protected double maxCurve;
 	protected double maxVel;
 	protected double maxAccel;
 	protected double duration;
@@ -17,17 +17,12 @@ public class MotionTrajectorySegment {
 	protected double cruiseTime;
 	public AbsoluteSegmentContext context;
 
-	public MotionTrajectorySegment(double initVel, double finVel,
-		double maxVel, double maxAccel, double maxCurve, double length) {
+	public MotionTrajectorySegment(double length, double initVel, double maxVel, double maxAccel) {
+		this.length = length;
 		this.initVel = initVel;
-		this.finVel = finVel;
 		this.maxVel = maxVel;
 		this.maxAccel = maxAccel;
-		this.maxCurve = maxCurve;
-		this.length = length;
 	}
-
-	public MotionTrajectorySegment() {}
 
 	public double calcVelFromFrontAndBack(double distance) {
 		return Math.min(maxVel, Math.min(maxReachableVel(length, initVel), maxReachableVel(length - distance, initVel)));
@@ -70,7 +65,22 @@ public class MotionTrajectorySegment {
 		duration = rampUpTime + rampDownTime + cruiseTime;
 	}
 
-	protected MotionTrajectoryPoint findSetPoint(double t, int tick) {
+	/**
+	 * Calculates the setpoint for a tick and time
+	 *
+	 * @param t
+	 * @param tick
+	 * @param posOffset
+	 * 		  the amount to offset the position of the setpoint by
+	 * @return Relative setpoint with position offset by absolute context's distance.
+	 */
+	protected MotionTrajectoryPoint calcOffsetSetpoint(double t, int tick, double posOffset) {
+		MotionTrajectoryPoint relativeSetPoint = calcSetpoint(t, tick);
+		relativeSetPoint.pos+=posOffset;
+		return relativeSetPoint;
+	}
+
+	protected MotionTrajectoryPoint calcSetpoint(double t, int tick) {
 		double pos;
 		double vel;
 		double accel;
@@ -91,11 +101,12 @@ public class MotionTrajectorySegment {
 		}
 		vel = Vel(t, vel, accel);
 		pos += Pos(t, vel, accel);
-		return new MotionTrajectoryPoint(tick, context.absoluteDistance + pos, vel, accel);
+		return new MotionTrajectoryPoint(tick, pos, vel, accel);
 	}
-	
+
 	@Override
 	public String toString() {
-		return "MotionSegment#{InitVel: "+ initVel + ", FinVel: " + finVel + ", MaxVel: " + maxVel + ", Length: " + length + ", Duration: " + duration + "}";
+		return "MotionSegment#{InitVel: " + initVel + ", FinVel: " + finVel + ", MaxVel: " + maxVel + ", Length: " + length
+			+ ", Duration: " + duration + "}";
 	}
 }
