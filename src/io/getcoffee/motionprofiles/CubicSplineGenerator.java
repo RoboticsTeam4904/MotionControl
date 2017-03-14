@@ -6,6 +6,7 @@ public class CubicSplineGenerator extends SplineGenerator {
 	protected final double[] PosX = new double[4], PosY = new double[4];
 	protected final double[] VelX = new double[3], VelY = new double[3];
 	protected final double[] AccX = new double[2], AccY = new double[2];
+	protected final double[] JerkX = new double[1], JerkY = new double[1];
 
 	public CubicSplineGenerator(double initPosX, double initPosY, double finPosX, double finPosY,
 		double initVelX, double initVelY, double finVelX, double finVelY) {
@@ -20,6 +21,7 @@ public class CubicSplineGenerator extends SplineGenerator {
 		initializePos();
 		initializeVel();
 		initializeAcc();
+		initializeJerk();
 	}
 
 	@Override
@@ -95,5 +97,21 @@ public class CubicSplineGenerator extends SplineGenerator {
 	protected double AccY(double s) {
 		return AccY[0] * s
 			+ AccY[1];
+	}
+
+	@Override
+	protected void initializeJerk() {
+		JerkX[0] = AccX[0];
+		JerkY[0] = AccX[0];
+	}
+
+	@Override
+	protected double JerkX(double s) {
+		return JerkX[0];
+	}
+
+	@Override
+	protected double JerkY(double s) {
+		return JerkY[0];
 	}
 }

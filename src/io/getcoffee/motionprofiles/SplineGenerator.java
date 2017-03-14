@@ -138,6 +138,22 @@ strictfp public abstract class SplineGenerator {
 	}
 
 	/**
+	 * Equation for the derivative of curvature at a percentage of the arc-length.
+	 * @see <a href="https://www.wolframalpha.com/input/?i=(x%27(t)+*+y%27%27(t)+-+y%27(t)+*+x%27%27(t))%2F(x%27(t)%5E2%2By%27(t)%5E2)%5E(3%2F2)">Wolfram-Alpha derivative</a>
+	 *
+	 * @param s
+	 * 		  the position along the spline from [0-1]
+	 * @return the derivature of curvature of the spline at point s
+	 */
+	public double calcCurvatureDerivative(double s) {
+		Tuple<Double, Double> vel = calcVel(s);
+		Tuple<Double, Double> acc = calcAcc(s);
+		Tuple<Double, Double> jerk = calcJerk(s);
+		return (1/(2 * Math.pow(vel.getX() * vel.getX() + vel.getY() * vel.getY(), 5/2)))
+				* (6 * (vel.getY() * acc.getX() - vel.getX() * acc.getY()) * (vel.getX() * acc.getX() + vel.getY() * acc.getY()) + 2 * (vel.getX() * vel.getX() + vel.getY() * vel.getY()) * (-vel.getY() * jerk.getX() + vel.getX() * jerk.getY()));
+	}
+
+	/**
 	 * @param s
 	 *        the position along the spline from [0-1]
 	 * @return the 'velocity' (note that this is not true physical velocity but merely the magnitude of the spline velocity)
@@ -191,4 +207,17 @@ strictfp public abstract class SplineGenerator {
 	protected abstract double AccX(double s);
 
 	protected abstract double AccY(double s);
+
+	/**
+	 * Initialize the jerk polynomial coefficients. For a cubic spline this should be the simplest.
+	 */
+	protected abstract void initializeJerk();
+
+	public Tuple<Double, Double> calcJerk(double s) {
+		return new Tuple<>(JerkX(s), JerkY(s));
+	}
+
+	protected abstract double JerkX(double s);
+
+	protected abstract double JerkY(double s);
 }

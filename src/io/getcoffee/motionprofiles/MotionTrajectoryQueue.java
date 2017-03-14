@@ -33,7 +33,11 @@ public class MotionTrajectoryQueue {
 
 		@Override
 		public void run() {
-			queue.add(trajectory.calcPoint(tickNum += 1));
+			Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> lastPoints = new Tuple<>(new MotionTrajectoryPoint(0, 0, 0, 0), new MotionTrajectoryPoint(0, 0, 0, 0));
+			while(true) {
+				lastPoints = trajectory.calcPoint(tickNum += 1, lastPoints);
+				queue.add(lastPoints);
+			}
 		}
 	}
 }

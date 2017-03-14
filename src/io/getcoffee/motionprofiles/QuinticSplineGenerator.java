@@ -8,6 +8,7 @@ public class QuinticSplineGenerator extends SplineGenerator {
 	protected final double[] PosX = new double[6], PosY = new double[6];
 	protected final double[] VelX = new double[5], VelY = new double[5];
 	protected final double[] AccX = new double[4], AccY = new double[4];
+	protected final double[] JerkX = new double[3], JerkY = new double[3];
 	protected final double absoluteLength;
 
 	QuinticSplineGenerator(double initPosX, double initPosY, double finPosX, double finPosY,
@@ -128,5 +129,29 @@ public class QuinticSplineGenerator extends SplineGenerator {
 			+ AccY[1] * s * s
 			+ AccY[2] * s
 			+ AccY[3];
+	}
+
+	@Override
+	protected void initializeJerk() {
+		JerkX[0] = AccX[0] * 3;
+		JerkX[1] = AccX[1] * 2;
+		JerkX[2] = AccX[2];
+		JerkY[0] = AccY[0] * 3;
+		JerkY[1] = AccY[1] * 2;
+		JerkY[2] = AccY[2];
+	}
+
+	@Override
+	protected double JerkX(double s) {
+		return JerkX[0] * s * s
+				+ JerkX[1] * s
+				+ JerkX[2];
+	}
+
+	@Override
+	protected double JerkY(double s) {
+		return JerkY[0] * s * s
+				+ JerkX[1] * s
+				+ JerkY[2];
 	}
 }
