@@ -20,6 +20,7 @@ strictfp public abstract class SplineGenerator {
 	public void initialize(double curveDerivativeThreshold, double granularity) {
 		double lastPercentage = 0.0;
 		// Hopefully the curvature is never non-zero at the initial position of the arc. (It really shouldn't be)
+		double segmentCurve = calcCurvature(0.0);
 		double lastCurve = calcCurvature(0.0);
 		double maxCurve = lastCurve;
 		double maxCurveDerivative = 0.0;
@@ -39,7 +40,8 @@ strictfp public abstract class SplineGenerator {
 			if (instantCurveDerivative > maxCurveDerivative) {
 				maxCurveDerivative = instantCurveDerivative;
 			}
-			if (instantCurveDerivative > curveDerivativeThreshold) {
+			double segmentCurveDerivative = Math.abs(segmentCurve - instantCurve);
+			if (segmentCurveDerivative > curveDerivativeThreshold) {
 				lastPercentage = percentage;
 				lastFeature = new SplineSegment(lastFeature.initCurve, instantCurve, maxCurve, maxCurveDerivative, arcSum, localLengthMap);
 				featureSegmentMap.put(absoluteArcSum, lastFeature);
@@ -49,6 +51,7 @@ strictfp public abstract class SplineGenerator {
 				arcSum = 0.0;
 				lastFeature = new SplineSegment(instantCurve);
 				localLengthMap = new TreeMap<>();
+				segmentCurve = instantCurve;
 			}
 			lastCurve = instantCurve;
 		}

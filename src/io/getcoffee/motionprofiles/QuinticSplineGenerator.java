@@ -29,6 +29,8 @@ public class QuinticSplineGenerator extends SplineGenerator {
 		initializePos();
 		initializeVel();
 		initializeAcc();
+		initializeJerk();
+		initialize(0.2);
 		absoluteLength = calcAbsoluteLength();
 	}
 

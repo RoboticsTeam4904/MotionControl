@@ -38,4 +38,9 @@ public class SplineSegment {
 		return highPoint.getValue();
 	}
 
+	@Override
+	public String toString() {
+		return "SplineSegment#{InitCurve: " + initCurve + ", FinCurve: " + finCurve + ", MaxCurve: " + maxCurve + ", MaxCurveDeriv: " + maxCurveDerivative + ", Length: " + length+"}";
+	}
+
 }
