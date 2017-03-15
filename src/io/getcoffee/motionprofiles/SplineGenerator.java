@@ -62,7 +62,7 @@ strictfp public abstract class SplineGenerator {
 			}
 			lastCurve = instantCurve;
 		}
-		lastFeature = new SplineSegment(lastFeature.initCurve, calcCurvature(1),
+		lastFeature = new SplineSegment(lastFeature.initCurve, calcCurvature(1), maxSpeed,
 			maxCurve, maxCurveDerivative, calcLength(lastPercentage, 1), localLengthMap);
 		featureSegmentMap.put(absoluteArcSum, lastFeature);
 	}
