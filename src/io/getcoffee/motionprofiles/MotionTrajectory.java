@@ -29,7 +29,8 @@ strictfp public class MotionTrajectory {
 		this.plantWidth = plantWidth / 2.0;
 		this.tickTime = tickTime;
 		// TODO: Update the threshold to reflect a real value.
-		trajectorySegments = finalizeSegments(applyBackwardConsistency(applyForwardConsistency(generateIsolatedSegments(splineGenerator.featureSegmentMap))));
+		trajectorySegments = finalizeSegments(
+			applyBackwardConsistency(applyForwardConsistency(generateIsolatedSegments(splineGenerator.featureSegmentMap))));
 		tickMap = generateFullTickMap(trajectorySegments);
 	}
 
@@ -164,7 +165,8 @@ strictfp public class MotionTrajectory {
 	 * @param tick
 	 * @return
 	 */
-	public Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> calcPoint(int tick, Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> lastPoints) {
+	public Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> calcPoint(int tick,
+		Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> lastPoints) {
 		MotionTrajectoryPoint generalSetpoint = tickMap.get(tick);
 		Map.Entry<Double, SplineSegment> segmentEntry = splineGenerator.featureSegmentMap.ceilingEntry(generalSetpoint.pos);
 		SplinePoint splinePoint = segmentEntry.getValue().findNearestPoint(generalSetpoint.pos - segmentEntry.getKey());
@@ -175,14 +177,15 @@ strictfp public class MotionTrajectory {
 		double rightVel = generalSetpoint.vel * rightOffset;
 		double leftVel = generalSetpoint.vel * leftOffset;
 		MotionTrajectoryPoint leftPoint = new MotionTrajectoryPoint(tick, lastPoints.getX().pos + leftVel * tickTime, leftVel,
-				generalSetpoint.accel * leftOffset - accOffset);
-		MotionTrajectoryPoint rightPoint = new MotionTrajectoryPoint(tick, lastPoints.getY().pos + rightVel * tickTime, rightVel,
+			generalSetpoint.accel * leftOffset - accOffset);
+		MotionTrajectoryPoint rightPoint = new MotionTrajectoryPoint(tick, lastPoints.getY().pos + rightVel * tickTime,
+			rightVel,
 			generalSetpoint.accel * rightOffset + accOffset);
 		return new Tuple<>(rightPoint, leftPoint);
 	}
 
-	public double calcMaxAcc(double curvature, double curveDerivative) {
-		return (robotMaxAccel - plantWidth * calcMaxVel(curvature) * curveDerivative) / calcDivisor(curvature);
+	public double calcMaxAcc(double curvature, double curveDerivative, double maxVel, double maxSplineVel) {
+		return (robotMaxAccel - plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel) / calcDivisor(curvature); // Or flip signs? equivalent? Also, make better by finding min val of maxAccel across the segment by making all of these (including V of robot?) functions of s and solving or probably just check at various values of s
 	}
 
 	public double calcMaxVel(double curvature) {
