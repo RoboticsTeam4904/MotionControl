@@ -1,7 +1,6 @@
 package io.getcoffee.motionprofiles;
 
 
-import java.util.LinkedList;
 import java.util.TreeMap;
 
 strictfp public abstract class SplineGenerator {
@@ -22,6 +21,7 @@ strictfp public abstract class SplineGenerator {
 		// Hopefully the curvature is never non-zero at the initial position of the arc. (It really shouldn't be)
 		double segmentCurve = calcCurvature(0.0);
 		double lastCurve = calcCurvature(0.0);
+		double maxSpeed = 0.0;
 		double maxCurve = lastCurve;
 		double maxCurveDerivative = 0.0;
 		double absoluteArcSum = 0.0;
@@ -30,10 +30,14 @@ strictfp public abstract class SplineGenerator {
 		TreeMap<Double, SplinePoint> localLengthMap = new TreeMap<>();
 		for (double i = 0; i < granularity; i++) {
 			double percentage = i / granularity;
-			arcSum += calcSpeed(percentage);
+			double instantSpeed = calcSpeed(percentage);
+			arcSum += instantSpeed;
 			localLengthMap.put(absoluteArcSum, new SplinePoint(arcSum, percentage));
 			double instantCurve = calcCurvature(percentage);
 			double instantCurveDerivative = Math.abs(lastCurve - instantCurve) * granularity;
+			if (instantSpeed > maxSpeed) {
+				maxSpeed = instantSpeed;
+			}
 			if (instantCurve > maxCurve) {
 				maxCurve = instantCurve;
 			}
@@ -43,9 +47,12 @@ strictfp public abstract class SplineGenerator {
 			double segmentCurveDerivative = Math.abs(segmentCurve - instantCurve);
 			if (segmentCurveDerivative > curveDerivativeThreshold) {
 				lastPercentage = percentage;
-				lastFeature = new SplineSegment(lastFeature.initCurve, instantCurve, maxCurve, maxCurveDerivative, arcSum, localLengthMap);
+				lastFeature = new SplineSegment(lastFeature.initCurve, instantCurve, maxSpeed, maxCurve, maxCurveDerivative,
+					arcSum,
+					localLengthMap);
 				featureSegmentMap.put(absoluteArcSum, lastFeature);
 				maxCurve = instantCurve;
+				maxSpeed = instantSpeed;
 				maxCurveDerivative = 0.0;
 				absoluteArcSum += arcSum;
 				arcSum = 0.0;
@@ -56,10 +63,10 @@ strictfp public abstract class SplineGenerator {
 			lastCurve = instantCurve;
 		}
 		lastFeature = new SplineSegment(lastFeature.initCurve, calcCurvature(1),
-				maxCurve, maxCurveDerivative, calcLength(lastPercentage, 1), localLengthMap);
+			maxCurve, maxCurveDerivative, calcLength(lastPercentage, 1), localLengthMap);
 		featureSegmentMap.put(absoluteArcSum, lastFeature);
 	}
-	
+
 	public void initialize(double curveThreshold) {
 		initialize(curveThreshold, SplineGenerator.INTEGRATION_GRANULARITY);
 	}
@@ -142,18 +149,20 @@ strictfp public abstract class SplineGenerator {
 
 	/**
 	 * Equation for the derivative of curvature at a percentage of the arc-length.
+	 * 
 	 * @see <a href="https://www.wolframalpha.com/input/?i=(x%27(t)+*+y%27%27(t)+-+y%27(t)+*+x%27%27(t))%2F(x%27(t)%5E2%2By%27(t)%5E2)%5E(3%2F2)">Wolfram-Alpha derivative</a>
 	 *
 	 * @param s
-	 * 		  the position along the spline from [0-1]
+	 *        the position along the spline from [0-1]
 	 * @return the derivature of curvature of the spline at point s
 	 */
 	public double calcCurvatureDerivative(double s) {
 		Tuple<Double, Double> vel = calcVel(s);
 		Tuple<Double, Double> acc = calcAcc(s);
 		Tuple<Double, Double> jerk = calcJerk(s);
-		return (1/(2 * Math.pow(vel.getX() * vel.getX() + vel.getY() * vel.getY(), 5/2)))
-				* (6 * (vel.getY() * acc.getX() - vel.getX() * acc.getY()) * (vel.getX() * acc.getX() + vel.getY() * acc.getY()) + 2 * (vel.getX() * vel.getX() + vel.getY() * vel.getY()) * (-vel.getY() * jerk.getX() + vel.getX() * jerk.getY()));
+		return (1 / (2 * Math.pow(vel.getX() * vel.getX() + vel.getY() * vel.getY(), 5 / 2)))
+			* (6 * (vel.getY() * acc.getX() - vel.getX() * acc.getY()) * (vel.getX() * acc.getX() + vel.getY() * acc.getY()) + 2
+				* (vel.getX() * vel.getX() + vel.getY() * vel.getY()) * (-vel.getY() * jerk.getX() + vel.getX() * jerk.getY()));
 	}
 
 	/**
