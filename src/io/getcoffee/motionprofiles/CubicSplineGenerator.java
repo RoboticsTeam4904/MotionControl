@@ -22,6 +22,7 @@ public class CubicSplineGenerator extends SplineGenerator {
 		initializeVel();
 		initializeAcc();
 		initializeJerk();
+		initialize(0.2);
 	}
 
 	@Override

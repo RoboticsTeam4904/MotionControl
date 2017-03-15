@@ -29,7 +29,8 @@ public class MotionTrajectorySegment {
 	}
 
 	private double maxReachableVel(double distance, double initVel) {
-		return Math.sqrt(2 * maxAccel * distance + initVel * initVel);
+		System.out.println(distance + " " + initVel + " " + maxAccel);
+		return Math.sqrt(2 * maxAccel * distance + (initVel * initVel));
 	}
 
 	public double calcReachableEndVel() {
@@ -106,7 +107,7 @@ public class MotionTrajectorySegment {
 
 	@Override
 	public String toString() {
-		return "MotionSegment#{InitVel: " + initVel + ", FinVel: " + finVel + ", MaxVel: " + maxVel + ", Length: " + length
+		return "MotionTrajectorySegment#{InitVel: " + initVel + ", FinVel: " + finVel + ", MaxVel: " + maxVel + ", MaxAccel: " + maxAccel + ", Length: " + length
 			+ ", Duration: " + duration + "}";
 	}
 }

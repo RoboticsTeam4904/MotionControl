@@ -32,6 +32,7 @@ strictfp public class MotionTrajectory {
 		trajectorySegments = finalizeSegments(
 			applyBackwardConsistency(applyForwardConsistency(generateIsolatedSegments(splineGenerator.featureSegmentMap))));
 		tickMap = generateFullTickMap(trajectorySegments);
+		System.out.println("Tick Map" + tickMap);
 	}
 
 	/**
@@ -51,18 +52,23 @@ strictfp public class MotionTrajectory {
 	 */
 	public LinkedList<MotionTrajectorySegment> generateIsolatedSegments(TreeMap<Double, SplineSegment> featureSegments) {
 		LinkedList<MotionTrajectorySegment> trajectorySegments = new LinkedList<>();
-		double maxVel = calcMaxVel(featureSegments.get(0).maxCurve);
-		double maxAcc = calcMaxAcc(featureSegments.get(0).maxCurve, featureSegments.get(0).maxCurveDerivative);
+		System.out.println(featureSegments.values());
+		Map.Entry<Double, SplineSegment> firstEntry = featureSegments.firstEntry();
+		SplineSegment firstFeature = firstEntry.getValue();
+		double maxVel = calcMaxVel(firstFeature.maxCurve);
+		double maxAcc = calcMaxAcc(firstFeature.maxCurve, firstFeature.maxCurveDerivative);
 		double lastFinVel = 0.0;
 		for (Map.Entry<Double, SplineSegment> featureEntry : featureSegments.entrySet()) {
 			MotionTrajectorySegment segment = new MotionTrajectorySegment(featureEntry.getValue().length, lastFinVel, maxVel,
 				maxAcc);
 			maxVel = calcMaxVel(featureEntry.getValue().maxCurve);
 			maxAcc = calcMaxAcc(featureEntry.getValue().maxCurve, featureEntry.getValue().maxCurveDerivative);
+			System.out.println(maxAcc);
 			segment.finVel = Math.min(segment.maxVel, maxVel);
 			trajectorySegments.add(segment);
 			lastFinVel = segment.finVel;
 		}
+		System.out.println("Isolated" + trajectorySegments);
 		return trajectorySegments;
 	}
 
@@ -84,6 +90,7 @@ strictfp public class MotionTrajectory {
 			segment.finVel = Math.min(segment.calcReachableEndVel(), segment.finVel);
 			lastFinVel = segment.finVel;
 		}
+		System.out.println(trajectorySegments);
 		return trajectorySegments;
 	}
 
@@ -108,6 +115,7 @@ strictfp public class MotionTrajectory {
 			trajectorySegment.initVel = Math.min(trajectorySegment.calcReachableStartVel(), trajectorySegment.initVel);
 			lastInitVel = trajectorySegment.initVel;
 		}
+		System.out.println(trajectorySegments);
 		return trajectorySegments;
 	}
 
@@ -127,6 +135,7 @@ strictfp public class MotionTrajectory {
 			timePassed += segment.duration;
 			distanceTraveled += segment.length;
 		}
+		System.out.println(trajectorySegments);
 		return trajectorySegments;
 	}
 
@@ -151,6 +160,7 @@ strictfp public class MotionTrajectory {
 			distanceTraveled += segment.length;
 		}
 		this.tickTotal = tickCount;
+		System.out.println(map);
 		return map;
 	}
 
@@ -168,7 +178,8 @@ strictfp public class MotionTrajectory {
 	public Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> calcPoint(int tick,
 		Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> lastPoints) {
 		MotionTrajectoryPoint generalSetpoint = tickMap.get(tick);
-		Map.Entry<Double, SplineSegment> segmentEntry = splineGenerator.featureSegmentMap.ceilingEntry(generalSetpoint.pos);
+		System.out.println(generalSetpoint);
+		Map.Entry<Double, SplineSegment> segmentEntry = splineGenerator.featureSegmentMap.floorEntry(generalSetpoint.pos);
 		SplinePoint splinePoint = segmentEntry.getValue().findNearestPoint(generalSetpoint.pos - segmentEntry.getKey());
 		double offset = plantWidth * splineGenerator.calcCurvature(splinePoint.percentage);
 		double accOffset = plantWidth * generalSetpoint.vel * splineGenerator.calcCurvatureDerivative(splinePoint.percentage);

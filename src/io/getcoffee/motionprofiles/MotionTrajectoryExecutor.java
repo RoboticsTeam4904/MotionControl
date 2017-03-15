@@ -3,7 +3,7 @@ package io.getcoffee.motionprofiles;
 
 strictfp public class MotionTrajectoryExecutor {
 	public static final double robotMaxVel = 5;
-	public static final double robotMaxAccel = 1;
+	public static final double robotMaxAccel = 50;
 
 	public static void main(String[] args) {
 		SplineGenerator spline = new QuinticSplineGenerator(
@@ -16,7 +16,6 @@ strictfp public class MotionTrajectoryExecutor {
 			1, 0, 0, -20);
 		testSpline(0.6, spline);
 		MotionTrajectory motionTrajectory = new MotionTrajectory(spline, 0.5, 10); // where do we get tick time?
-		System.out.println("number of segments: " + motionTrajectory.featureSegments.size());
 		printPoints(motionTrajectory);
 	}
 
@@ -25,8 +24,8 @@ strictfp public class MotionTrajectoryExecutor {
 		Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> lastPoint = new Tuple<>(motionTrajectoryPoint,
 			motionTrajectoryPoint);
 		for (int i = 1; i < motionTrajectory.getTickTotal(); i++) { // What about the first setpoint?
-			System.out.println(lastPoint); // last point should be used as context for new point (makes program run better and more efficiently, alternative not implemented) (though honestly the contextualized method hasn't been implemented either) (well at least we thought about it a lot)
-			Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> newPoint = motionTrajectory.calcPoint(i);
+			System.out.println(i); // last point should be used as context for new point (makes program run better and more efficiently, alternative not implemented) (though honestly the contextualized method hasn't been implemented either) (well at least we thought about it a lot)
+			Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> newPoint = motionTrajectory.calcPoint(i, lastPoint);
 			lastPoint = newPoint;
 		}
 		System.out.println(lastPoint);
