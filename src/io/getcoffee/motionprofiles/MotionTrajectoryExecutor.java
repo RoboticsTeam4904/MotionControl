@@ -3,7 +3,7 @@ package io.getcoffee.motionprofiles;
 
 strictfp public class MotionTrajectoryExecutor {
 	public static final double robotMaxVel = 5;
-	public static final double robotMaxAccel = 50;
+	public static final double robotMaxAccel = 10;
 
 	public static void main(String[] args) {
 		SplineGenerator spline = new QuinticSplineGenerator(
