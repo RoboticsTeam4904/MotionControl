@@ -44,6 +44,10 @@ strictfp public abstract class SplineGenerator {
 			if (instantCurveDerivative > maxCurveDerivative) {
 				maxCurveDerivative = instantCurveDerivative;
 			}
+			double maxVel = robotMaxVel / (1 + (plantWidth * Math.abs(instantCurve))); // negative?
+			tempMaxAccel = (robotMaxAccel
+				+ Math.signum(curvature) * (plantWidth * maxVel * maxVel * instantCurveDerivative / instantSpeed) / 1
+				+ (plantWidth * Math.abs(instantCurve)));
 			double segmentCurveDerivative = Math.abs(segmentCurve - instantCurve);
 			if (segmentCurveDerivative > curveDerivativeThreshold) {
 				lastPercentage = percentage;
