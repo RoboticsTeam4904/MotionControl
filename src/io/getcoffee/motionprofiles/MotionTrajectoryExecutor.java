@@ -15,7 +15,7 @@ strictfp public class MotionTrajectoryExecutor {
 			// Acceleration
 			1, 0, 0, -20);
 		testSpline(0.6, spline);
-		MotionTrajectory motionTrajectory = new MotionTrajectory(spline, 0.5, 10); // where do we get tick time?
+		MotionTrajectory motionTrajectory = new MotionTrajectory(spline, 0.5, 10);
 		printPoints(motionTrajectory);
 	}
 

@@ -7,6 +7,7 @@ public class MotionTrajectorySegment {
 	protected double length;
 	protected double maxVel;
 	protected double maxAccel;
+	protected double minAccel;
 	protected double duration;
 	protected double adjustedMaxVel;
 	protected double rampUpTime;
@@ -25,20 +26,29 @@ public class MotionTrajectorySegment {
 	}
 
 	public double calcVelFromFrontAndBack(double distance) {
-		return Math.min(maxVel, Math.min(maxReachableVel(length, initVel), maxReachableVel(length - distance, initVel)));
+		return Math.min(maxVel, Math.min(maxReachableVelForward(distance), maxReachableVelBack(distance)));
 	}
 
-	private double maxReachableVel(double distance, double initVel) {
+	private double maxReachableVelForward(double distance) {
 		System.out.println(distance + " " + initVel + " " + maxAccel);
 		return Math.sqrt(2 * maxAccel * distance + (initVel * initVel));
 	}
 
+	private double maxReachableVelBack(double distance) {
+		return Math.sqrt(-2 * minAccel * (length - distance) + (finVel * finVel));
+	}
+
 	public double calcReachableEndVel() {
-		return maxReachableVel(length, initVel);
+		return maxReachableVelForward(length);
 	}
 
 	public double calcReachableStartVel() {
-		return maxReachableVel(length, finVel);
+		return maxReachableVelBack(0);
+	}
+
+	public double calcAdjustedVel() {
+		return Math.sqrt(maxAccel * (-2 * minAccel * length + (finVel * finVel)) - minAccel * (initVel * initVel))
+			/ Math.sqrt(maxAccel - minAccel);
 	}
 
 	protected double Pos(double t, double initVel, double a) {
@@ -47,10 +57,6 @@ public class MotionTrajectorySegment {
 
 	protected double Vel(double t, double initVel, double a) {
 		return initVel + a * t;
-	}
-
-	public double calcAdjustedVel() {
-		return Math.sqrt(maxAccel * length + (initVel * initVel + finVel * finVel) / 2);
 	}
 
 	protected void dividePath() {
@@ -72,12 +78,12 @@ public class MotionTrajectorySegment {
 	 * @param t
 	 * @param tick
 	 * @param posOffset
-	 * 		  the amount to offset the position of the setpoint by
+	 *        the amount to offset the position of the setpoint by
 	 * @return Relative setpoint with position offset by absolute context's distance.
 	 */
 	protected MotionTrajectoryPoint calcOffsetSetpoint(double t, int tick, double posOffset) {
 		MotionTrajectoryPoint relativeSetPoint = calcSetpoint(t, tick);
-		relativeSetPoint.pos+=posOffset;
+		relativeSetPoint.pos += posOffset;
 		return relativeSetPoint;
 	}
 
@@ -107,7 +113,8 @@ public class MotionTrajectorySegment {
 
 	@Override
 	public String toString() {
-		return "MotionTrajectorySegment#{InitVel: " + initVel + ", FinVel: " + finVel + ", MaxVel: " + maxVel + ", MaxAccel: " + maxAccel + ", Length: " + length
+		return "MotionTrajectorySegment#{InitVel: " + initVel + ", FinVel: " + finVel + ", MaxVel: " + maxVel + ", MaxAccel: "
+			+ maxAccel + ", Length: " + length
 			+ ", Duration: " + duration + "}";
 	}
 }
