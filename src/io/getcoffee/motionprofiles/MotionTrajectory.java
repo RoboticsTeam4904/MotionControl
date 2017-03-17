@@ -27,7 +27,7 @@ strictfp public class MotionTrajectory {
 	public MotionTrajectory(SplineGenerator splineGenerator, double plantWidth, double tickTime) {
 		this.splineGenerator = splineGenerator;
 		this.plantWidth = plantWidth / 2.0;
-		this.tickTime = tickTime;
+		this.tickTime = tickTime / 1000;
 		// TODO: Update the threshold to reflect a real value.
 		trajectorySegments = finalizeSegments(
 			applyBackwardConsistency(applyForwardConsistency(generateIsolatedSegments(splineGenerator.featureSegmentMap))));
@@ -159,7 +159,7 @@ strictfp public class MotionTrajectory {
 			System.out.println(tickCount);
 			System.out.println(timeOverSegment);
 			MotionTrajectorySegment segment = trajectorySegments.get(tickCount);
-			for (; timeOverSegment < segment.duration; timeOverSegment += tickTime/1000) {
+			for (; timeOverSegment < segment.duration; timeOverSegment += tickTime) {
 				MotionTrajectoryPoint point = segment.calcOffsetSetpoint(timeOverSegment, tickCount, distanceTraveled);
 				System.out.println(point);
 				map.put(tickCount, point);
@@ -196,10 +196,9 @@ strictfp public class MotionTrajectory {
 		double rightVel = generalSetpoint.vel * rightOffset;
 		double leftVel = generalSetpoint.vel * leftOffset;
 		MotionTrajectoryPoint leftPoint = new MotionTrajectoryPoint(tick, lastPoints.getX().pos + leftVel * tickTime, leftVel,
-			generalSetpoint.accel * leftOffset - accOffset);
+				(leftVel - lastPoints.getX().vel)/tickTime);
 		MotionTrajectoryPoint rightPoint = new MotionTrajectoryPoint(tick, lastPoints.getY().pos + rightVel * tickTime,
-			rightVel,
-			generalSetpoint.accel * rightOffset + accOffset);
+			rightVel, (rightVel - lastPoints.getY().vel)/tickTime);
 		return new Tuple<>(rightPoint, leftPoint);
 	}
 
