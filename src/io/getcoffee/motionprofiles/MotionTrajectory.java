@@ -159,7 +159,7 @@ strictfp public class MotionTrajectory {
 			System.out.println(tickCount);
 			System.out.println(timeOverSegment);
 			MotionTrajectorySegment segment = trajectorySegments.get(tickCount);
-			for (; timeOverSegment < segment.duration; timeOverSegment += tickTime) {
+			for (; timeOverSegment < segment.duration; timeOverSegment += tickTime/1000) {
 				MotionTrajectoryPoint point = segment.calcOffsetSetpoint(timeOverSegment, tickCount, distanceTraveled);
 				System.out.println(point);
 				map.put(tickCount, point);
@@ -220,7 +220,7 @@ strictfp public class MotionTrajectory {
 		return (-robotMaxAccel - Math.signum(curvature) * (plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel)
 				/ calcDivisor(-curvature)); // Or flip signs? equivalent? Also, make better by finding min val of maxAccel across the segment by making all of these (including V of robot?) functions of s and solving or probably just check at various values of s
 	}
-	
+
 	public double calcMaxVel(double curvature) {
 		return robotMaxVel / calcDivisor(curvature);
 	}
