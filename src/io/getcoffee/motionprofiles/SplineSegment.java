@@ -14,8 +14,8 @@ public class SplineSegment {
 	protected double finPercentage;
 	protected double length;
 
-	public SplineSegment(double initCurve, double finCurve, double maxSpeed, double maxCurve, double maxCurveDerivative,
-		double length, TreeMap<Double, SplinePoint> lengthMap) {
+	public SplineSegment(double initCurve, double finCurve, double maxCurve, double maxCurveDerivative, double maxSpeed,
+						 double length, TreeMap<Double, SplinePoint> lengthMap) {
 		this.initCurve = initCurve;
 		this.finCurve = finCurve;
 		this.maxSpeed = maxSpeed;

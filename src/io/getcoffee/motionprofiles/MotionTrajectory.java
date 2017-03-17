@@ -31,6 +31,7 @@ strictfp public class MotionTrajectory {
 		// TODO: Update the threshold to reflect a real value.
 		trajectorySegments = finalizeSegments(
 			applyBackwardConsistency(applyForwardConsistency(generateIsolatedSegments(splineGenerator.featureSegmentMap))));
+		System.out.println(trajectorySegments.getFirst());
 		tickMap = generateFullTickMap(trajectorySegments);
 		System.out.println("Tick Map" + tickMap);
 	}
@@ -152,10 +153,14 @@ strictfp public class MotionTrajectory {
 		double distanceTraveled = 0.0;
 		int tickCount = 0;
 		for (; tickCount < trajectorySegments.size(); tickCount++) {
+			System.out.println(tickCount);
+			System.out.println(timeOverSegment);
+
 			MotionTrajectorySegment segment = trajectorySegments.get(tickCount);
-			segment.dividePath();
 			for (; timeOverSegment < segment.duration; timeOverSegment += tickTime) {
-				map.put(tickCount, segment.calcOffsetSetpoint(timeOverSegment, tickCount, distanceTraveled));
+				MotionTrajectoryPoint point = segment.calcOffsetSetpoint(timeOverSegment, tickCount, distanceTraveled);
+				System.out.println(point);
+				map.put(tickCount, point);
 			}
 			timeOverSegment -= segment.duration;
 			distanceTraveled += segment.length;
@@ -197,7 +202,7 @@ strictfp public class MotionTrajectory {
 	}
 
 	public double calcMaxAcc(double curvature, double curveDerivative, double maxVel, double maxSplineVel) {
-		return (robotMaxAccel - plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel) / calcDivisor(curvature); // Or flip signs? equivalent? Also, make better by finding min val of maxAccel across the segment by making all of these (including V of robot?) functions of s and solving or probably just check at various values of s
+		return (robotMaxAccel + plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel) / calcDivisor(curvature); // Or flip signs? equivalent? Also, make better by finding min val of maxAccel across the segment by making all of these (including V of robot?) functions of s and solving or probably just check at various values of s
 	}
 
 	public double calcMaxVel(double curvature) {
@@ -205,7 +210,7 @@ strictfp public class MotionTrajectory {
 	}
 
 	private double calcDivisor(double curvature) {
-		return 1 + plantWidth * Math.abs(curvature);
+		return 1 - plantWidth * Math.abs(curvature);
 	}
 
 	public int getTickTotal() {

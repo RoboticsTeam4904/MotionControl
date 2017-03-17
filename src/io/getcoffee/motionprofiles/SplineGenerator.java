@@ -47,7 +47,7 @@ strictfp public abstract class SplineGenerator {
 			double segmentCurveDerivative = Math.abs(segmentCurve - instantCurve);
 			if (segmentCurveDerivative > curveDerivativeThreshold) {
 				lastPercentage = percentage;
-				lastFeature = new SplineSegment(lastFeature.initCurve, instantCurve, maxSpeed, maxCurve, maxCurveDerivative,
+				lastFeature = new SplineSegment(lastFeature.initCurve, instantCurve, maxCurve, maxCurveDerivative, maxSpeed,
 					arcSum,
 					localLengthMap);
 				featureSegmentMap.put(absoluteArcSum, lastFeature);
@@ -62,8 +62,8 @@ strictfp public abstract class SplineGenerator {
 			}
 			lastCurve = instantCurve;
 		}
-		lastFeature = new SplineSegment(lastFeature.initCurve, calcCurvature(1), maxSpeed,
-			maxCurve, maxCurveDerivative, calcLength(lastPercentage, 1), localLengthMap);
+		lastFeature = new SplineSegment(lastFeature.initCurve, calcCurvature(1),
+			maxCurve, maxCurveDerivative, maxSpeed, calcLength(lastPercentage, 1), localLengthMap);
 		featureSegmentMap.put(absoluteArcSum, lastFeature);
 	}
 
