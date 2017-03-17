@@ -18,11 +18,12 @@ public class MotionTrajectorySegment {
 	protected double cruiseTime;
 	public AbsoluteSegmentContext context;
 
-	public MotionTrajectorySegment(double length, double initVel, double maxVel, double maxAccel) {
+	public MotionTrajectorySegment(double length, double initVel, double maxVel, double maxAccel, double minAccel) {
 		this.length = length;
 		this.initVel = initVel;
 		this.maxVel = maxVel;
 		this.maxAccel = maxAccel;
+		this.minAccel = minAccel;
 	}
 
 	public double calcVelFromFrontAndBack(double distance) {

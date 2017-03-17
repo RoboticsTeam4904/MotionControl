@@ -58,12 +58,15 @@ strictfp public class MotionTrajectory {
 		SplineSegment firstFeature = firstEntry.getValue();
 		double maxVel = calcMaxVel(firstFeature.maxCurve);
 		double maxAcc = calcMaxAcc(firstFeature.maxCurve, firstFeature.maxCurveDerivative, maxVel, firstFeature.maxSpeed);
+		double minAcc = calcMinAcc(firstFeature.maxCurve, firstFeature.maxCurveDerivative, maxVel, firstFeature.maxSpeed);
 		double lastFinVel = 0.0;
 		for (Map.Entry<Double, SplineSegment> featureEntry : featureSegments.entrySet()) {
 			MotionTrajectorySegment segment = new MotionTrajectorySegment(featureEntry.getValue().length, lastFinVel, maxVel,
-				maxAcc);
+				maxAcc, minAcc);
 			maxVel = calcMaxVel(featureEntry.getValue().maxCurve);
 			maxAcc = calcMaxAcc(featureEntry.getValue().maxCurve, featureEntry.getValue().maxCurveDerivative, maxVel,
+				featureEntry.getValue().maxSpeed);
+			minAcc = calcMinAcc(featureEntry.getValue().maxCurve, featureEntry.getValue().maxCurveDerivative, maxVel,
 				featureEntry.getValue().maxSpeed);
 			System.out.println(maxAcc);
 			segment.finVel = Math.min(segment.maxVel, maxVel);
@@ -155,7 +158,6 @@ strictfp public class MotionTrajectory {
 		for (; tickCount < trajectorySegments.size(); tickCount++) {
 			System.out.println(tickCount);
 			System.out.println(timeOverSegment);
-
 			MotionTrajectorySegment segment = trajectorySegments.get(tickCount);
 			for (; timeOverSegment < segment.duration; timeOverSegment += tickTime) {
 				MotionTrajectoryPoint point = segment.calcOffsetSetpoint(timeOverSegment, tickCount, distanceTraveled);
@@ -201,8 +203,20 @@ strictfp public class MotionTrajectory {
 		return new Tuple<>(rightPoint, leftPoint);
 	}
 
-	public double calcMaxAcc(double curvature, double curveDerivative, double maxVel, double maxSplineVel) {
-		return (robotMaxAccel + (plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel) / calcDivisor(curvature)) * Math.signum(curvature); // Or flip signs? equivalent? Also, make better by finding min val of maxAccel across the segment by making all of these (including V of robot?) functions of s and solving or probably just check at various values of s
+	public double calcAccExtrema(double targetAccel, double curvature, double curveDerivative, double maxVel,
+		double maxSplineVel) {
+		return (targetAccel + Math.signum(curvature) * (plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel)
+			/ calcDivisor(curvature)); // Or flip signs? equivalent? Also, make better by finding min val of maxAccel across the segment by making all of these (including V of robot?) functions of s and solving or probably just check at various values of s
+	}
+
+	public double calcMaxAcc(double curvature, double curveDerivative, double maxVel,
+		double maxSplineVel) {
+		return calcAccExtrema(robotMaxAccel, curvature, curveDerivative, maxVel, maxSplineVel);
+	}
+
+	public double calcMinAcc(double curvature, double curveDerivative, double maxVel,
+		double maxSplineVel) {
+		return calcAccExtrema(-robotMaxAccel, curvature, curveDerivative, maxVel, maxSplineVel);
 	}
 
 	public double calcMaxVel(double curvature) {
@@ -210,7 +224,7 @@ strictfp public class MotionTrajectory {
 	}
 
 	private double calcDivisor(double curvature) {
-		return 1 - (plantWidth * Math.abs(curvature)) * Math.signum(curvature);
+		return 1 - Math.signum(curvature) * (plantWidth * Math.abs(curvature));
 	}
 
 	public int getTickTotal() {
