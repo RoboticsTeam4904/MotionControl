@@ -63,11 +63,11 @@ public class MotionTrajectorySegment {
 	protected void dividePath() {
 		adjustedMaxVel = Math.min(maxVel, calcAdjustedVel());
 		rampUpTime = (adjustedMaxVel - initVel) / maxAccel;
-		rampDownTime = (adjustedMaxVel - finVel) / maxAccel;
+		rampDownTime = (finVel - adjustedMaxVel) / minAccel;
 		rampUpDistance = (adjustedMaxVel * adjustedMaxVel - initVel * initVel)
 			/ (2 * maxAccel);
-		rampDownDistance = (adjustedMaxVel * adjustedMaxVel - finVel * finVel)
-			/ (2 * maxAccel);
+		rampDownDistance = (finVel * finVel - adjustedMaxVel * adjustedMaxVel)
+			/ (2 * minAccel);
 		cruiseDistance = length - rampUpDistance - rampDownDistance;
 		cruiseTime = cruiseDistance / adjustedMaxVel;
 		duration = rampUpTime + rampDownTime + cruiseTime;
@@ -114,7 +114,8 @@ public class MotionTrajectorySegment {
 
 	@Override
 	public String toString() {
-		return "MotionTrajectorySegment#{InitVel: " + initVel + ", FinVel: " + finVel + ", MaxVel: " + maxVel + ", MinAccel: " + minAccel + ", MaxAccel: "
+		return "MotionTrajectorySegment#{InitVel: " + initVel + ", FinVel: " + finVel + ", MaxVel: " + maxVel + ", MinAccel: "
+			+ minAccel + ", MaxAccel: "
 			+ maxAccel + ", Length: " + length
 			+ ", Duration: " + duration + "}";
 	}
