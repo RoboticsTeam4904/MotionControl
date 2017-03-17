@@ -31,7 +31,6 @@ public class MotionTrajectorySegment {
 	}
 
 	private double calcMaxReachableVelForward(double distance) {
-		System.out.println(distance + " " + initVel + " " + maxAccel);
 		return Math.sqrt(2 * maxAccel * distance + (initVel * initVel));
 	}
 

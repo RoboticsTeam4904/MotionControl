@@ -27,11 +27,10 @@ strictfp public class MotionTrajectory {
 	public MotionTrajectory(SplineGenerator splineGenerator, double plantWidth, double tickTime) {
 		this.splineGenerator = splineGenerator;
 		this.plantWidth = plantWidth / 2.0;
-		this.tickTime = tickTime;
+		this.tickTime = tickTime / 1000;
 		// TODO: Update the threshold to reflect a real value.
 		trajectorySegments = finalizeSegments(
 			applyBackwardConsistency(applyForwardConsistency(generateIsolatedSegments(splineGenerator.featureSegmentMap))));
-		System.out.println(trajectorySegments.getFirst());
 		tickMap = generateFullTickMap(trajectorySegments);
 		System.out.println("Tick Map" + tickMap);
 	}
@@ -61,6 +60,7 @@ strictfp public class MotionTrajectory {
 		double minAcc = calcMinAcc(firstFeature.maxCurve, firstFeature.maxCurveDerivative, maxVel, firstFeature.maxSpeed);
 		double lastFinVel = 0.0;
 		for (Map.Entry<Double, SplineSegment> featureEntry : featureSegments.entrySet()) {
+			System.out.println("Max Accel: " + maxAcc + ", Min Accel: " + minAcc);
 			MotionTrajectorySegment segment = new MotionTrajectorySegment(featureEntry.getValue().length, lastFinVel, maxVel,
 				maxAcc, minAcc);
 			maxVel = calcMaxVel(featureEntry.getValue().maxCurve);
@@ -68,7 +68,6 @@ strictfp public class MotionTrajectory {
 				featureEntry.getValue().maxSpeed);
 			minAcc = calcMinAcc(featureEntry.getValue().maxCurve, featureEntry.getValue().maxCurveDerivative, maxVel,
 				featureEntry.getValue().maxSpeed);
-			System.out.println(maxAcc);
 			segment.finVel = Math.min(segment.maxVel, maxVel);
 			trajectorySegments.add(segment);
 			lastFinVel = segment.finVel;
@@ -155,20 +154,17 @@ strictfp public class MotionTrajectory {
 		double timeOverSegment = 0.0;
 		double distanceTraveled = 0.0;
 		int tickCount = 0;
-		for (; tickCount < trajectorySegments.size(); tickCount++) {
-			System.out.println(tickCount);
-			System.out.println(timeOverSegment);
-			MotionTrajectorySegment segment = trajectorySegments.get(tickCount);
-			for (; timeOverSegment < segment.duration; timeOverSegment += tickTime / 1000) {
+		for (int segmentIndex = 0; segmentIndex < trajectorySegments.size(); segmentIndex++) {
+			MotionTrajectorySegment segment = trajectorySegments.get(segmentIndex);
+			for (; timeOverSegment < segment.duration; timeOverSegment += tickTime) {
 				MotionTrajectoryPoint point = segment.calcOffsetSetpoint(timeOverSegment, tickCount, distanceTraveled);
-				System.out.println(point);
 				map.put(tickCount, point);
+				tickCount++;
 			}
 			timeOverSegment -= segment.duration;
 			distanceTraveled += segment.length;
 		}
 		this.tickTotal = tickCount;
-		System.out.println(map);
 		return map;
 	}
 
@@ -186,7 +182,6 @@ strictfp public class MotionTrajectory {
 	public Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> calcPoint(int tick,
 		Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> lastPoints) {
 		MotionTrajectoryPoint generalSetpoint = tickMap.get(tick);
-		System.out.println(generalSetpoint);
 		Map.Entry<Double, SplineSegment> segmentEntry = splineGenerator.featureSegmentMap.floorEntry(generalSetpoint.pos);
 		SplinePoint splinePoint = segmentEntry.getValue().findNearestPoint(generalSetpoint.pos - segmentEntry.getKey());
 		double offset = plantWidth * splineGenerator.calcCurvature(splinePoint.percentage);
@@ -196,20 +191,14 @@ strictfp public class MotionTrajectory {
 		double rightVel = generalSetpoint.vel * rightOffset;
 		double leftVel = generalSetpoint.vel * leftOffset;
 		MotionTrajectoryPoint leftPoint = new MotionTrajectoryPoint(tick, lastPoints.getX().pos + leftVel * tickTime, leftVel,
-			generalSetpoint.accel * leftOffset - accOffset);
+			(leftVel - lastPoints.getX().vel) / tickTime);
 		MotionTrajectoryPoint rightPoint = new MotionTrajectoryPoint(tick, lastPoints.getY().pos + rightVel * tickTime,
-			rightVel,
-			generalSetpoint.accel * rightOffset + accOffset);
+			rightVel, (rightVel - lastPoints.getY().vel) / tickTime);
 		return new Tuple<>(rightPoint, leftPoint);
 	}
 
-	public double calcAccExtrema(double targetAccel, double curvature, double curveDerivative, double maxVel,
+	public double calcMaxAcc(double curvature, double curveDerivative, double maxVel,
 		double maxSplineVel) {
-		return (targetAccel + Math.signum(curvature) * (plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel)
-			/ calcDivisor(curvature)); // Or flip signs? equivalent? Also, make better by finding min val of maxAccel across the segment by making all of these (including V of robot?) functions of s and solving or probably just check at various values of s
-	}
-
-	public double calcMaxAcc(double curvature, double curveDerivative, double maxVel, double maxSplineVel) {
 		return (robotMaxAccel + Math.signum(curvature) * (plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel)
 			/ calcDivisor(curvature)); // Or flip signs? equivalent? Also, make better by finding min val of maxAccel across the segment by making all of these (including V of robot?) functions of s and solving or probably just check at various values of s }
 	}
