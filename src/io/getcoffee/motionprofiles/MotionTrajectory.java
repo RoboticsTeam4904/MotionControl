@@ -211,14 +211,16 @@ strictfp public class MotionTrajectory {
 
 	public double calcMaxAcc(double curvature, double curveDerivative, double maxVel,
 		double maxSplineVel) {
-		return calcAccExtrema(robotMaxAccel, curvature, curveDerivative, maxVel, maxSplineVel);
+		return (robotMaxAccel + Math.signum(curvature) * (plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel)
+				/ calcDivisor(curvature)); // Or flip signs? equivalent? Also, make better by finding min val of maxAccel across the segment by making all of these (including V of robot?) functions of s and solving or probably just check at various values of s	}
 	}
 
 	public double calcMinAcc(double curvature, double curveDerivative, double maxVel,
 		double maxSplineVel) {
-		return calcAccExtrema(-robotMaxAccel, curvature, curveDerivative, maxVel, maxSplineVel);
+		return (-robotMaxAccel - Math.signum(curvature) * (plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel)
+				/ calcDivisor(-curvature)); // Or flip signs? equivalent? Also, make better by finding min val of maxAccel across the segment by making all of these (including V of robot?) functions of s and solving or probably just check at various values of s
 	}
-
+	
 	public double calcMaxVel(double curvature) {
 		return robotMaxVel / calcDivisor(curvature);
 	}
