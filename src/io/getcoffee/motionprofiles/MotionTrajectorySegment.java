@@ -26,24 +26,24 @@ public class MotionTrajectorySegment {
 	}
 
 	public double calcVelFromFrontAndBack(double distance) {
-		return Math.min(maxVel, Math.min(maxReachableVelForward(distance), maxReachableVelBack(distance)));
+		return Math.min(maxVel, Math.min(calcMaxReachableVelForward(distance), calcMaxReachableVelBack(distance)));
 	}
 
-	private double maxReachableVelForward(double distance) {
+	private double calcMaxReachableVelForward(double distance) {
 		System.out.println(distance + " " + initVel + " " + maxAccel);
 		return Math.sqrt(2 * maxAccel * distance + (initVel * initVel));
 	}
 
-	private double maxReachableVelBack(double distance) {
+	private double calcMaxReachableVelBack(double distance) {
 		return Math.sqrt(-2 * minAccel * (length - distance) + (finVel * finVel));
 	}
 
 	public double calcReachableEndVel() {
-		return maxReachableVelForward(length);
+		return calcMaxReachableVelForward(length);
 	}
 
 	public double calcReachableStartVel() {
-		return maxReachableVelBack(0);
+		return calcMaxReachableVelBack(0);
 	}
 
 	public double calcAdjustedVel() {
