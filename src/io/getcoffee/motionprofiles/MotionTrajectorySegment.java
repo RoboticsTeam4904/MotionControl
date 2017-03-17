@@ -104,7 +104,7 @@ public class MotionTrajectorySegment {
 		} else {
 			pos = rampUpDistance + cruiseDistance;
 			vel = adjustedMaxVel;
-			accel = -maxAccel;
+			accel = minAccel;
 			t -= rampUpTime + cruiseTime;
 		}
 		vel = Vel(t, vel, accel);
