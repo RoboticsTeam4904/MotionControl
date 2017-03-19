@@ -16,7 +16,6 @@ public class MotionTrajectorySegment {
 	protected double rampDownDistance;
 	protected double cruiseDistance;
 	protected double cruiseTime;
-	public AbsoluteSegmentContext context;
 
 	public MotionTrajectorySegment(double length, double initVel, double maxVel, double maxAccel, double minAccel) {
 		this.length = length;

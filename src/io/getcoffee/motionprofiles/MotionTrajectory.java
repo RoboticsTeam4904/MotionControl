@@ -129,7 +129,6 @@ strictfp public class MotionTrajectory {
 		double distanceTraveled = 0;
 		for (MotionTrajectorySegment segment : trajectorySegments) {
 			segment.dividePath();
-			segment.context = new AbsoluteSegmentContext(timePassed, distanceTraveled);
 			timePassed += segment.duration;
 			distanceTraveled += segment.length;
 		}

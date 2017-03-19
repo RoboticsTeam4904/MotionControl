@@ -14,7 +14,7 @@ strictfp public class MotionTrajectoryExecutor {
 			// Velocity
 			1, 0, 0, 1,
 			// Acceleration
-			1, 0, 0, -1;
+			1, 0, 0, -20);
 		testSpline(0.6, spline);
 		MotionTrajectory motionTrajectory = new MotionTrajectory(spline, 0.5, 10);
 		printPoints(motionTrajectory);
