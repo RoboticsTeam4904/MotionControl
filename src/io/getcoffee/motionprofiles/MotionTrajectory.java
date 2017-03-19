@@ -134,6 +134,7 @@ strictfp public class MotionTrajectory {
 			distanceTraveled += segment.length;
 		}
 		System.out.println(trajectorySegments);
+		System.out.println(timePassed);
 		return trajectorySegments;
 	}
 
@@ -188,7 +189,7 @@ strictfp public class MotionTrajectory {
 			(leftVel - lastPoints.getX().vel) / tickTime);
 		MotionTrajectoryPoint rightPoint = new MotionTrajectoryPoint(tick, lastPoints.getY().pos + rightVel * tickTime,
 			rightVel, (rightVel - lastPoints.getY().vel) / tickTime);
-		return new Tuple<>(rightPoint, leftPoint);
+		return new Tuple<>(leftPoint, rightPoint);
 	}
 
 	public double calcMaxAcc(double curvature, double curveDerivative, double maxVel,

@@ -7,7 +7,7 @@ strictfp public abstract class SplineGenerator {
 	public static double INTEGRATION_GRANULARITY = 100;
 	public static double robotMaxAccel = MotionTrajectoryExecutor.robotMaxAccel;
 	public static double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;
-	public static double plantWidth;
+	public static double plantWidth = MotionTrajectoryExecutor.plantWidth;
 	public TreeMap<Double, SplineSegment> featureSegmentMap = new TreeMap<>();
 
 	/**
@@ -41,7 +41,7 @@ strictfp public abstract class SplineGenerator {
 			double instantCurve = calcCurvature(percentage);
 			double instantCurveDerivative = Math.abs(lastCurve - instantCurve) * granularity;
 			double k = Math.signum(instantCurve);
-			double o = Math.signum(instantCurveDerivative / (k - plantWidth * instantCurve));
+			double o = Math.signum(k * instantCurveDerivative / (1 + k * plantWidth * instantCurve));
 			double minVelSqrd;
 			double maxVelSqrd;
 			if (o == 1.0) {
@@ -67,7 +67,7 @@ strictfp public abstract class SplineGenerator {
 			if (instantMinAcc > minAcc) {
 				minAcc = instantMinAcc;
 			}
-			if (instantMaxAcc > maxAcc) {
+			if (instantMaxAcc < maxAcc) {
 				maxAcc = instantMaxAcc;
 			}
 			double segmentCurveDerivative = Math.abs(segmentCurve - instantCurve);
