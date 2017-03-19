@@ -11,11 +11,13 @@ public class SplineSegment {
 	protected double maxSpeed;
 	protected double maxCurve;
 	protected double maxCurveDerivative;
+	protected double minAcc;
+	protected double maxAcc;
 	protected double finPercentage;
 	protected double length;
 
 	public SplineSegment(double initCurve, double finCurve, double maxCurve, double maxCurveDerivative, double maxSpeed,
-						 double length, TreeMap<Double, SplinePoint> lengthMap) {
+		double length, TreeMap<Double, SplinePoint> lengthMap) {
 		this.initCurve = initCurve;
 		this.finCurve = finCurve;
 		this.maxSpeed = maxSpeed;
@@ -25,8 +27,17 @@ public class SplineSegment {
 		this.lengthMap = lengthMap;
 	}
 
-	public SplineSegment(double initCurve) {
+	public SplineSegment(double initCurve, double finCurve, double maxCurve, double maxCurveDerivative, double maxSpeed,
+		double minAcc, double maxAcc, double length, TreeMap<Double, SplinePoint> lengthMap) {
 		this.initCurve = initCurve;
+		this.finCurve = finCurve;
+		this.maxSpeed = maxSpeed;
+		this.maxCurve = maxCurve;
+		this.maxCurveDerivative = maxCurveDerivative;
+		this.length = length;
+		this.lengthMap = lengthMap;
+		this.minAcc = minAcc;
+		this.maxAcc = maxAcc;
 	}
 
 	public SplinePoint findNearestPoint(double distance) {

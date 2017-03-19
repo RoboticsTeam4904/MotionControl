@@ -5,6 +5,9 @@ import java.util.TreeMap;
 
 strictfp public abstract class SplineGenerator {
 	public static double INTEGRATION_GRANULARITY = 100;
+	public static double robotMaxAccel;
+	public static double robotMaxVel;
+	public static double plantWidth;
 	public TreeMap<Double, SplineSegment> featureSegmentMap = new TreeMap<>();
 
 	/**
@@ -24,6 +27,8 @@ strictfp public abstract class SplineGenerator {
 		double maxSpeed = 0.0;
 		double maxCurve = lastCurve;
 		double maxCurveDerivative = 0.0;
+		double minAcc = -robotMaxAccel;
+		double maxAcc = robotMaxAccel;
 		double absoluteArcSum = 0.0;
 		double arcSum = 0.0;
 		SplineSegment lastFeature = new SplineSegment(0);
@@ -35,6 +40,21 @@ strictfp public abstract class SplineGenerator {
 			localLengthMap.put(absoluteArcSum, new SplinePoint(arcSum, percentage));
 			double instantCurve = calcCurvature(percentage);
 			double instantCurveDerivative = Math.abs(lastCurve - instantCurve) * granularity;
+			double k = Math.signum(instantCurve);
+			double o = Math.signum(instantCurveDerivative / (k - plantWidth * instantCurve));
+			double minVelSqrd;
+			double maxVelSqrd;
+			if (o == 1.0) {
+				minVelSqrd = 0;
+				maxVelSqrd = robotMaxVel * robotMaxVel;
+			} else {
+				maxVelSqrd = 0;
+				minVelSqrd = robotMaxVel * robotMaxVel;
+			}
+			double instantMinAcc = (-robotMaxAccel - k * plantWidth * maxVelSqrd * instantCurveDerivative / instantSpeed)
+				/ (1 + k * plantWidth * instantCurve);
+			double instantMaxAcc = (robotMaxAccel - k * plantWidth * minVelSqrd * instantCurveDerivative / instantSpeed)
+				/ (1 + k * plantWidth * instantCurve);
 			if (instantSpeed > maxSpeed) {
 				maxSpeed = instantSpeed;
 			}
@@ -44,30 +64,22 @@ strictfp public abstract class SplineGenerator {
 			if (instantCurveDerivative > maxCurveDerivative) {
 				maxCurveDerivative = instantCurveDerivative;
 			}
-			double maxVel = robotMaxVel / (1 + plantWidth * Math.abs(instantCurve))); // negative?
-			double divisor1 = 1 + Math.signum(instantCurve) * (plantWidth * instantCurve); // = math.abs(curve)
-			double offSet = (plantWidth * maxVel * maxVel * instantCurveDerivative / instantSpeed);
-			double tempAcc1 = (robotMaxAccel - Math.signum(instantCurve)*offSet) / divisor1;
-//			double tempAcc2 = (robotMaxAccel + offSet) / divisor2;
-			if (tempAcc1 > tempAcc2) {
-				double maxAcc = tempAcc1;
-				double minAcc = tempAcc2;
-			} else {
-				double maxAcc = tempAcc2;
-				double minAcc = tempAcc1;
+			if (instantMinAcc > minAcc) {
+				minAcc = instantMinAcc;
 			}
-			o = signum(dCurve/(Math.signum(curve) - w*k));
-			double velSqrd = 0 or v^2
-			double minAcc = -robotMaxAccel - Math.signum(curve)*vel;
+			if (instantMaxAcc > maxAcc) {
+				maxAcc = instantMaxAcc;
+			}
 			double segmentCurveDerivative = Math.abs(segmentCurve - instantCurve);
 			if (segmentCurveDerivative > curveDerivativeThreshold) {
 				lastPercentage = percentage;
 				lastFeature = new SplineSegment(lastFeature.initCurve, instantCurve, maxCurve, maxCurveDerivative, maxSpeed,
-					arcSum,
-					localLengthMap);
+					minAcc, maxAcc, arcSum, localLengthMap);
 				featureSegmentMap.put(absoluteArcSum, lastFeature);
 				maxCurve = instantCurve;
 				maxSpeed = instantSpeed;
+				minAcc = -robotMaxAccel;
+				maxAcc = robotMaxAccel;
 				maxCurveDerivative = 0.0;
 				absoluteArcSum += arcSum;
 				arcSum = 0.0;
