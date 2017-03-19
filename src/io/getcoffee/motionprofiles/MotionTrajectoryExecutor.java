@@ -6,6 +6,8 @@ strictfp public class MotionTrajectoryExecutor {
 	public static final double robotMaxAccel = 1;
 
 	public static void main(String[] args) {
+		double test = 0.11230999999999999999;
+		System.out.println(Math.round(test * 1e5) / 1e5);
 		SplineGenerator spline = new QuinticSplineGenerator(
 			// xi, yi, xf, yf
 			// Position

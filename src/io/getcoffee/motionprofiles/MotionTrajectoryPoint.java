@@ -16,6 +16,6 @@ public class MotionTrajectoryPoint {
 
 	@Override
 	public String toString() {
-		return "MP#" + tick + "{" + pos + ", " + vel + ", " + accel + "}";
+		return "MotionTrajectoryPoint#{Tick: " + tick + ", Pos: " + pos + ", Vel: " + vel + ", Accel: " + accel + "}";
 	}
 }
