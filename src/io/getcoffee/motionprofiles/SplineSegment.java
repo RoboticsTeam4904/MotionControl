@@ -40,6 +40,10 @@ public class SplineSegment {
 		this.maxAcc = maxAcc;
 	}
 
+	public SplineSegment(double finCurve) {
+		this.finCurve = finCurve;
+	}
+
 	public SplinePoint findNearestPoint(double distance) {
 		Map.Entry<Double, SplinePoint> lowPoint = lengthMap.floorEntry(distance);
 		Map.Entry<Double, SplinePoint> highPoint = lengthMap.ceilingEntry(distance);

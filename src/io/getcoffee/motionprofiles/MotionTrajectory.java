@@ -56,18 +56,13 @@ strictfp public class MotionTrajectory {
 		Map.Entry<Double, SplineSegment> firstEntry = featureSegments.firstEntry();
 		SplineSegment firstFeature = firstEntry.getValue();
 		double maxVel = calcMaxVel(firstFeature.maxCurve);
-		double maxAcc = calcMaxAcc(firstFeature.maxCurve, firstFeature.maxCurveDerivative, maxVel, firstFeature.maxSpeed);
-		double minAcc = calcMinAcc(firstFeature.maxCurve, firstFeature.maxCurveDerivative, maxVel, firstFeature.maxSpeed);
 		double lastFinVel = 0.0;
 		for (Map.Entry<Double, SplineSegment> featureEntry : featureSegments.entrySet()) {
-			System.out.println("Max Accel: " + maxAcc + ", Min Accel: " + minAcc);
+			System.out
+				.println("Max Accel: " + featureEntry.getValue().maxAcc + ", Min Accel: " + featureEntry.getValue().minAcc);
 			MotionTrajectorySegment segment = new MotionTrajectorySegment(featureEntry.getValue().length, lastFinVel, maxVel,
-				maxAcc, minAcc);
+				featureEntry.getValue().maxAcc, featureEntry.getValue().maxAcc);
 			maxVel = calcMaxVel(featureEntry.getValue().maxCurve);
-			maxAcc = calcMaxAcc(featureEntry.getValue().maxCurve, featureEntry.getValue().maxCurveDerivative, maxVel,
-				featureEntry.getValue().maxSpeed);
-			minAcc = calcMinAcc(featureEntry.getValue().maxCurve, featureEntry.getValue().maxCurveDerivative, maxVel,
-				featureEntry.getValue().maxSpeed);
 			segment.finVel = Math.min(segment.maxVel, maxVel);
 			trajectorySegments.add(segment);
 			lastFinVel = segment.finVel;

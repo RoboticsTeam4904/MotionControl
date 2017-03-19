@@ -5,8 +5,8 @@ import java.util.TreeMap;
 
 strictfp public abstract class SplineGenerator {
 	public static double INTEGRATION_GRANULARITY = 100;
-	public static double robotMaxAccel;
-	public static double robotMaxVel;
+	public static double robotMaxAccel = MotionTrajectoryExecutor.robotMaxAccel;
+	public static double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;
 	public static double plantWidth;
 	public TreeMap<Double, SplineSegment> featureSegmentMap = new TreeMap<>();
 
@@ -73,7 +73,7 @@ strictfp public abstract class SplineGenerator {
 			double segmentCurveDerivative = Math.abs(segmentCurve - instantCurve);
 			if (segmentCurveDerivative > curveDerivativeThreshold) {
 				lastPercentage = percentage;
-				lastFeature = new SplineSegment(lastFeature.initCurve, instantCurve, maxCurve, maxCurveDerivative, maxSpeed,
+				lastFeature = new SplineSegment(lastFeature.finCurve, instantCurve, maxCurve, maxCurveDerivative, maxSpeed,
 					minAcc, maxAcc, arcSum, localLengthMap);
 				featureSegmentMap.put(absoluteArcSum, lastFeature);
 				maxCurve = instantCurve;
@@ -83,14 +83,13 @@ strictfp public abstract class SplineGenerator {
 				maxCurveDerivative = 0.0;
 				absoluteArcSum += arcSum;
 				arcSum = 0.0;
-				lastFeature = new SplineSegment(instantCurve);
 				localLengthMap = new TreeMap<>();
 				segmentCurve = instantCurve;
 			}
 			lastCurve = instantCurve;
 		}
-		lastFeature = new SplineSegment(lastFeature.initCurve, calcCurvature(1),
-			maxCurve, maxCurveDerivative, maxSpeed, calcLength(lastPercentage, 1), localLengthMap);
+		lastFeature = new SplineSegment(lastFeature.finCurve, calcCurvature(1), maxCurve, maxCurveDerivative, maxSpeed, minAcc,
+			maxAcc, calcLength(lastPercentage, 1), localLengthMap);
 		featureSegmentMap.put(absoluteArcSum, lastFeature);
 	}
 
