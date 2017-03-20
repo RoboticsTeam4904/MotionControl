@@ -138,7 +138,7 @@ strictfp public class MotionTrajectory {
 	}
 
 	/**
-	 * Finalize segments and generate map from ticks to set-points
+	 * Generate map from ticks to set-points
 	 * 
 	 * @param trajectorySegments
 	 * @return
