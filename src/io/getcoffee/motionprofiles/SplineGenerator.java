@@ -41,7 +41,8 @@ strictfp public abstract class SplineGenerator {
 			double instantCurve = calcCurvature(percentage);
 			double instantCurveDerivative = Math.abs(lastCurve - instantCurve) * granularity;
 			double k = Math.signum(instantCurve);
-			double o = Math.signum(k * instantCurveDerivative / (1 + k * plantWidth * instantCurve));
+			double divisor = 1 + k * plantWidth * instantCurve;
+			double o = Math.signum(k * instantCurveDerivative / divisor);
 			double minVelSqrd;
 			double maxVelSqrd;
 			if (o == 1.0) {
@@ -52,9 +53,9 @@ strictfp public abstract class SplineGenerator {
 				minVelSqrd = robotMaxVel * robotMaxVel;
 			}
 			double instantMinAcc = (-robotMaxAccel - k * plantWidth * maxVelSqrd * instantCurveDerivative / instantSpeed)
-				/ (1 + k * plantWidth * instantCurve);
+				/ divisor;
 			double instantMaxAcc = (robotMaxAccel - k * plantWidth * minVelSqrd * instantCurveDerivative / instantSpeed)
-				/ (1 + k * plantWidth * instantCurve);
+				/ divisor;
 			if (instantSpeed > maxSpeed) {
 				maxSpeed = instantSpeed;
 			}
