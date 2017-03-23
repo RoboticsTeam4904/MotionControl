@@ -26,7 +26,7 @@ strictfp public class MotionTrajectory {
 	 */
 	public MotionTrajectory(SplineGenerator splineGenerator, double plantWidth, double tickTime) {
 		this.splineGenerator = splineGenerator;
-		this.plantWidth = plantWidth / 2.0;
+		this.plantWidth = plantWidth;
 		this.tickTime = tickTime / 1000;
 		// TODO: Update the threshold to reflect a real value.
 		trajectorySegments = finalizeSegments(
