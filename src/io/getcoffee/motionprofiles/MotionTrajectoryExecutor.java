@@ -3,18 +3,18 @@ package io.getcoffee.motionprofiles;
 
 strictfp public class MotionTrajectoryExecutor {
 	public static final double robotMaxVel = 5;
-	public static final double robotMaxAccel = 3;
+	public static final double robotMaxAccel = 1;
 	public static final double plantWidth = 0.25; //radius
 
 	public static void main(String[] args) {
 		SplineGenerator spline = new QuinticSplineGenerator(
 			// xi, yi, xf, yf
 			// Position
-			0, 0, 1, 2,
+			0, 0, 2, 0,
 			// Velocity
-			1, 0, 0, 1,
+			1, 0, 0, 0,
 			// Acceleration
-			1, 0, 0, -20);
+			1, 0, -1, 0);
 		testSpline(0.6, spline);
 		MotionTrajectory motionTrajectory = new MotionTrajectory(spline, plantWidth, 10);
 		printPoints(motionTrajectory);

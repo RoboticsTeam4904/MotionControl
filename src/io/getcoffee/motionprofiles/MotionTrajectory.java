@@ -107,7 +107,7 @@ strictfp public class MotionTrajectory {
 	public LinkedList<MotionTrajectorySegment> applyBackwardConsistency(
 		LinkedList<MotionTrajectorySegment> trajectorySegments) {
 		double lastInitVel = 0.0;
-		for (int i = trajectorySegments.size() - 1; i > 0; i--) {
+		for (int i = trajectorySegments.size() - 1; i > -1; i--) {
 			MotionTrajectorySegment trajectorySegment = trajectorySegments.get(i);
 			trajectorySegment.finVel = lastInitVel;
 			trajectorySegment.initVel = Math.min(trajectorySegment.calcReachableStartVel(), trajectorySegment.initVel);
