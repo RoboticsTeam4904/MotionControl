@@ -112,12 +112,15 @@ public class MotionTrajectorySegment {
 
 	@Override
 	public String toString() {
-		return "MotionTrajectorySegment#{InitVel: " + initVel +
-				", FinVel: " + finVel +
-				", MaxVel: " + maxVel +
-				", MinAccel: " + minAccel +
-				", MaxAccel: " + maxAccel +
-				", Length: " + length +
-				", Duration: " + duration + "}";
+		// return "MotionTrajectorySegment#{InitVel: " + initVel + ", FinVel: " + finVel + ", MaxVel: " + maxVel + ", MinAccel: "
+		// + minAccel + ", MaxAccel: "
+		// + maxAccel + ", Length: " + length
+		// + ", Duration: " + duration + "}";
+		return "Duration: " + duration + " Should be: " + calcDuration();
+	}
+
+	public double calcDuration() {
+		return (minAccel * (maxVel - initVel) * (maxVel - initVel)
+			+ maxAccel * (2 * minAccel * length - (maxVel - finVel) * (maxVel - finVel))) / (2 * maxAccel * minAccel * maxVel);
 	}
 }
