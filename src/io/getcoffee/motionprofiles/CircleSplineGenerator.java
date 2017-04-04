@@ -23,7 +23,7 @@ public class CircularSplineGenerator extends SplineGenerator {
 
 	protected double calcRadius(double initPosX, double initPosY, double finPosX, double finPosY, double phi) {
 		return ((initPosX - finPosX) * (initPosX - finPosX) + (initPosY - finPosY) * (initPosY - finPosY))
-			/ (2 * (initPosX - finPosX));
+			/ (2 * ((initPosX - finPosX) * Math.cos(phi) + (initPosY - finPosY) * Math.sin(phi)));
 	}
 
 	protected double timeToAngle(double t, double initAngle, double finAngle) {
