@@ -1,12 +1,15 @@
-package io.getcoffee.motionprofiles;
+package io.getcoffee.motionprofiles.pathing.spline;
 
 
+import io.getcoffee.motionprofiles.MotionTrajectoryExecutor;
+import io.getcoffee.motionprofiles.Tuple;
+import io.getcoffee.motionprofiles.pathing.PathGenerator;
 import io.getcoffee.motionprofiles.pathing.PathPoint;
 import io.getcoffee.motionprofiles.pathing.PathSegment;
 
 import java.util.TreeMap;
 
-strictfp public abstract class SplineGenerator {
+strictfp public abstract class SplineGenerator extends PathGenerator {
 	public static double INTEGRATION_GRANULARITY = 100;
 	public static double robotMaxAccel = MotionTrajectoryExecutor.robotMaxAccel;
 	public static double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;
@@ -22,6 +25,7 @@ strictfp public abstract class SplineGenerator {
 	 * 
 	 * @return ordered list of distinct features of the generated spline
 	 */
+	@Override
 	public void initialize(double curveDerivativeThreshold, double granularity) {
 		double lastPercentage = 0.0;
 		// Hopefully the curvature is never non-zero at the initial position of the arc. (It really shouldn't be)
@@ -97,6 +101,7 @@ strictfp public abstract class SplineGenerator {
 		featureSegmentMap.put(absoluteArcSum, lastFeature);
 	}
 
+	@Override
 	public void initialize(double curveThreshold) {
 		initialize(curveThreshold, SplineGenerator.INTEGRATION_GRANULARITY);
 	}
@@ -168,6 +173,7 @@ strictfp public abstract class SplineGenerator {
 	 *        the position along the spline from [0-1]
 	 * @return the curvature of the spline at point s
 	 */
+	@Override
 	public double calcCurvature(double s) {
 		Tuple<Double, Double> vel = calcVel(s);
 		Tuple<Double, Double> acc = calcAcc(s);

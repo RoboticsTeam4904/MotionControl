@@ -1,12 +1,14 @@
-package io.getcoffee.motionprofiles;
+package io.getcoffee.motionprofiles.pathing;
 
 
-public abstract class CircularSplineGenerator extends SplineGenerator {
+import io.getcoffee.motionprofiles.pathing.spline.SplineGenerator;
+
+public class CircularPathGenerator extends PathGenerator {
 	private final double initPosX, initPosY, finPosX, finPosY, finAngle;
 	protected final double centerX, centerY, radius, initAngle;
 	protected final double absoluteLength;
 
-	CircularSplineGenerator(double initPosX, double initPosY, double finPosX, double finPosY, double finAngle) {
+	CircularPathGenerator(double initPosX, double initPosY, double finPosX, double finPosY, double finAngle) {
 		finAngle = finAngle - Math.PI / 2;
 		this.initPosX = initPosX;
 		this.initPosY = initPosY;
@@ -32,6 +34,16 @@ public abstract class CircularSplineGenerator extends SplineGenerator {
 
 	protected double timeToAngle(double t) {
 		return timeToAngle(t, initAngle, finAngle);
+	}
+
+	@Override
+	protected void initialize(double threshold, double granularity) {
+		
+	}
+
+	@Override
+	public double calcCurvature(double s) {
+		return 0;
 	}
 
 	protected double PosX(double t) {

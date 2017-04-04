@@ -3,6 +3,7 @@ package io.getcoffee.motionprofiles;
 
 import io.getcoffee.motionprofiles.pathing.PathPoint;
 import io.getcoffee.motionprofiles.pathing.PathSegment;
+import io.getcoffee.motionprofiles.pathing.spline.SplineGenerator;
 
 import java.util.HashMap;
 import java.util.LinkedList;

@@ -1,6 +1,9 @@
 package io.getcoffee.motionprofiles;
 
 
+import io.getcoffee.motionprofiles.pathing.spline.SplineGenerator;
+import io.getcoffee.motionprofiles.pathing.spline.QuinticSplineGenerator;
+
 strictfp public class MotionTrajectoryExecutor {
 	public static final double robotMaxVel = 5;
 	public static final double robotMaxAccel = 1;
