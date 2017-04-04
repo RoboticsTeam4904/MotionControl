@@ -1,14 +1,14 @@
-package io.getcoffee.motionprofiles;
+package io.getcoffee.motionprofiles.pathing;
 
 /**
  * Created by howard on 3/9/17.
  */
-public class SplinePoint {
+public class PathPoint {
 
 	public double length;
 	public double percentage;
 
-	public SplinePoint(double length, double percentage) {
+	public PathPoint(double length, double percentage) {
 		this.length = length;
 		this.percentage = percentage;
 	}

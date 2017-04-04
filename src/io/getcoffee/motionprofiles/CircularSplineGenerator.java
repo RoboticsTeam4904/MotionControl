@@ -1,7 +1,7 @@
 package io.getcoffee.motionprofiles;
 
 
-public class CircularSplineGenerator extends SplineGenerator {
+public abstract class CircularSplineGenerator extends SplineGenerator {
 	private final double initPosX, initPosY, finPosX, finPosY, finAngle;
 	protected final double centerX, centerY, radius, initAngle;
 	protected final double absoluteLength;

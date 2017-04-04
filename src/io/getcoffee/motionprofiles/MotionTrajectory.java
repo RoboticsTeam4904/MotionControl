@@ -1,6 +1,9 @@
 package io.getcoffee.motionprofiles;
 
 
+import io.getcoffee.motionprofiles.pathing.PathPoint;
+import io.getcoffee.motionprofiles.pathing.PathSegment;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -50,14 +53,14 @@ strictfp public class MotionTrajectory {
 	 * @param featureSegments
 	 * @return
 	 */
-	public LinkedList<MotionTrajectorySegment> generateIsolatedSegments(TreeMap<Double, SplineSegment> featureSegments) {
+	public LinkedList<MotionTrajectorySegment> generateIsolatedSegments(TreeMap<Double, PathSegment> featureSegments) {
 		LinkedList<MotionTrajectorySegment> trajectorySegments = new LinkedList<>();
 		System.out.println(featureSegments.values());
-		Map.Entry<Double, SplineSegment> firstEntry = featureSegments.firstEntry();
-		SplineSegment firstFeature = firstEntry.getValue();
+		Map.Entry<Double, PathSegment> firstEntry = featureSegments.firstEntry();
+		PathSegment firstFeature = firstEntry.getValue();
 		double maxVel = calcMaxVel(firstFeature.maxCurve);
 		double lastFinVel = 0.0;
-		for (Map.Entry<Double, SplineSegment> featureEntry : featureSegments.entrySet()) {
+		for (Map.Entry<Double, PathSegment> featureEntry : featureSegments.entrySet()) {
 			System.out
 				.println("Max Accel: " + featureEntry.getValue().maxAcc + ", Min Accel: " + featureEntry.getValue().minAcc);
 			MotionTrajectorySegment segment = new MotionTrajectorySegment(featureEntry.getValue().length, lastFinVel, maxVel,
@@ -177,10 +180,10 @@ strictfp public class MotionTrajectory {
 	public Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> calcPoint(int tick,
 		Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> lastPoints) {
 		MotionTrajectoryPoint generalSetpoint = tickMap.get(tick);
-		Map.Entry<Double, SplineSegment> segmentEntry = splineGenerator.featureSegmentMap.floorEntry(generalSetpoint.pos);
-		SplinePoint splinePoint = segmentEntry.getValue().findNearestPoint(generalSetpoint.pos - segmentEntry.getKey());
-		double offset = plantWidth * splineGenerator.calcCurvature(splinePoint.percentage);
-		double accOffset = plantWidth * generalSetpoint.vel * splineGenerator.calcCurvatureDerivative(splinePoint.percentage);
+		Map.Entry<Double, PathSegment> segmentEntry = splineGenerator.featureSegmentMap.floorEntry(generalSetpoint.pos);
+		PathPoint pathPoint = segmentEntry.getValue().findNearestPoint(generalSetpoint.pos - segmentEntry.getKey());
+		double offset = plantWidth * splineGenerator.calcCurvature(pathPoint.percentage);
+		double accOffset = plantWidth * generalSetpoint.vel * splineGenerator.calcCurvatureDerivative(pathPoint.percentage);
 		double leftOffset = 1 - offset;
 		double rightOffset = 1 + offset;
 		double rightVel = generalSetpoint.vel * rightOffset;

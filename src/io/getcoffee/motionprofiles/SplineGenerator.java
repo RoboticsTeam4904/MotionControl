@@ -1,6 +1,9 @@
 package io.getcoffee.motionprofiles;
 
 
+import io.getcoffee.motionprofiles.pathing.PathPoint;
+import io.getcoffee.motionprofiles.pathing.PathSegment;
+
 import java.util.TreeMap;
 
 strictfp public abstract class SplineGenerator {
@@ -8,7 +11,7 @@ strictfp public abstract class SplineGenerator {
 	public static double robotMaxAccel = MotionTrajectoryExecutor.robotMaxAccel;
 	public static double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;
 	public static double plantWidth = MotionTrajectoryExecutor.plantWidth;
-	public TreeMap<Double, SplineSegment> featureSegmentMap = new TreeMap<>();
+	public TreeMap<Double, PathSegment> featureSegmentMap = new TreeMap<>();
 
 	/**
 	 * Generates an ordered list of distinct features of the spline. Distinct features are
@@ -31,13 +34,13 @@ strictfp public abstract class SplineGenerator {
 		double maxAcc = robotMaxAccel;
 		double absoluteArcSum = 0.0;
 		double arcSum = 0.0;
-		SplineSegment lastFeature = new SplineSegment(0);
-		TreeMap<Double, SplinePoint> localLengthMap = new TreeMap<>();
+		PathSegment lastFeature = new PathSegment(0);
+		TreeMap<Double, PathPoint> localLengthMap = new TreeMap<>();
 		for (double i = 0; i < granularity; i++) {
 			double percentage = i / granularity;
 			double instantSpeed = calcSpeed(percentage);
 			arcSum += instantSpeed;
-			localLengthMap.put(absoluteArcSum, new SplinePoint(arcSum, percentage));
+			localLengthMap.put(absoluteArcSum, new PathPoint(arcSum, percentage));
 			double instantCurve = calcCurvature(percentage);
 			double instantCurveDerivative = Math.abs(lastCurve - instantCurve) * granularity;
 			double k = Math.signum(instantCurve);
@@ -74,7 +77,7 @@ strictfp public abstract class SplineGenerator {
 			double segmentCurveDerivative = Math.abs(segmentCurve - instantCurve);
 			if (segmentCurveDerivative > curveDerivativeThreshold) {
 				lastPercentage = percentage;
-				lastFeature = new SplineSegment(lastFeature.finCurve, instantCurve, maxCurve, maxCurveDerivative, maxSpeed,
+				lastFeature = new PathSegment(lastFeature.finCurve, instantCurve, maxCurve, maxCurveDerivative, maxSpeed,
 					minAcc, maxAcc, arcSum, localLengthMap);
 				featureSegmentMap.put(absoluteArcSum, lastFeature);
 				maxCurve = instantCurve;
@@ -89,7 +92,7 @@ strictfp public abstract class SplineGenerator {
 			}
 			lastCurve = instantCurve;
 		}
-		lastFeature = new SplineSegment(lastFeature.finCurve, calcCurvature(1), maxCurve, maxCurveDerivative, maxSpeed, minAcc,
+		lastFeature = new PathSegment(lastFeature.finCurve, calcCurvature(1), maxCurve, maxCurveDerivative, maxSpeed, minAcc,
 			maxAcc, calcLength(lastPercentage, 1), localLengthMap);
 		featureSegmentMap.put(absoluteArcSum, lastFeature);
 	}
