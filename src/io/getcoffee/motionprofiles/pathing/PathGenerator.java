@@ -21,4 +21,7 @@ public abstract class PathGenerator {
 	protected abstract double AccX(double s);
 	protected abstract double AccY(double s);
 
+	protected abstract double JerkX(double s);
+	protected abstract double JerkY(double s);
+
 }

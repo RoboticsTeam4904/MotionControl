@@ -38,7 +38,7 @@ public class CircularPathGenerator extends PathGenerator {
 
 	@Override
 	protected void initialize(double threshold, double granularity) {
-		
+
 	}
 
 	@Override
