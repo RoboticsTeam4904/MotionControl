@@ -1,7 +1,7 @@
 package io.getcoffee.motionprofiles;
 
 
-import io.getcoffee.motionprofiles.pathing.spline.SplineGenerator;
+import io.getcoffee.motionprofiles.pathing.PathGenerator;
 import io.getcoffee.motionprofiles.pathing.spline.QuinticSplineGenerator;
 
 strictfp public class MotionTrajectoryExecutor {
@@ -10,7 +10,7 @@ strictfp public class MotionTrajectoryExecutor {
 	public static final double plantWidth = 0.25; //radius
 
 	public static void main(String[] args) {
-		SplineGenerator spline = new QuinticSplineGenerator(
+		PathGenerator spline = new QuinticSplineGenerator(
 			// xi, yi, xf, yf
 			// Position
 			0, 0, 2, 0,
@@ -33,8 +33,8 @@ strictfp public class MotionTrajectoryExecutor {
 		}
 	}
 
-	public static void testSpline(double s, SplineGenerator spline) {
-		System.out.println("Spline point at " + s);
+	public static void testSpline(double s, PathGenerator spline) {
+		System.out.println("Path point at " + s);
 		System.out.println("Pos " + spline.calcPos(s));
 		System.out.println("Vel " + spline.calcVel(s));
 		System.out.println("Acc " + spline.calcAcc(s));

@@ -1,8 +1,6 @@
 package io.getcoffee.motionprofiles.pathing;
 
 
-import io.getcoffee.motionprofiles.pathing.PathPoint;
-
 import java.util.Map;
 import java.util.TreeMap;
 

@@ -1,7 +1,7 @@
 package io.getcoffee.motionprofiles.pathing.spline;
 
 
-public class CubicSplineGenerator extends SplineGenerator {
+strictfp public class CubicSplineGenerator extends SplineGenerator {
 	private final double initPosX, initPosY, finPosX, finPosY, initVelX, initVelY, finVelX, finVelY;
 	protected final double[] PosX = new double[4], PosY = new double[4];
 	protected final double[] VelX = new double[3], VelY = new double[3];
@@ -22,9 +22,6 @@ public class CubicSplineGenerator extends SplineGenerator {
 	}
 
 	@Override
-	/**
-	 * Position
-	 */
 	protected void initializePos() {
 		/* a */PosX[0] = 2 * initPosX - 2 * finPosX + initVelX + finVelX;
 		/* b */PosX[1] = -3 * initPosX + 3 * finPosX - 2 * initVelX - finVelX;
