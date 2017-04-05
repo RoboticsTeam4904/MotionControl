@@ -26,9 +26,6 @@ public class CubicSplineGenerator extends SplineGenerator {
 	}
 
 	@Override
-	/**
-	 * Position
-	 */
 	protected void initializePos() {
 		/* a */PosX[0] = 2 * initPosX - 2 * finPosX + initVelX + finVelX;
 		/* b */PosX[1] = -3 * initPosX + 3 * finPosX - 2 * initVelX - finVelX;

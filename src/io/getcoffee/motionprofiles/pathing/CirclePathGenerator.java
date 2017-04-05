@@ -1,14 +1,14 @@
 package io.getcoffee.motionprofiles.pathing;
 
 
-import io.getcoffee.motionprofiles.pathing.spline.SplineGenerator;
+import java.util.TreeMap;
 
-public class CircularPathGenerator extends PathGenerator {
+public class CirclePathGenerator extends PathGenerator {
 	private final double initPosX, initPosY, finPosX, finPosY, finAngle;
 	protected final double centerX, centerY, radius, initAngle;
 	protected final double absoluteLength;
 
-	CircularPathGenerator(double initPosX, double initPosY, double finPosX, double finPosY, double finAngle) {
+	CirclePathGenerator(double initPosX, double initPosY, double finPosX, double finPosY, double finAngle) {
 		finAngle = finAngle - Math.PI / 2;
 		this.initPosX = initPosX;
 		this.initPosY = initPosY;
@@ -19,8 +19,8 @@ public class CircularPathGenerator extends PathGenerator {
 		this.centerX = finPosX + radius * Math.cos(finAngle);
 		this.centerY = finPosY + radius * Math.sin(finAngle);
 		this.initAngle = Math.atan2(initPosX - centerX, initPosY - centerY);
-		// this.radius = Math.abs(radius)
 		this.absoluteLength = 2 * (finAngle - initAngle) * radius;
+		initialize(0.2);
 	}
 
 	protected double calcRadius(double initPosX, double initPosY, double finPosX, double finPosY, double phi) {
@@ -34,16 +34,6 @@ public class CircularPathGenerator extends PathGenerator {
 
 	protected double timeToAngle(double t) {
 		return timeToAngle(t, initAngle, finAngle);
-	}
-
-	@Override
-	protected void initialize(double threshold, double granularity) {
-
-	}
-
-	@Override
-	public double calcCurvature(double s) {
-		return 0;
 	}
 
 	protected double PosX(double t) {
