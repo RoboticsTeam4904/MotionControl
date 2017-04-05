@@ -18,10 +18,6 @@ public class CubicSplineGenerator extends SplineGenerator {
 		this.initVelY = initVelY;
 		this.finVelX = finVelX;
 		this.finVelY = finVelY;
-		initializePos();
-		initializeVel();
-		initializeAcc();
-		initializeJerk();
 		initialize(0.2);
 	}
 
@@ -38,81 +34,5 @@ public class CubicSplineGenerator extends SplineGenerator {
 		/* b */PosY[1] = -3 * initPosY + 3 * finPosY - 2 * initVelY - finVelY;
 		/* c */PosY[2] = initVelY;
 		/* d */PosY[3] = initPosY;
-	}
-
-	@Override
-	protected double PosX(double s) {
-		return PosX[0] * s * s * s
-			+ PosX[1] * s * s
-			+ PosX[2] * s
-			+ PosX[3];
-	}
-
-	@Override
-	protected double PosY(double s) {
-		return PosY[0] * s * s * s
-			+ PosY[1] * s * s
-			+ PosY[2] * s
-			+ PosY[3];
-	}
-
-	@Override
-	protected void initializeVel() {
-		VelX[0] = PosX[0] * 3;
-		VelX[1] = PosX[1] * 2;
-		VelX[2] = PosX[2];
-		VelY[0] = PosY[0] * 3;
-		VelY[1] = PosY[1] * 2;
-		VelY[2] = PosY[2];
-	}
-
-	@Override
-	protected double VelX(double s) {
-		return VelX[0] * s * s
-			+ VelX[1] * s
-			+ VelX[2];
-	}
-
-	@Override
-	protected double VelY(double s) {
-		return VelY[0] * s * s
-			+ VelY[1] * s
-			+ VelY[2];
-	}
-
-	@Override
-	protected void initializeAcc() {
-		AccX[0] = VelX[0] * 2;
-		AccX[1] = VelX[1];
-		AccY[0] = VelY[0] * 2;
-		AccY[1] = VelY[1];
-	}
-
-	@Override
-	protected double AccX(double s) {
-		return AccX[0] * s
-			+ AccX[1];
-	}
-
-	@Override
-	protected double AccY(double s) {
-		return AccY[0] * s
-			+ AccY[1];
-	}
-
-	@Override
-	protected void initializeJerk() {
-		JerkX[0] = AccX[0];
-		JerkY[0] = AccX[0];
-	}
-
-	@Override
-	protected double JerkX(double s) {
-		return JerkX[0];
-	}
-
-	@Override
-	protected double JerkY(double s) {
-		return JerkY[0];
 	}
 }

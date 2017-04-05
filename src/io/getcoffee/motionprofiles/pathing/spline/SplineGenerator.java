@@ -1,13 +1,12 @@
 package io.getcoffee.motionprofiles.pathing.spline;
 
 
+import java.util.TreeMap;
 import io.getcoffee.motionprofiles.MotionTrajectoryExecutor;
 import io.getcoffee.motionprofiles.Tuple;
 import io.getcoffee.motionprofiles.pathing.PathGenerator;
 import io.getcoffee.motionprofiles.pathing.PathPoint;
 import io.getcoffee.motionprofiles.pathing.PathSegment;
-
-import java.util.TreeMap;
 
 strictfp public abstract class SplineGenerator extends PathGenerator {
 	public static double INTEGRATION_GRANULARITY = 100;
@@ -15,6 +14,7 @@ strictfp public abstract class SplineGenerator extends PathGenerator {
 	public static double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;
 	public static double plantWidth = MotionTrajectoryExecutor.plantWidth;
 	public TreeMap<Double, PathSegment> featureSegmentMap = new TreeMap<>();
+	protected double[] PosX, PosY, VelX, VelY, AccX, AccY, JerkX, JerkY;
 
 	/**
 	 * Generates an ordered list of distinct features of the spline. Distinct features are
@@ -27,6 +27,9 @@ strictfp public abstract class SplineGenerator extends PathGenerator {
 	 */
 	@Override
 	public void initialize(double curveDerivativeThreshold, double granularity) {
+		initializePos();
+		initializeDerivatives();
+		absoluteLength = calcAbsoluteLength();
 		double lastPercentage = 0.0;
 		// Hopefully the curvature is never non-zero at the initial position of the arc. (It really shouldn't be)
 		double segmentCurve = calcCurvature(0.0);
@@ -125,7 +128,7 @@ strictfp public abstract class SplineGenerator extends PathGenerator {
 
 	/**
 	 * Calculate a map from arclength (along segment) to s
-	 * Alternatively also record the speed of the spline (depracated)
+	 * Alternatively also record the speed of the spline (deprecated)
 	 * 
 	 * @param a
 	 * @param b
@@ -190,7 +193,7 @@ strictfp public abstract class SplineGenerator extends PathGenerator {
 	 *
 	 * @param s
 	 *        the position along the spline from [0-1]
-	 * @return the derivature of curvature of the spline at point s
+	 * @return the derivative of curvature of the spline at point s
 	 */
 	public double calcCurvatureDerivative(double s) {
 		Tuple<Double, Double> vel = calcVel(s);
@@ -212,9 +215,53 @@ strictfp public abstract class SplineGenerator extends PathGenerator {
 	}
 
 	/**
+	 * Calculate the derivative of a polynomial function using the power rule on each of its coefficients
+	 * 
+	 * @param coefs
+	 * @return
+	 */
+	protected double[] derivative(double[] coefs) {
+		int length = coefs.length;
+		double[] dCoefs = new double[length - 1];
+		for (int i = 1; i < length; i++) {
+			dCoefs[i - 1] = coefs[i] * i;
+		}
+		return dCoefs;
+	}
+
+	/**
+	 * Evaluate a polynomial function at s
+	 * 
+	 * @param coefs
+	 *        the coefficients of the polynomial
+	 * @param s
+	 *        the position along the spline from [0-1]
+	 * @return
+	 */
+	protected double evaluate(double[] coefs, double s) {
+		double out = 0;
+		for (int i = 0; i < coefs.length; i++) {
+			out += coefs[i] * Math.pow(s, i);
+		}
+		return out;
+	}
+
+	/**
 	 * Initialize the position polynomial coefficients
 	 */
 	protected abstract void initializePos();
+
+	/**
+	 * Initialize the polynomial coefficients for derivatives of position
+	 */
+	protected void initializeDerivatives() {
+		VelX = derivative(PosX);
+		VelY = derivative(PosY);
+		AccX = derivative(VelX);
+		AccY = derivative(VelY);
+		JerkX = derivative(AccX);
+		JerkY = derivative(AccY);
+	}
 
 	/**
 	 * @param s
@@ -225,47 +272,47 @@ strictfp public abstract class SplineGenerator extends PathGenerator {
 		return new Tuple<>(PosX(s), PosY(s));
 	}
 
-	protected abstract double PosX(double s);
+	protected double PosX(double s) {
+		return evaluate(PosX, s);
+	}
 
-	protected abstract double PosY(double s);
-
-	/**
-	 * Initialize the velocity polynomial coefficients. The complexity for this is much
-	 * simpler since you can use the position coefficients.
-	 */
-	protected abstract void initializeVel();
+	protected double PosY(double s) {
+		return evaluate(PosY, s);
+	}
 
 	public Tuple<Double, Double> calcVel(double s) {
 		return new Tuple<>(VelX(s), VelY(s));
 	}
 
-	protected abstract double VelX(double s);
+	protected double VelX(double s) {
+		return evaluate(VelX, s);
+	}
 
-	protected abstract double VelY(double s);
-
-	/**
-	 * Initialize the acceleration polynomial coefficients.
-	 */
-	protected abstract void initializeAcc();
+	protected double VelY(double s) {
+		return evaluate(VelY, s);
+	}
 
 	public Tuple<Double, Double> calcAcc(double s) {
 		return new Tuple<>(AccX(s), AccY(s));
 	}
 
-	protected abstract double AccX(double s);
+	protected double AccX(double s) {
+		return evaluate(AccX, s);
+	}
 
-	protected abstract double AccY(double s);
-
-	/**
-	 * Initialize the jerk polynomial coefficients. For a cubic spline this should be the simplest.
-	 */
-	protected abstract void initializeJerk();
+	protected double AccY(double s) {
+		return evaluate(AccY, s);
+	}
 
 	public Tuple<Double, Double> calcJerk(double s) {
 		return new Tuple<>(JerkX(s), JerkY(s));
 	}
 
-	protected abstract double JerkX(double s);
+	protected double JerkX(double s) {
+		return evaluate(JerkX, s);
+	}
 
-	protected abstract double JerkY(double s);
+	protected double JerkY(double s) {
+		return evaluate(JerkY, s);
+	}
 }
