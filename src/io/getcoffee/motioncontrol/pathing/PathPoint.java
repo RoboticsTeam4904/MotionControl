@@ -1,4 +1,4 @@
-package io.getcoffee.motionprofiles.pathing;
+package io.getcoffee.motioncontrol.pathing;
 
 /**
  * Created by howard on 3/9/17.

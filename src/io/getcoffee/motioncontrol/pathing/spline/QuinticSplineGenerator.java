@@ -1,7 +1,7 @@
-package io.getcoffee.motionprofiles.pathing.spline;
+package io.getcoffee.motioncontrol.pathing.spline;
 
 
-public class QuinticSplineGenerator extends SplineGenerator {
+strictfp public class QuinticSplineGenerator extends SplineGenerator {
 	private final double initPosX, initPosY, finPosX, finPosY, initVelX, initVelY, finVelX, finVelY, initAccX, initAccY,
 		finAccX, finAccY;
 	// TODO: Turn these into individual doubles to remove unnecessary overhead that comes with non-dynamic access of any of the variables.
@@ -9,11 +9,10 @@ public class QuinticSplineGenerator extends SplineGenerator {
 	protected final double[] VelX = new double[5], VelY = new double[5];
 	protected final double[] AccX = new double[4], AccY = new double[4];
 	protected final double[] JerkX = new double[3], JerkY = new double[3];
-	protected final double absoluteLength;
 
-	QuinticSplineGenerator(double initPosX, double initPosY, double finPosX, double finPosY,
-		double initVelX, double initVelY, double finVelX, double finVelY,
-		double initAccX, double initAccY, double finAccX, double finAccY) {
+	public QuinticSplineGenerator(double initPosX, double initPosY, double finPosX, double finPosY,
+								  double initVelX, double initVelY, double finVelX, double finVelY,
+								  double initAccX, double initAccY, double finAccX, double finAccY) {
 		this.initPosX = initPosX;
 		this.initPosY = initPosY;
 		this.finPosX = finPosX;
@@ -31,7 +30,6 @@ public class QuinticSplineGenerator extends SplineGenerator {
 		initializeAcc();
 		initializeJerk();
 		initialize(0.2);
-		absoluteLength = calcAbsoluteLength();
 	}
 
 	@Override

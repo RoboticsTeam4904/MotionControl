@@ -1,7 +1,7 @@
-package io.getcoffee.motionprofiles.pathing.spline;
+package io.getcoffee.motioncontrol.pathing.spline;
 
 
-public class CubicSplineGenerator extends SplineGenerator {
+strictfp public class CubicSplineGenerator extends SplineGenerator {
 	private final double initPosX, initPosY, finPosX, finPosY, initVelX, initVelY, finVelX, finVelY;
 	protected final double[] PosX = new double[4], PosY = new double[4];
 	protected final double[] VelX = new double[3], VelY = new double[3];

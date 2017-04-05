@@ -1,11 +1,11 @@
-package io.getcoffee.motionprofiles.pathing;
+package io.getcoffee.motioncontrol.pathing;
 
-import io.getcoffee.motionprofiles.MotionTrajectoryExecutor;
-import io.getcoffee.motionprofiles.Tuple;
+import io.getcoffee.motioncontrol.MotionTrajectoryExecutor;
+import io.getcoffee.motioncontrol.Tuple;
 
 import java.util.TreeMap;
 
-public abstract class PathGenerator {
+strictfp public abstract class PathGenerator {
 
 	public static final double INTEGRATION_GRANULARITY = 100;
 	public static double robotMaxAccel = MotionTrajectoryExecutor.robotMaxAccel;

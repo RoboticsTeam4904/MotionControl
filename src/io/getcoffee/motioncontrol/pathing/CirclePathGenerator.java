@@ -1,9 +1,6 @@
-package io.getcoffee.motionprofiles.pathing;
+package io.getcoffee.motioncontrol.pathing;
 
-
-import java.util.TreeMap;
-
-public class CirclePathGenerator extends PathGenerator {
+strictfp public class CirclePathGenerator extends PathGenerator {
 	private final double initPosX, initPosY, finPosX, finPosY, finAngle;
 	protected final double centerX, centerY, radius, initAngle;
 	protected final double absoluteLength;

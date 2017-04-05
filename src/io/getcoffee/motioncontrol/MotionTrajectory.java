@@ -1,9 +1,9 @@
-package io.getcoffee.motionprofiles;
+package io.getcoffee.motioncontrol;
 
 
-import io.getcoffee.motionprofiles.pathing.PathPoint;
-import io.getcoffee.motionprofiles.pathing.PathSegment;
-import io.getcoffee.motionprofiles.pathing.spline.SplineGenerator;
+import io.getcoffee.motioncontrol.pathing.PathPoint;
+import io.getcoffee.motioncontrol.pathing.PathSegment;
+import io.getcoffee.motioncontrol.pathing.PathGenerator;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -13,7 +13,7 @@ import java.util.TreeMap;
 strictfp public class MotionTrajectory {
 	public static final double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;
 	public static final double robotMaxAccel = MotionTrajectoryExecutor.robotMaxAccel;
-	protected SplineGenerator splineGenerator;
+	protected PathGenerator pathGenerator;
 	protected double plantWidth;
 	protected double tickTime;
 	protected LinkedList<MotionTrajectorySegment> trajectorySegments;
@@ -22,19 +22,19 @@ strictfp public class MotionTrajectory {
 
 	/**
 	 * 
-	 * @param splineGenerator
+	 * @param pathGenerator
 	 * @param plantWidth
 	 *        the width of whatever system we will be moving (in our case the robot)
 	 * @param tickTime
 	 *        the time that passes during a tick (in milliseconds)
 	 */
-	public MotionTrajectory(SplineGenerator splineGenerator, double plantWidth, double tickTime) {
-		this.splineGenerator = splineGenerator;
+	public MotionTrajectory(PathGenerator pathGenerator, double plantWidth, double tickTime) {
+		this.pathGenerator = pathGenerator;
 		this.plantWidth = plantWidth;
 		this.tickTime = tickTime / 1000;
 		// TODO: Update the threshold to reflect a real value.
 		trajectorySegments = finalizeSegments(
-			applyBackwardConsistency(applyForwardConsistency(generateIsolatedSegments(splineGenerator.featureSegmentMap))));
+			applyBackwardConsistency(applyForwardConsistency(generateIsolatedSegments(pathGenerator.featureSegmentMap))));
 		tickMap = generateFullTickMap(trajectorySegments);
 		System.out.println("Tick Map" + tickMap);
 	}
@@ -181,10 +181,10 @@ strictfp public class MotionTrajectory {
 	public Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> calcPoint(int tick,
 		Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> lastPoints) {
 		MotionTrajectoryPoint generalSetpoint = tickMap.get(tick);
-		Map.Entry<Double, PathSegment> segmentEntry = splineGenerator.featureSegmentMap.floorEntry(generalSetpoint.pos);
+		Map.Entry<Double, PathSegment> segmentEntry = pathGenerator.featureSegmentMap.floorEntry(generalSetpoint.pos);
 		PathPoint pathPoint = segmentEntry.getValue().findNearestPoint(generalSetpoint.pos - segmentEntry.getKey());
-		double offset = plantWidth * splineGenerator.calcCurvature(pathPoint.percentage);
-		double accOffset = plantWidth * generalSetpoint.vel * splineGenerator.calcCurvatureDerivative(pathPoint.percentage);
+		double offset = plantWidth * pathGenerator.calcCurvature(pathPoint.percentage);
+		double accOffset = plantWidth * generalSetpoint.vel * pathGenerator.calcCurvatureDerivative(pathPoint.percentage);
 		double leftOffset = 1 - offset;
 		double rightOffset = 1 + offset;
 		double rightVel = generalSetpoint.vel * rightOffset;

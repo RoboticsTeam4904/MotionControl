@@ -1,4 +1,4 @@
-package io.getcoffee.motionprofiles;
+package io.getcoffee.motioncontrol;
 
 
 public class Tuple<X, Y> {

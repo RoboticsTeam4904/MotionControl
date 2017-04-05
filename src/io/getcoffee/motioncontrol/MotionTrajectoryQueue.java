@@ -1,4 +1,4 @@
-package io.getcoffee.motionprofiles;
+package io.getcoffee.motioncontrol;
 
 
 import java.util.Deque;

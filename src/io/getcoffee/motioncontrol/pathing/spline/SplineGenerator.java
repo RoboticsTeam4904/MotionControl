@@ -1,9 +1,9 @@
-package io.getcoffee.motionprofiles.pathing.spline;
+package io.getcoffee.motioncontrol.pathing.spline;
 
 
-import io.getcoffee.motionprofiles.pathing.PathGenerator;
+import io.getcoffee.motioncontrol.pathing.PathGenerator;
 
-strictfp public abstract class SplineGenerator extends PathGenerator {
+strictfp public abstract class SplineGenerator extends io.getcoffee.motioncontrol.pathing.PathGenerator {
 
 	/**
 	 * Initialize the position polynomial coefficients
