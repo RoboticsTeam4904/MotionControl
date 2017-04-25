@@ -1,4 +1,4 @@
-package io.getcoffee.motionprofiles.pathing;
+package org.usfirst.frc4904.motionprofiles.pathing;
 
 /**
  * Created by howard on 3/9/17.

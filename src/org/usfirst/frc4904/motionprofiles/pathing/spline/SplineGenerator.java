@@ -1,7 +1,7 @@
-package io.getcoffee.motionprofiles.pathing.spline;
+package org.usfirst.frc4904.motionprofiles.pathing.spline;
 
 
-strictfp public abstract class SplineGenerator extends io.getcoffee.motionprofiles.pathing.PathGenerator {
+strictfp public abstract class SplineGenerator extends org.usfirst.frc4904.motionprofiles.pathing.PathGenerator {
 	protected void initialize() {
 		initializePos();
 		initializeDerivatives();

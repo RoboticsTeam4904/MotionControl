@@ -1,9 +1,10 @@
-package io.getcoffee.motionprofiles.pathing;
+package org.usfirst.frc4904.motionprofiles.pathing;
 
 
 import java.util.TreeMap;
-import io.getcoffee.motionprofiles.MotionTrajectoryExecutor;
-import io.getcoffee.motionprofiles.Tuple;
+
+import org.usfirst.frc4904.motionprofiles.MotionTrajectoryExecutor;
+import org.usfirst.frc4904.motionprofiles.Tuple;
 
 strictfp public abstract class PathGenerator {
 	public static final double INTEGRATION_GRANULARITY = 100;

@@ -1,4 +1,4 @@
-package io.getcoffee.motionprofiles;
+package org.usfirst.frc4904.motionprofiles;
 
 
 public class MotionTrajectorySegment {

@@ -1,8 +1,8 @@
-package io.getcoffee.motionprofiles;
+package org.usfirst.frc4904.motionprofiles;
 
 
-import io.getcoffee.motionprofiles.pathing.PathGenerator;
-import io.getcoffee.motionprofiles.pathing.spline.QuinticSplineGenerator;
+import org.usfirst.frc4904.motionprofiles.pathing.PathGenerator;
+import org.usfirst.frc4904.motionprofiles.pathing.spline.QuinticSplineGenerator;
 
 strictfp public class MotionTrajectoryExecutor {
 	public static final double robotMaxVel = 5;

@@ -1,4 +1,4 @@
-package io.getcoffee.motionprofiles.pathing;
+package org.usfirst.frc4904.motionprofiles.pathing;
 
 
 strictfp public class CirclePathGenerator extends PathGenerator {

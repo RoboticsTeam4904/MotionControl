@@ -1,4 +1,4 @@
-package io.getcoffee.motionprofiles.pathing;
+package org.usfirst.frc4904.motionprofiles.pathing;
 
 
 import java.util.Map;

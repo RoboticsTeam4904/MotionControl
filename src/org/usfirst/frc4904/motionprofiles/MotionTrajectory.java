@@ -1,13 +1,14 @@
-package io.getcoffee.motionprofiles;
+package org.usfirst.frc4904.motionprofiles;
 
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
-import io.getcoffee.motionprofiles.pathing.PathGenerator;
-import io.getcoffee.motionprofiles.pathing.PathPoint;
-import io.getcoffee.motionprofiles.pathing.PathSegment;
+
+import org.usfirst.frc4904.motionprofiles.pathing.PathGenerator;
+import org.usfirst.frc4904.motionprofiles.pathing.PathPoint;
+import org.usfirst.frc4904.motionprofiles.pathing.PathSegment;
 
 strictfp public class MotionTrajectory {
 	public static final double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;

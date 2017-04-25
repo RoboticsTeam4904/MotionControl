@@ -1,4 +1,4 @@
-package io.getcoffee.motionprofiles.pathing.spline;
+package org.usfirst.frc4904.motionprofiles.pathing.spline;
 
 
 strictfp public class QuinticSplineGenerator extends SplineGenerator {
