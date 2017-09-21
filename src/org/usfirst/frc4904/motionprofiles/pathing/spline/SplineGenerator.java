@@ -3,9 +3,19 @@ package org.usfirst.frc4904.motionprofiles.pathing.spline;
 
 strictfp public abstract class SplineGenerator extends org.usfirst.frc4904.motionprofiles.pathing.PathGenerator {
 	protected void initialize() {
+		super.initialize();
+	}
+
+	protected void initialize(double threshold) {
 		initializePos();
 		initializeDerivatives();
-		super.initialize();
+		super.initialize(threshold);
+	}
+
+	public void initialize(double curveDerivativeThreshold, double granularity) {
+		initializePos();
+		initializeDerivatives();
+		super.initialize(curveDerivativeThreshold, granularity);
 	}
 
 	/**

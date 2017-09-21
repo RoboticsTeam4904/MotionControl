@@ -3,13 +3,18 @@ package org.usfirst.frc4904.motionprofiles.pathing.spline;
 
 strictfp public class CubicSplineGenerator extends SplineGenerator {
 	private final double initPosX, initPosY, finPosX, finPosY, initVelX, initVelY, finVelX, finVelY;
-	protected final double[] PosX = new double[4], PosY = new double[4];
-	protected final double[] VelX = new double[3], VelY = new double[3];
-	protected final double[] AccX = new double[2], AccY = new double[2];
-	protected final double[] JerkX = new double[1], JerkY = new double[1];
 
 	public CubicSplineGenerator(double initPosX, double initPosY, double finPosX, double finPosY,
 		double initVelX, double initVelY, double finVelX, double finVelY) {
+		PosX = new double[4];
+		PosY = new double[4];
+		VelX = new double[3];
+		VelY = new double[3];
+		AccX = new double[2];
+		AccY = new double[2];
+		JerkX = new double[1];
+		JerkY = new double[1];
+
 		this.initPosX = initPosX;
 		this.initPosY = initPosY;
 		this.finPosX = finPosX;
