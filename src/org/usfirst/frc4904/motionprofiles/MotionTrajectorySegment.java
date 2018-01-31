@@ -116,7 +116,7 @@ public class MotionTrajectorySegment {
 		// + minAccel + ", MaxAccel: "
 		// + maxAccel + ", Length: " + length
 		// + ", Duration: " + duration + "}";
-		return "Duration: " + duration + " Should be: " + calcDuration();
+		return "MotionTrajectorySegment[duration=" + duration + ", exp_duration=" + calcDuration() + "]";
 	}
 
 	public double calcDuration() {
