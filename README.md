@@ -3,7 +3,9 @@
 ## Table of Contents
 - [Introduction](#intro)
 - [Pathing](#pathing)
-  - [Path Types](#execution)
+  - [Generator](#generator)
+  - [Segment](#segment)
+- [Trajectory](#trajectory)
 
 ## Introduction
 
@@ -17,14 +19,15 @@ To understand the mathematics behind much of this library, we highly suggest rea
 
 Our abstracting of a path can be broken down into three pieces: the path generator, which produces path segments, which contain path points. To implement a new type of path, one simply need implement a generator, which has been generalized and simplified to a remarkable level.
 
+We have already implemented cubic and quintic splines, as well as a further level of generalization for the generation of *n { n ≤ 5 }*th degree splines. Additionally, we've provided a straight-forward arc-based path generator which implements the standard path generator.  
+
 ### Generator
 
 At its core, a path generator describes the *x* and *y* components of position, velocity, acceleration, and jerk at a given percentage along the path. Given this information, we iterate over the path from 0 -> 1, building an ordered list of "features" or path segments.
 
 ### Segment
 
-A path segment/feature is defined by a change in curvature above a certain threshold. The segment contains individual path points separated by a constant amount. As it is feasible that the robot's traversal of the path doesn't line up perfectly with each path point, the path points are stored in a tree map (As of Java 8, it is implemented as a [Red-Black Tree](https://en.wikipedia.org/wiki/Red–black_tree), allowing us to find the path point nearest to a given percentage along the path. This is vital to the ability to translate from the abstract path to a trajectory as is described later.
+A path segment/feature is defined by a change in curvature above a certain threshold. The segment contains individual path points separated by a constant amount. As it is feasible that the robot's traversal of the path doesn't line up perfectly with each path point, the path points are stored in a tree map (As of Java 8, it is implemented as a [Red-Black Tree](https://en.wikipedia.org/wiki/Red–black_tree)), allowing us to find the path point nearest to a given percentage along the path. This is vital to the ability to translate from the abstract path to a trajectory as is described later.
 
-### Path Types
-
+## Trajectory
 
