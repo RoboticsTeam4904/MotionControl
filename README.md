@@ -19,7 +19,7 @@ To understand the mathematics behind much of this library, we highly suggest rea
 
 Our abstracting of a path can be broken down into three pieces: the path generator, which produces path segments, which contain path points. To implement a new type of path, one simply need implement a generator, which has been generalized and simplified to a remarkable level.
 
-We have already implemented cubic and quintic splines, as well as a further level of generalization for the generation of *n { n ≤ 5 }*th degree splines. Additionally, we've provided a straight-forward arc-based path generator which implements the standard path generator.  
+We have already implemented cubic and quintic splines, as well as a further level of generalization for the generation of *n { n ≤ 5 }th* degree splines. Additionally, we've provided a straight-forward arc-based path generator which implements the standard path generator.  
 
 ### Generator
 
