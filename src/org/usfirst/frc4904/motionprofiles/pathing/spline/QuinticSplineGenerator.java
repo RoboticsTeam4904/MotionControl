@@ -8,16 +8,10 @@ strictfp public class QuinticSplineGenerator extends SplineGenerator {
 	public QuinticSplineGenerator(double initPosX, double initPosY, double finPosX, double finPosY,
 								  double initVelX, double initVelY, double finVelX, double finVelY,
 								  double initAccX, double initAccY, double finAccX, double finAccY) {
-		// TODO: Turn these into individual doubles to remove unnecessary overhead that comes with non-dynamic access of any of the variables.
-		PosX = new double[6];
-		PosY = new double[6];
-		VelX = new double[5];
-		VelY = new double[5];
-		AccX = new double[4];
-		AccY = new double[4];
-		JerkX = new double[3];
-		JerkY = new double[3];
-
+		PosX = PosY = new double[6];
+		VelX = VelY = new double[5];
+		AccX = AccY = new double[4];
+		JerkX = JerkY = new double[3];
 		this.initPosX = initPosX;
 		this.initPosY = initPosY;
 		this.finPosX = finPosX;

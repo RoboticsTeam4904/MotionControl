@@ -1,7 +1,8 @@
 package org.usfirst.frc4904.motionprofiles.pathing.spline;
+import org.usfirst.frc4904.motionprofiles.pathing.PathGenerator;
 
 
-strictfp public abstract class SplineGenerator extends org.usfirst.frc4904.motionprofiles.pathing.PathGenerator {
+strictfp public abstract class SplineGenerator extends PathGenerator {
 	protected void initialize() {
 		super.initialize();
 	}
