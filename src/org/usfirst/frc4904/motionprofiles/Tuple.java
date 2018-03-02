@@ -20,6 +20,6 @@ public class Tuple<X, Y> {
 	
 	@Override
 	public String toString() {
-		return "[" + x + ", " + y + "]";
+		return "Tuple[" + x + ", " + y + "]";
 	}
 }

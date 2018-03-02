@@ -15,10 +15,10 @@ strictfp public class MotionTrajectoryExecutor {
 			// Position
 			0, 0, 2, 0,
 			// Velocity
-			1, 0, 0, 0,
+			1, 0.001, 0, 0,
 			// Acceleration
 			1, 0, -1, 0);
-		testSpline(0.6, spline);
+		testSpline(0.1, spline);
 		MotionTrajectory motionTrajectory = new MotionTrajectory(spline, plantWidth, 10);
 		printPoints(motionTrajectory);
 	}
