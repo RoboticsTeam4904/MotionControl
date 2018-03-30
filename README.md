@@ -36,8 +36,8 @@ A path segment/feature is defined by a change in curvature above a certain thres
 
 ## Installing
 
-- [motioncontrol-1.0.0.jar](https://crate.botprovoking.org/motioncontrol/motioncontrol-1.0.0.jar)
-- [motioncontrol-1.0.0-sources.jar](https://crate.botprovoking.org/motioncontro/motioncontrol-1.0.0-sources.jar)
+- [motioncontrol-1.1.0.jar](https://crate.botprovoking.org/motioncontrol/motioncontrol-1.1.0.jar)
+- [motioncontrol-1.1.0-sources.jar](https://crate.botprovoking.org/motioncontro/motioncontrol-1.1.0-sources.jar)
 
 Include these in some way into your project classpath/dependencies. These are not currently hosted on a Maven server, although we may do so in the future. 
 
