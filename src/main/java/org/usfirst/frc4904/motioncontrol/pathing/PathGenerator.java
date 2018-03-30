@@ -1,9 +1,9 @@
-package org.usfirst.frc4904.motionprofiles.pathing;
+package org.usfirst.frc4904.motioncontrol.pathing;
 
 import java.util.TreeMap;
 
-import org.usfirst.frc4904.motionprofiles.MotionTrajectoryExecutor;
-import org.usfirst.frc4904.motionprofiles.Tuple;
+import org.usfirst.frc4904.motioncontrol.MotionTrajectoryExecutor;
+import org.usfirst.frc4904.motioncontrol.Tuple;
 
 strictfp public abstract class PathGenerator {
 	public static final double INTEGRATION_GRANULARITY = 100;

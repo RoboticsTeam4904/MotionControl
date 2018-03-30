@@ -1,4 +1,16 @@
 bin/
 .idea/
-.settings/
 MotionProfile.iml
+.gradle/
+build/
+
+# IntelliJ
+.idea/
+.settings/
+MotionControl.iml
+MotionControl.ipr
+
+# Eclipse
+.settings/
+.classpath
+.project

@@ -1,4 +1,4 @@
-package org.usfirst.frc4904.motionprofiles.pathing;
+package org.usfirst.frc4904.motioncontrol.pathing;
 
 strictfp public class CirclePathGenerator extends PathGenerator {
 	private final double initPosX, initPosY, finPosX, finPosY, finAngle;

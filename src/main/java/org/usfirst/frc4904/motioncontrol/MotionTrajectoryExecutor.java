@@ -1,7 +1,10 @@
-package org.usfirst.frc4904.motionprofiles;
+package org.usfirst.frc4904.motioncontrol;
 
-import org.usfirst.frc4904.motionprofiles.pathing.PathGenerator;
-import org.usfirst.frc4904.motionprofiles.pathing.spline.QuinticSplineGenerator;
+import org.usfirst.frc4904.motioncontrol.MotionTrajectory;
+import org.usfirst.frc4904.motioncontrol.MotionTrajectoryPoint;
+import org.usfirst.frc4904.motioncontrol.Tuple;
+import org.usfirst.frc4904.motioncontrol.pathing.PathGenerator;
+import org.usfirst.frc4904.motioncontrol.pathing.spline.QuinticSplineGenerator;
 
 strictfp public class MotionTrajectoryExecutor {
 	public static final double robotMaxVel = 5;

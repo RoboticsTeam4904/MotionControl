@@ -1,4 +1,4 @@
-package org.usfirst.frc4904.motionprofiles.pathing.spline;
+package org.usfirst.frc4904.motioncontrol.pathing.spline;
 
 strictfp public class QuinticSplineGenerator extends SplineGenerator {
 	private final double initPosX, initPosY, finPosX, finPosY, initVelX, initVelY, finVelX, finVelY, initAccX, initAccY,
