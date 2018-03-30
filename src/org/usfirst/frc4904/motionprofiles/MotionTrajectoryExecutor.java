@@ -29,15 +29,12 @@ strictfp public class MotionTrajectoryExecutor {
 		MotionTrajectoryPoint motionTrajectoryPoint = new MotionTrajectoryPoint(0, 0, 0, 0);
 		Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> lastPoint = new Tuple<>(motionTrajectoryPoint,
 				motionTrajectoryPoint);
-		for (int i = 1; i < motionTrajectory.getTickTotal(); i++) { // What
-																	// about the
-																	// first
-																	// setpoint?
+		for (int i = 0; i < motionTrajectory.getTickTotal(); i++) {
 			Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> newPoint = motionTrajectory.calcPoint(i, lastPoint);
 			System.out.print(newPoint);
 			lastPoint = newPoint;
 		}
-		System.out.println("POINTS2");
+		System.out.println("\nPOINTS2");
 	}
 
 	public static void testSpline(double s, PathGenerator spline) {
