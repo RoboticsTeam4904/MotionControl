@@ -6,11 +6,23 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 public class MotionTrajectoryQueue {
 	protected final MotionTrajectory trajectory;
-	public Deque<Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint>> pointQueue;
+	public LinkedBlockingDeque<Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint>> pointQueue;
+	protected MotionTrajectoryBuilder pointQueueBuilder;
+	protected Thread pointQueueBuilderThread;
 
 	public MotionTrajectoryQueue(MotionTrajectory trajectory) {
 		this.trajectory = trajectory;
 		pointQueue = new LinkedBlockingDeque<>();
+		pointQueueBuilder = new MotionTrajectoryBuilder(trajectory, pointQueue);
+		pointQueueBuilderThread = new Thread(pointQueueBuilder);
+	}
+
+	public void build() {
+		this.pointQueueBuilderThread.start();
+	}
+
+	public void cancel() {
+		this.pointQueueBuilderThread.interrupt();
 	}
 
 	public MotionTrajectory getTrajectory() {
