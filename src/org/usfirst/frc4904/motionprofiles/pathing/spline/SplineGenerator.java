@@ -1,6 +1,6 @@
 package org.usfirst.frc4904.motionprofiles.pathing.spline;
-import org.usfirst.frc4904.motionprofiles.pathing.PathGenerator;
 
+import org.usfirst.frc4904.motionprofiles.pathing.PathGenerator;
 
 strictfp public abstract class SplineGenerator extends PathGenerator {
 	protected void initialize() {
@@ -13,6 +13,7 @@ strictfp public abstract class SplineGenerator extends PathGenerator {
 		super.initialize(threshold);
 	}
 
+	// TODO: gets called by super initialize(threshold)
 	public void initialize(double curveDerivativeThreshold, double granularity) {
 		initializePos();
 		initializeDerivatives();
@@ -20,7 +21,8 @@ strictfp public abstract class SplineGenerator extends PathGenerator {
 	}
 
 	/**
-	 * Calculate the derivative of a polynomial function using the power rule on each of its coefficients
+	 * Calculate the derivative of a polynomial function using the power rule on
+	 * each of its coefficients
 	 * 
 	 * @param coefs
 	 * @return
@@ -28,7 +30,7 @@ strictfp public abstract class SplineGenerator extends PathGenerator {
 	protected double[] derivative(double[] coefs) {
 		int length = coefs.length;
 		if (length == 1) {
-			return new double[] {0.0};
+			return new double[] { 0.0 };
 		}
 		double[] dCoefs = new double[length - 1];
 		for (int i = 1; i < length; i++) {
@@ -41,14 +43,17 @@ strictfp public abstract class SplineGenerator extends PathGenerator {
 	 * Evaluate a polynomial function at s
 	 * 
 	 * @param coefs
-	 *        the coefficients of the polynomial
+	 *            the coefficients of the polynomial
 	 * @param s
-	 *        the position along the spline from [0-1]
+	 *            the position along the spline from [0-1]
 	 * @return
 	 */
 	protected double evaluate(double[] coefs, double s) {
 		double out = 0;
-		for (int i = 0; i < coefs.length; i++) {
+
+		for (int i = 0; i < coefs.length; i++) {// coefs.length - 1; i >= 0;
+			// System.out.println(Double.toString(i) + " power, coef " +
+			// Double.toString(coefs[i])); // i--) {
 			out += coefs[i] * Math.pow(s, i);
 		}
 		return out;
