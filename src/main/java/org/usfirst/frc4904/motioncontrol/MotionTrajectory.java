@@ -231,4 +231,8 @@ strictfp public class MotionTrajectory {
 	public int getTickTotal() {
 		return tickTotal;
 	}
+
+	public double getTickTime() {
+		return tickTime;
+	}
 }
