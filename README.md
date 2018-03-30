@@ -1,11 +1,14 @@
 # Motion Control
 
 ## Table of Contents
-- [Introduction](#intro)
-- [Pathing](#pathing)
-  - [Generator](#generator)
-  - [Segment](#segment)
-- [Trajectory](#trajectory)
+- [About](#about)
+  - [Introduction](#intro)
+  - [Pathing](#pathing)
+    - [Generator](#generator)
+    - [Segment](#segment)
+  - [~~Trajectory~~](#trajectory)
+
+# About
 
 ## Introduction
 
@@ -29,5 +32,19 @@ At its core, a path generator describes the *x* and *y* components of position, 
 
 A path segment/feature is defined by a change in curvature above a certain threshold. The segment contains individual path points separated by a constant amount. As it is feasible that the robot's traversal of the path doesn't line up perfectly with each path point, the path points are stored in a tree map (As of Java 8, it is implemented as a [Red-Black Tree](https://en.wikipedia.org/wiki/Red–black_tree)), allowing us to find the path point nearest to a given percentage along the path. This is vital to the ability to translate from the abstract path to a trajectory as is described later.
 
-## Trajectory
+# Using
 
+## Installing
+
+- [motioncontrol-1.0.0.jar](https://crate.botprovoking.org/motioncontrol/motioncontrol-1.0.0.jar)
+- [motioncontrol-1.0.0-sources.jar](https://crate.botprovoking.org/motioncontro/motioncontrol-1.0.0-sources.jar)
+
+Include these in some way into your project classpath/dependencies. These are not currently hosted on a Maven server, although we may do so in the future. 
+
+## Building
+
+If you instead wish to build the library, simply go to the root of the project and run:
+```
+./gradlew build
+```
+The output for both the library and the sources can be found in `build/libs/[...]` Cheers!

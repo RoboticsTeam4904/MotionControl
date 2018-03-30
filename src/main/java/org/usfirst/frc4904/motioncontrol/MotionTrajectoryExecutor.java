@@ -1,7 +1,7 @@
-package org.usfirst.frc4904.motionprofiles;
+package org.usfirst.frc4904.motioncontrol;
 
-import org.usfirst.frc4904.motionprofiles.pathing.CirclePathGenerator;
-import org.usfirst.frc4904.motionprofiles.pathing.PathGenerator;
+import org.usfirst.frc4904.motioncontrol.pathing.CirclePathGenerator;
+import org.usfirst.frc4904.motioncontrol.pathing.PathGenerator;
 
 strictfp public class MotionTrajectoryExecutor {
 	public static final double robotMaxVel = 5;

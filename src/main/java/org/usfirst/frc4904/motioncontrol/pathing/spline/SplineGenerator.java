@@ -1,5 +1,5 @@
-package org.usfirst.frc4904.motionprofiles.pathing.spline;
-import org.usfirst.frc4904.motionprofiles.pathing.PathGenerator;
+package org.usfirst.frc4904.motioncontrol.pathing.spline;
+import org.usfirst.frc4904.motioncontrol.pathing.PathGenerator;
 
 
 strictfp public abstract class SplineGenerator extends PathGenerator {

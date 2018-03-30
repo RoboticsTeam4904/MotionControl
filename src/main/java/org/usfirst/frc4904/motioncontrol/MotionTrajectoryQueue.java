@@ -1,4 +1,4 @@
-package org.usfirst.frc4904.motionprofiles;
+package org.usfirst.frc4904.motioncontrol;
 
 
 import java.util.Deque;
