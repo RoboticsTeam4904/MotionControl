@@ -12,19 +12,20 @@ strictfp public class MotionTrajectoryExecutor {
 		// PathGenerator spline = new QuinticSplineGenerator(
 		// // xi, yi, xf, yf
 		// // Position
-		// 0, 0, 2, 0,
+		// 0, 0, 2, 0.2,
 		// // Velocity
 		// 1, 0.001, 0, 0,
 		// // Acceleration
 		// 1, 0, -1, 0);
-		PathGenerator spline = new CirclePathGenerator(0, 0, 1, 1, 0.1);
+		PathGenerator spline = new CirclePathGenerator(0, 0, 1, 2, -0.2);
 		testSpline(0.6, spline);
-		// MotionTrajectory motionTrajectory = new MotionTrajectory(spline,
-		// plantWidth, 10);
-		// printPoints(motionTrajectory);
+		System.out.println(spline.featureSegmentMap);
+		MotionTrajectory motionTrajectory = new MotionTrajectory(spline, plantWidth, 10);
+		printPoints(motionTrajectory);
 	}
 
 	public static void printPoints(MotionTrajectory motionTrajectory) {
+		System.out.println("POINTS");
 		MotionTrajectoryPoint motionTrajectoryPoint = new MotionTrajectoryPoint(0, 0, 0, 0);
 		Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> lastPoint = new Tuple<>(motionTrajectoryPoint,
 				motionTrajectoryPoint);
@@ -33,8 +34,10 @@ strictfp public class MotionTrajectoryExecutor {
 																	// first
 																	// setpoint?
 			Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> newPoint = motionTrajectory.calcPoint(i, lastPoint);
+			System.out.print(newPoint);
 			lastPoint = newPoint;
 		}
+		System.out.println("POINTS2");
 	}
 
 	public static void testSpline(double s, PathGenerator spline) {
