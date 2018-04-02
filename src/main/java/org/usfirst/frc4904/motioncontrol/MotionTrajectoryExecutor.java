@@ -21,24 +21,24 @@ strictfp public class MotionTrajectoryExecutor {
 				// Acceleration
 				1, 0, 0, -20);
 		// PathGenerator spline = new CirclePathGenerator(0, 0, 1, 2, -0.2);
-		testSpline(0.6, spline);
-		System.out.println(spline.featureSegmentMap);
-		// MotionTrajectory motionTrajectory = new MotionTrajectory(spline,
-		// plantWidth, 10);
-		// printPoints(motionTrajectory);
+//		testSpline(0.6, spline);
+//		System.out.println(spline.featureSegmentMap);
+		MotionTrajectory motionTrajectory = new MotionTrajectory(spline, plantWidth, 10);
+		printPoints(motionTrajectory);
 	}
 
 	public static void printPoints(MotionTrajectory motionTrajectory) {
-		System.out.println("POINTS");
+		System.out.println("Left Tick, Left Pos, Left Vel, Left Accel, Right Tick, Right Pos, Right Vel, Right Accel");
 		MotionTrajectoryPoint motionTrajectoryPoint = new MotionTrajectoryPoint(0, 0, 0, 0);
 		Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> lastPoint = new Tuple<>(motionTrajectoryPoint,
 				motionTrajectoryPoint);
 		for (int i = 0; i < motionTrajectory.getTickTotal(); i++) {
 			Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> newPoint = motionTrajectory.calcPoint(i, lastPoint);
-			System.out.print(newPoint);
+			MotionTrajectoryPoint left = newPoint.getX();
+			MotionTrajectoryPoint right = newPoint.getY();
+			System.out.println(left.tick + "," + left.pos + "," + left.vel + "," + left.accel + "," + right.tick + "," + right.pos + "," + right.vel + "," + right.accel);
 			lastPoint = newPoint;
 		}
-		System.out.println("\nPOINTS2");
 	}
 
 	public static void testSpline(double s, PathGenerator spline) {
