@@ -13,4 +13,8 @@ public class PathPoint {
 		this.percentage = percentage;
 	}
 
+	@Override
+	public String toString() {
+		return "PathPoint#{length:" + length + ", percentage:" + percentage + "}";
+	}
 }

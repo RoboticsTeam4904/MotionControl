@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class PathSegment {
-	public TreeMap<Double, PathPoint> lengthMap = new TreeMap<>();
+	public TreeMap<Double, Double> lengthMap = new TreeMap<>();
 	public double initCurve;
 	public double finCurve;
 	public double maxSpeed;
@@ -17,7 +17,7 @@ public class PathSegment {
 	public double length;
 
 	public PathSegment(double initCurve, double finCurve, double maxCurve, double maxCurveDerivative, double maxSpeed,
-					   double length, TreeMap<Double, PathPoint> lengthMap) {
+					   double length, TreeMap<Double, Double> lengthMap) {
 		this.initCurve = initCurve;
 		this.finCurve = finCurve;
 		this.maxSpeed = maxSpeed;
@@ -28,7 +28,7 @@ public class PathSegment {
 	}
 
 	public PathSegment(double initCurve, double finCurve, double maxCurve, double maxCurveDerivative, double maxSpeed,
-					   double minAcc, double maxAcc, double length, TreeMap<Double, PathPoint> lengthMap) {
+					   double minAcc, double maxAcc, double length, TreeMap<Double, Double> lengthMap) {
 		this.initCurve = initCurve;
 		this.finCurve = finCurve;
 		this.maxSpeed = maxSpeed;
@@ -36,6 +36,7 @@ public class PathSegment {
 		this.maxCurveDerivative = maxCurveDerivative;
 		this.length = length;
 		this.lengthMap = lengthMap;
+		System.out.println(lengthMap);
 		this.minAcc = minAcc;
 		this.maxAcc = maxAcc;
 	}
@@ -44,16 +45,27 @@ public class PathSegment {
 		this.finCurve = finCurve;
 	}
 
-	public PathPoint findNearestPoint(double distance) {
-		Map.Entry<Double, PathPoint> lowPoint = lengthMap.floorEntry(distance);
-		Map.Entry<Double, PathPoint> highPoint = lengthMap.ceilingEntry(distance);
-		if (lowPoint == null || highPoint == null) {
-			return (lowPoint != null ? lowPoint.getValue() : highPoint.getValue());
+	public double nearestPercentage(double distance) {
+		Map.Entry<Double, Double> lowEntry = lengthMap.floorEntry(distance);
+		Map.Entry<Double, Double> highEntry = lengthMap.ceilingEntry(distance);
+		if (lowEntry == null || highEntry == null) {
+			return (lowEntry != null ? lowEntry.getValue() : highEntry.getValue());
 		}
-		if (Math.abs(distance - lowPoint.getKey()) < Math.abs(distance - highPoint.getKey())) {
-			return lowPoint.getValue();
+		if (Math.abs(distance - lowEntry.getKey()) < Math.abs(distance - highEntry.getKey())) {
+			return lowEntry.getValue();
 		}
-		return highPoint.getValue();
+		return highEntry.getValue();
+	}
+
+	public double extrapolatePercentage(double distance) {
+		Map.Entry<Double, Double> lowEntry = lengthMap.floorEntry(distance);
+		Map.Entry<Double, Double> highEntry = lengthMap.ceilingEntry(distance);
+		if (lowEntry == null || highEntry == null) {
+			return (lowEntry != null ? lowEntry.getValue() : highEntry.getValue());
+		}
+		double fraction = (distance - lowEntry.getKey())/(highEntry.getKey() - lowEntry.getKey());
+		double out = lowEntry.getValue() + fraction * (highEntry.getValue() - lowEntry.getValue()) / (highEntry.getKey() - lowEntry.getKey());
+		return out;
 	}
 
 	@Override

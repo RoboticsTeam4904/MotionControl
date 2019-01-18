@@ -181,9 +181,9 @@ strictfp public class MotionTrajectory {
 		Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> lastPoints) {
 		MotionTrajectoryPoint generalSetpoint = tickMap.get(tick);
 		Map.Entry<Double, PathSegment> segmentEntry = pathGenerator.featureSegmentMap.floorEntry(generalSetpoint.pos);
-		PathPoint pathPoint = segmentEntry.getValue().findNearestPoint(generalSetpoint.pos - segmentEntry.getKey());
-		double offset = plantWidth * pathGenerator.calcCurvature(pathPoint.percentage);
-		double accOffset = plantWidth * generalSetpoint.vel * pathGenerator.calcCurvatureDerivative(pathPoint.percentage);
+		double percentage = segmentEntry.getValue().extrapolatePercentage(generalSetpoint.pos - segmentEntry.getKey());
+		double offset = plantWidth * pathGenerator.calcCurvature(percentage);
+		double accOffset = plantWidth * generalSetpoint.vel * pathGenerator.calcCurvatureDerivative(percentage);
 		double leftOffset = 1 - offset;
 		double rightOffset = 1 + offset;
 		double rightVel = generalSetpoint.vel * rightOffset;

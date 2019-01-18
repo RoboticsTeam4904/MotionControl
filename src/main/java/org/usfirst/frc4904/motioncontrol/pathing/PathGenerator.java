@@ -39,12 +39,12 @@ strictfp public abstract class PathGenerator {
 		double absoluteArcSum = 0.0;
 		double arcSum = 0.0;
 		PathSegment lastFeature = new PathSegment(segmentCurve);
-		TreeMap<Double, PathPoint> localLengthMap = new TreeMap<>();
+		TreeMap<Double, Double> localLengthMap = new TreeMap<>();
 		for (double i = 0; i < granularity; i++) {
 			double percentage = i / granularity;
 			double instantSpeed = calcSpeed(percentage);
 			arcSum += instantSpeed / granularity;
-			localLengthMap.put(absoluteArcSum, new PathPoint(arcSum, percentage));
+			localLengthMap.put(arcSum, percentage);
 			double instantCurve = calcCurvature(percentage);
 			double instantCurveDerivative = Math.abs(lastCurve - instantCurve) * granularity;
 			double k = Math.signum(instantCurve);

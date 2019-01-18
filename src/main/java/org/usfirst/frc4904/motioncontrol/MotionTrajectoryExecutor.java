@@ -24,7 +24,7 @@ strictfp public class MotionTrajectoryExecutor {
 //		testSpline(0.6, spline);
 //		System.out.println(spline.featureSegmentMap);
 		MotionTrajectory motionTrajectory = new MotionTrajectory(spline, plantWidth, 10);
-		printPoints(motionTrajectory);
+//		printPoints(motionTrajectory);
 	}
 
 	public static void printPoints(MotionTrajectory motionTrajectory) {
