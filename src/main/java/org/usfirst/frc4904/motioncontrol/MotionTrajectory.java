@@ -35,7 +35,7 @@ strictfp public class MotionTrajectory {
 		trajectorySegments = finalizeSegments(
 			applyBackwardConsistency(applyForwardConsistency(generateIsolatedSegments(pathGenerator.featureSegmentMap))));
 		tickMap = generateFullTickMap(trajectorySegments);
-		System.out.println("Tick Map" + tickMap);
+		System.out.println("Tick Map: " + tickMap);
 	}
 
 	/**
@@ -61,7 +61,7 @@ strictfp public class MotionTrajectory {
 		double maxVel = calcMaxVel(firstFeature.maxCurve);
 		double lastFinVel = 0.0;
 		for (Map.Entry<Double, PathSegment> featureEntry : featureSegments.entrySet()) {
-			System.out.println("Max Accel: " + featureEntry.getValue().maxAcc + ", Min Accel: " + featureEntry.getValue().minAcc);
+			System.out.println("Max Accel: " + featureEntry.getValue().maxAcc + ",\tMin Accel: " + featureEntry.getValue().minAcc);
 			MotionTrajectorySegment segment = new MotionTrajectorySegment(featureEntry.getValue().length, lastFinVel, maxVel,
 				featureEntry.getValue().maxAcc, featureEntry.getValue().minAcc);
 			maxVel = calcMaxVel(featureEntry.getValue().maxCurve);
@@ -69,7 +69,7 @@ strictfp public class MotionTrajectory {
 			trajectorySegments.add(segment);
 			lastFinVel = segment.finVel;
 		}
-		System.out.println("Isolated" + trajectorySegments);
+		System.out.println("Isolated: \t\t" + trajectorySegments);
 		return trajectorySegments;
 	}
 
@@ -91,7 +91,7 @@ strictfp public class MotionTrajectory {
 			segment.finVel = Math.min(segment.calcReachableEndVel(), segment.finVel);
 			lastFinVel = segment.finVel;
 		}
-		System.out.println(trajectorySegments);
+		System.out.println("Forward consistency: \t" + trajectorySegments);
 		return trajectorySegments;
 	}
 
@@ -116,7 +116,7 @@ strictfp public class MotionTrajectory {
 			trajectorySegment.initVel = Math.min(trajectorySegment.calcReachableStartVel(), trajectorySegment.initVel);
 			lastInitVel = trajectorySegment.initVel;
 		}
-		System.out.println(trajectorySegments);
+		System.out.println("Backward consistency: \t" + trajectorySegments);
 		return trajectorySegments;
 	}
 
@@ -135,8 +135,8 @@ strictfp public class MotionTrajectory {
 			timePassed += segment.duration;
 			distanceTraveled += segment.length;
 		}
-		System.out.println(trajectorySegments);
-		System.out.println(timePassed);
+		System.out.println("Finalized: \t\t" + trajectorySegments);
+		System.out.println("T=" + timePassed);
 		return trajectorySegments;
 	}
 

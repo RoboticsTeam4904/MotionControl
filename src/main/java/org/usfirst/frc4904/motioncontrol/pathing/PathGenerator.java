@@ -6,7 +6,7 @@ import org.usfirst.frc4904.motioncontrol.MotionTrajectoryExecutor;
 import org.usfirst.frc4904.motioncontrol.Tuple;
 
 strictfp public abstract class PathGenerator {
-	public static final double INTEGRATION_GRANULARITY = 100;
+	public static final double INTEGRATION_GRANULARITY = 400;
 	public static final double CURVATURE_THRESHOLD = 0.2;
 	public static double robotMaxAccel = MotionTrajectoryExecutor.robotMaxAccel;
 	public static double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;

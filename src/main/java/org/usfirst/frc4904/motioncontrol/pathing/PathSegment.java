@@ -36,7 +36,7 @@ public class PathSegment {
 		this.maxCurveDerivative = maxCurveDerivative;
 		this.length = length;
 		this.lengthMap = lengthMap;
-		System.out.println(lengthMap);
+//		System.out.println(lengthMap);
 		this.minAcc = minAcc;
 		this.maxAcc = maxAcc;
 	}
