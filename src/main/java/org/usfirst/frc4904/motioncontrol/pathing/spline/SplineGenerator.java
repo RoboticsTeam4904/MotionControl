@@ -8,10 +8,10 @@ strictfp public abstract class SplineGenerator extends PathGenerator {
 		super.initialize();
 	}
 
-	protected void initialize(double threshold) {
+	protected void initialize(double curveDerivativeThreshold) {
 		initializePos();
 		initializeDerivatives();
-		super.initialize(threshold);
+		super.initialize(curveDerivativeThreshold);
 	}
 
 	// TODO: gets called by super initialize(threshold)

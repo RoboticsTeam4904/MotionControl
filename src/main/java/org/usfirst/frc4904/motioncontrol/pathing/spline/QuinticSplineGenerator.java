@@ -6,6 +6,58 @@ strictfp public class QuinticSplineGenerator extends SplineGenerator {
 
 	public QuinticSplineGenerator(double initPosX, double initPosY, double finPosX, double finPosY, double initVelX,
 			double initVelY, double finVelX, double finVelY, double initAccX, double initAccY, double finAccX,
+			double finAccY, double curveDerivativeThreshold, double granularity) {
+		PosX = new double[6];
+		PosY = new double[6];
+		VelX = new double[5];
+		VelY = new double[5];
+		AccX = new double[4];
+		AccY = new double[4];
+		JerkX = new double[3];
+		JerkY = new double[3];
+		this.initPosX = initPosX;
+		this.initPosY = initPosY;
+		this.finPosX = finPosX;
+		this.finPosY = finPosY;
+		this.initVelX = initVelX;
+		this.initVelY = initVelY;
+		this.finVelX = finVelX;
+		this.finVelY = finVelY;
+		this.initAccX = initAccX;
+		this.initAccY = initAccY;
+		this.finAccX = finAccX;
+		this.finAccY = finAccY;
+		super.initialize(curveDerivativeThreshold, granularity);
+	}
+
+	public QuinticSplineGenerator(double initPosX, double initPosY, double finPosX, double finPosY, double initVelX,
+			double initVelY, double finVelX, double finVelY, double initAccX, double initAccY, double finAccX,
+			double finAccY, double curveDerivativeThreshold) {
+		PosX = new double[6];
+		PosY = new double[6];
+		VelX = new double[5];
+		VelY = new double[5];
+		AccX = new double[4];
+		AccY = new double[4];
+		JerkX = new double[3];
+		JerkY = new double[3];
+		this.initPosX = initPosX;
+		this.initPosY = initPosY;
+		this.finPosX = finPosX;
+		this.finPosY = finPosY;
+		this.initVelX = initVelX;
+		this.initVelY = initVelY;
+		this.finVelX = finVelX;
+		this.finVelY = finVelY;
+		this.initAccX = initAccX;
+		this.initAccY = initAccY;
+		this.finAccX = finAccX;
+		this.finAccY = finAccY;
+		super.initialize(curveDerivativeThreshold);
+	}
+
+	public QuinticSplineGenerator(double initPosX, double initPosY, double finPosX, double finPosY, double initVelX,
+			double initVelY, double finVelX, double finVelY, double initAccX, double initAccY, double finAccX,
 			double finAccY) {
 		PosX = new double[6];
 		PosY = new double[6];
@@ -27,8 +79,9 @@ strictfp public class QuinticSplineGenerator extends SplineGenerator {
 		this.initAccY = initAccY;
 		this.finAccX = finAccX;
 		this.finAccY = finAccY;
-		initialize(0.2);
+		super.initialize();
 	}
+
 
 	@Override
 	/**
