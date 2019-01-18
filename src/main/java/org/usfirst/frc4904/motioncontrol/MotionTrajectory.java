@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.usfirst.frc4904.motioncontrol.pathing.PathGenerator;
-import org.usfirst.frc4904.motioncontrol.pathing.PathPoint;
 import org.usfirst.frc4904.motioncontrol.pathing.PathSegment;
 
 strictfp public class MotionTrajectory {
