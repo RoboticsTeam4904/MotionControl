@@ -81,7 +81,7 @@ strictfp public abstract class PathGenerator {
 			double segmentCurveDerivative = Math.abs(segmentCurve - instantCurve);
 			if (segmentCurveDerivative > curveDerivativeThreshold) {
 				lastFeature = new PathSegment(lastFeature.finCurve, instantCurve, maxCurve, maxCurveDerivative,
-						maxSpeed, minAcc, maxAcc, arcSum, localLengthMap);
+						minAcc, maxAcc, arcSum, localLengthMap);
 				featureSegmentMap.put(absoluteArcSum, lastFeature);
 				maxCurve = instantCurve;
 				maxSpeed = instantSpeed;
@@ -95,7 +95,7 @@ strictfp public abstract class PathGenerator {
 			}
 			lastCurve = instantCurve;
 		}
-		lastFeature = new PathSegment(lastFeature.finCurve, calcCurvature(1), maxCurve, maxCurveDerivative, maxSpeed,
+		lastFeature = new PathSegment(lastFeature.finCurve, calcCurvature(1), maxCurve, maxCurveDerivative,
 				minAcc, maxAcc, arcSum, localLengthMap);
 		featureSegmentMap.put(absoluteArcSum, lastFeature);
 	}
