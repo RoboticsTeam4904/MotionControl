@@ -5,6 +5,7 @@ import java.util.TreeMap;
 import org.usfirst.frc4904.motioncontrol.MotionTrajectoryExecutor;
 import org.usfirst.frc4904.motioncontrol.Tuple;
 
+
 strictfp public abstract class PathGenerator {
 	public static final double INTEGRATION_GRANULARITY = 400;
 	public static final double CURVATURE_THRESHOLD = 0.2;
@@ -12,7 +13,6 @@ strictfp public abstract class PathGenerator {
 	public static double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;
 	public static double plantWidth = MotionTrajectoryExecutor.plantWidth;
 	public TreeMap<Double, PathSegment> featureSegmentMap = new TreeMap<>();
-	protected double[] PosX, PosY, VelX, VelY, AccX, AccY, JerkX, JerkY;
 	public double absoluteLength;
 
 	/**
@@ -31,7 +31,6 @@ strictfp public abstract class PathGenerator {
 		// the arc. (It really shouldn't be)
 		double segmentCurve = calcCurvature(0.0);
 		double lastCurve = calcCurvature(0.0);
-		double maxSpeed = 0.0;
 		double maxCurve = lastCurve;
 		double maxCurveDerivative = 0.0;
 		double minAcc = -robotMaxAccel;
@@ -63,9 +62,6 @@ strictfp public abstract class PathGenerator {
 					- k * plantWidth * maxVelSqrd * instantCurveDerivative / instantSpeed) / divisor;
 			double instantMaxAcc = (robotMaxAccel - k * plantWidth * minVelSqrd * instantCurveDerivative / instantSpeed)
 					/ divisor;
-			if (instantSpeed > maxSpeed) {
-				maxSpeed = instantSpeed;
-			}
 			if (instantCurve > maxCurve) {
 				maxCurve = instantCurve;
 			}
@@ -84,7 +80,6 @@ strictfp public abstract class PathGenerator {
 						minAcc, maxAcc, arcSum, localLengthMap);
 				featureSegmentMap.put(absoluteArcSum, lastFeature);
 				maxCurve = instantCurve;
-				maxSpeed = instantSpeed;
 				minAcc = -robotMaxAccel;
 				maxAcc = robotMaxAccel;
 				maxCurveDerivative = 0.0;
