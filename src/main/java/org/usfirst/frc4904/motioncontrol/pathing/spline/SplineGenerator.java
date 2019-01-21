@@ -4,7 +4,11 @@ package org.usfirst.frc4904.motioncontrol.pathing.spline;
 import org.usfirst.frc4904.motioncontrol.pathing.PathGenerator;
 
 strictfp public abstract class SplineGenerator extends PathGenerator {
+	protected Polynomial PosX, PosY, VelX, VelY, AccX, AccY, JerkX, JerkY;
+
 	protected void initialize() {
+		initializePos();
+		initializeDerivatives();
 		super.initialize();
 	}
 
@@ -21,55 +25,17 @@ strictfp public abstract class SplineGenerator extends PathGenerator {
 		super.initialize(curveDerivativeThreshold, granularity);
 	}
 
-	/**
-	 * Calculate the derivative of a polynomial function using the power rule on
-	 * each of its coefficients
-	 * 
-	 * @param coefs
-	 * @return
-	 */
-	protected double[] derivative(double[] coefs) {
-		int length = coefs.length;
-		if (length == 1) {
-			return new double[] { 0.0 };
-		}
-		double[] dCoefs = new double[length - 1];
-		for (int i = 1; i < length; i++) {
-			dCoefs[i - 1] = coefs[i] * i;
-		}
-		return dCoefs;
-	}
-
-	/**
-	 * Evaluate a polynomial function at s
-	 * 
-	 * @param coefs
-	 *            the coefficients of the polynomial
-	 * @param s
-	 *            the position along the spline from [0-1]
-	 * @return
-	 */
-	protected double evaluate(double[] coefs, double s) {
-		double out = 0;
-
-		for (int i = 0; i < coefs.length; i++) {// coefs.length - 1; i >= 0;
-			// System.out.println(Double.toString(i) + " power, coef " +
-			// Double.toString(coefs[i])); // i--) {
-			out += coefs[i] * Math.pow(s, i);
-		}
-		return out;
-	}
 
 	/**
 	 * Initialize the polynomial coefficients for derivatives of position
 	 */
 	protected void initializeDerivatives() {
-		VelX = derivative(PosX);
-		VelY = derivative(PosY);
-		AccX = derivative(VelX);
-		AccY = derivative(VelY);
-		JerkX = derivative(AccX);
-		JerkY = derivative(AccY);
+		VelX = PosX.derivative();
+		VelY = PosY.derivative();
+		AccX = VelX.derivative();
+		AccY = VelY.derivative();
+		JerkX = AccX.derivative();
+		JerkY = AccY.derivative();
 	}
 
 	/**
@@ -78,34 +44,79 @@ strictfp public abstract class SplineGenerator extends PathGenerator {
 	protected abstract void initializePos();
 
 	protected double PosX(double s) {
-		return evaluate(PosX, s);
+		return PosX.evaluate(s);
 	}
 
 	protected double PosY(double s) {
-		return evaluate(PosY, s);
+		return PosY.evaluate(s);
 	}
 
 	protected double VelX(double s) {
-		return evaluate(VelX, s);
+		return VelX.evaluate(s);
 	}
 
 	protected double VelY(double s) {
-		return evaluate(VelY, s);
+		return VelY.evaluate(s);
 	}
 
 	protected double AccX(double s) {
-		return evaluate(AccX, s);
+		return AccX.evaluate(s);
 	}
 
 	protected double AccY(double s) {
-		return evaluate(AccY, s);
+		return AccY.evaluate(s);
 	}
 
 	protected double JerkX(double s) {
-		return evaluate(JerkX, s);
+		return JerkX.evaluate(s);
 	}
 
 	protected double JerkY(double s) {
-		return evaluate(JerkY, s);
+		return JerkY.evaluate(s);
+	}
+
+	protected class Polynomial {
+		double[] coefs;
+		int length;
+
+		public Polynomial(double... coefs) {
+			this.coefs = coefs;
+			this.length = coefs.length;
+		}
+
+		/**
+		 * Calculate the derivative of a polynomial function using the power rule on
+		 * each of its coefficients
+		 *
+		 * @return
+		 */
+		public Polynomial derivative() {
+			if (length == 1) {
+				return new Polynomial(0.0);
+			}
+			double[] dCoefs = new double[length - 1];
+			for (int i = 1; i < length; i++) {
+				dCoefs[i - 1] = coefs[i] * i;
+			}
+			return new Polynomial(dCoefs);
+		}
+
+		/**
+		 * Evaluate a polynomial function at s
+		 *
+		 * @param s
+		 *            the position along the spline from [0-1]
+		 * @return
+		 */
+		protected double evaluate(double s) {
+			double out = 0;
+
+			for (int i = 0; i < coefs.length; i++) {// coefs.length - 1; i >= 0;
+				// System.out.println(Double.toString(i) + " power, coef " +
+				// Double.toString(coefs[i])); // i--) {
+				out += coefs[i] * Math.pow(s, i);
+			}
+			return out;
+		}
 	}
 }
