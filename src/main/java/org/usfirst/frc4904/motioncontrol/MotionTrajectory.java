@@ -69,7 +69,7 @@ strictfp public class MotionTrajectory {
 			trajectorySegments.add(segment);
 			lastFinVel = segment.finVel;
 		}
-		System.out.println("Isolated: \t\t" + trajectorySegments);
+		System.out.println("Isolated:\t\t" + trajectorySegments);
 		return trajectorySegments;
 	}
 

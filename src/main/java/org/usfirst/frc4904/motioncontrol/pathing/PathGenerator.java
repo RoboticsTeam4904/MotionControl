@@ -29,21 +29,20 @@ strictfp public abstract class PathGenerator {
 		// absoluteLength = calcAbsoluteLength();
 		// Hopefully the curvature is never non-zero at the initial position of
 		// the arc. (It really shouldn't be)
-		double segmentCurve = calcCurvature(0.0);
-		double lastCurve = calcCurvature(0.0);
-		double maxCurve = lastCurve;
+		double initCurve = calcCurvature(0.0);
+		double lastCurve = initCurve;
+		double maxCurve = initCurve;
 		double maxCurveDerivative = 0.0;
 		double minAcc = -robotMaxAccel;
 		double maxAcc = robotMaxAccel;
 		double absoluteArcSum = 0.0;
 		double arcSum = 0.0;
-		PathSegment lastFeature = new PathSegment(segmentCurve);
 		TreeMap<Double, Double> localLengthMap = new TreeMap<>();
 		for (double i = 0; i < granularity; i++) {
 			double percentage = i / granularity;
+			localLengthMap.put(arcSum, percentage);
 			double instantSpeed = calcSpeed(percentage);
 			arcSum += instantSpeed / granularity;
-			localLengthMap.put(arcSum, percentage);
 			double instantCurve = calcCurvature(percentage);
 			double instantCurveDerivative = Math.abs(lastCurve - instantCurve) * granularity;
 			double k = Math.signum(instantCurve);
@@ -74,11 +73,9 @@ strictfp public abstract class PathGenerator {
 			if (instantMaxAcc < maxAcc) {
 				maxAcc = instantMaxAcc;
 			}
-			double segmentCurveDerivative = Math.abs(segmentCurve - instantCurve);
-			if (segmentCurveDerivative > curveDerivativeThreshold) {
-				lastFeature = new PathSegment(lastFeature.finCurve, instantCurve, maxCurve, maxCurveDerivative,
-						minAcc, maxAcc, arcSum, localLengthMap);
-				featureSegmentMap.put(absoluteArcSum, lastFeature);
+			if (Math.abs(initCurve - instantCurve) > curveDerivativeThreshold) {
+				featureSegmentMap.put(absoluteArcSum, new PathSegment(initCurve, instantCurve,
+						maxCurve, maxCurveDerivative, minAcc, maxAcc, arcSum, localLengthMap));
 				maxCurve = instantCurve;
 				minAcc = -robotMaxAccel;
 				maxAcc = robotMaxAccel;
@@ -86,13 +83,13 @@ strictfp public abstract class PathGenerator {
 				absoluteArcSum += arcSum;
 				arcSum = 0.0;
 				localLengthMap = new TreeMap<>();
-				segmentCurve = instantCurve;
+				initCurve = instantCurve;
 			}
 			lastCurve = instantCurve;
 		}
-		lastFeature = new PathSegment(lastFeature.finCurve, calcCurvature(1), maxCurve, maxCurveDerivative,
-				minAcc, maxAcc, arcSum, localLengthMap);
-		featureSegmentMap.put(absoluteArcSum, lastFeature);
+		localLengthMap.put(arcSum, 1.);
+		featureSegmentMap.put(absoluteArcSum, new PathSegment(initCurve, calcCurvature(1.),
+				maxCurve, maxCurveDerivative, minAcc, maxAcc, arcSum, localLengthMap));
 	}
 
 	protected void initialize(double threshold) {

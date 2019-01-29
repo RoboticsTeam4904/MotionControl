@@ -34,7 +34,6 @@ public class MotionTrajectoryQueue {
 		private final LinkedBlockingDeque<Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint>> queue;
 		private final Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> zeroPoint = new Tuple<>(
 			new MotionTrajectoryPoint(0, 0, 0, 0), new MotionTrajectoryPoint(0, 0, 0, 0));
-		private int tickNum = 0;
 
 		MotionTrajectoryBuilder(MotionTrajectory trajectory,
 			LinkedBlockingDeque<Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint>> queue) {
@@ -45,7 +44,8 @@ public class MotionTrajectoryQueue {
 
 		@Override
 		public void run() {
-			Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> lastPoints = new Tuple<>(new MotionTrajectoryPoint(0, 0, 0, 0), new MotionTrajectoryPoint(0, 0, 0, 0));
+			Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> lastPoints = zeroPoint;
+			int tickNum = 0;
 			while(true) {
 				lastPoints = trajectory.calcPoint(tickNum += 1, lastPoints);
 				queue.add(lastPoints);
