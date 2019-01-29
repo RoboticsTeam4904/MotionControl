@@ -29,17 +29,15 @@ strictfp public abstract class PathGenerator {
 		// absoluteLength = calcAbsoluteLength();
 		// Hopefully the curvature is never non-zero at the initial position of
 		// the arc. (It really shouldn't be)
-		double initCurve = calcCurvature(0.0);
-		double lastCurve = initCurve;
-		double maxCurve = initCurve;
+		double lastCurve = calcCurvature(0.0);
+		double maxCurve = lastCurve;
 		double maxCurveDerivative = 0.0;
 		double minAcc = -robotMaxAccel;
 		double maxAcc = robotMaxAccel;
 		double absoluteArcSum = 0.0;
 		double arcSum = 0.0;
 		TreeMap<Double, Double> localLengthMap = new TreeMap<>();
-		for (double i = 0; i < granularity; i++) {
-			double percentage = i / granularity;
+		for (double percentage = 0; percentage < 1; percentage += 1/granularity) {
 			localLengthMap.put(arcSum, percentage);
 			double instantSpeed = calcSpeed(percentage);
 			arcSum += instantSpeed / granularity;

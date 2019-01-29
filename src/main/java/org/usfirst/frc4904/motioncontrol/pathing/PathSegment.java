@@ -16,20 +16,16 @@ public class PathSegment {
 	public double finPercentage;
 	public double length;
 
-	public PathSegment(double initCurve, double finCurve, double maxCurve, double maxCurveDerivative,
+	public PathSegment(double maxCurve, double maxCurveDerivative,
 					   double length, TreeMap<Double, Double> lengthMap) {
-		this.initCurve = initCurve;
-		this.finCurve = finCurve;
 		this.maxCurve = maxCurve;
 		this.maxCurveDerivative = maxCurveDerivative;
 		this.length = length;
 		this.lengthMap = lengthMap;
 	}
 
-	public PathSegment(double initCurve, double finCurve, double maxCurve, double maxCurveDerivative,
+	public PathSegment(double maxCurve, double maxCurveDerivative,
 					   double minAcc, double maxAcc, double length, TreeMap<Double, Double> lengthMap) {
-		this.initCurve = initCurve;
-		this.finCurve = finCurve;
 		this.maxCurve = maxCurve;
 		this.maxCurveDerivative = maxCurveDerivative;
 		this.length = length;
