@@ -151,7 +151,7 @@ strictfp public abstract class PathGenerator {
 	 * arc-length.
 	 *
 	 * @see <a href=
-	 *      "https://www.wolframalpha.com/input/?i=(x%27(t)+*+y%27%27(t)+-+y%27(t)+*+x%27%27(t))%2F(x%27(t)%5E2%2By%27(t)%5E2)%5E(3%2F2)">Wolfram-Alpha
+	 *      "https://www.wolframalpha.com/input/?i=(x%27(t)+*+y%27%27(t)+-+y%27(t)+*+x%27%27(t))%2F(x%27(t)%5E2+%2B+y%27(t)%5E2)%5E(3%2F2)">Wolfram-Alpha
 	 *      derivative</a>
 	 *
 	 * @param s
