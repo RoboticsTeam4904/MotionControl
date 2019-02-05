@@ -25,7 +25,7 @@ strictfp public abstract class PathGenerator {
 	 *
 	 * @return ordered list of distinct features of the generated spline
 	 */
-	public void initialize(double curveDerivativeThreshold, double granularity) {
+	public void segment(double curveDerivativeThreshold, double granularity) {
 		// absoluteLength = calcAbsoluteLength();
 		// Hopefully the curvature is never non-zero at the initial position of
 		// the arc. (It really shouldn't be)
@@ -91,11 +91,11 @@ strictfp public abstract class PathGenerator {
 	}
 
 	protected void initialize(double threshold) {
-		initialize(threshold, INTEGRATION_GRANULARITY);
+		segment(threshold, INTEGRATION_GRANULARITY);
 	}
 
 	protected void initialize() {
-		initialize(CURVATURE_THRESHOLD, INTEGRATION_GRANULARITY);
+		segment(CURVATURE_THRESHOLD, INTEGRATION_GRANULARITY);
 	}
 
 	/**
@@ -151,7 +151,7 @@ strictfp public abstract class PathGenerator {
 	 * arc-length.
 	 *
 	 * @see <a href=
-	 *      "https://www.wolframalpha.com/input/?i=(x%27(t)+*+y%27%27(t)+-+y%27(t)+*+x%27%27(t))%2F(x%27(t)%5E2%2By%27(t)%5E2)%5E(3%2F2)">Wolfram-Alpha
+	 *      "https://www.wolframalpha.com/input/?i=(x%27(t)+*+y%27%27(t)+-+y%27(t)+*+x%27%27(t))%2F(x%27(t)%5E2+%2B+y%27(t)%5E2)%5E(3%2F2)">Wolfram-Alpha
 	 *      derivative</a>
 	 *
 	 * @param s
