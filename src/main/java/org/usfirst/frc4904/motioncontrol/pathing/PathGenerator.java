@@ -12,7 +12,6 @@ strictfp public abstract class PathGenerator {
 	public static double robotMaxAccel = MotionTrajectoryExecutor.robotMaxAccel;
 	public static double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;
 	public static double plantWidth = MotionTrajectoryExecutor.plantWidth;
-	public TreeMap<Double, PathSegment> featureSegmentMap = new TreeMap<>();
 	public double absoluteLength;
 
 	/**
@@ -25,10 +24,11 @@ strictfp public abstract class PathGenerator {
 	 *
 	 * @return ordered list of distinct features of the generated spline
 	 */
-	public void initialize(double curveDerivativeThreshold, double granularity) {
+	public TreeMap<Double, PathSegment> segment(double curveDerivativeThreshold, double granularity) {
 		// absoluteLength = calcAbsoluteLength();
 		// Hopefully the curvature is never non-zero at the initial position of
 		// the arc. (It really shouldn't be)
+		TreeMap<Double, PathSegment> featureSegmentMap = new TreeMap<>();
 		double lastCurve = calcCurvature(0.0);
 		double maxCurve = lastCurve;
 		double maxCurveDerivative = 0.0;
@@ -73,11 +73,10 @@ strictfp public abstract class PathGenerator {
 			}
 			if (Math.abs(initCurve - instantCurve) > curveDerivativeThreshold) {
 				featureSegmentMap.put(absoluteArcSum, new PathSegment(initCurve, instantCurve,
-						maxCurve, maxCurveDerivative, minAcc, maxAcc, arcSum, localLengthMap));
+						maxCurve, minAcc, maxAcc, arcSum, localLengthMap));
 				maxCurve = instantCurve;
 				minAcc = -robotMaxAccel;
 				maxAcc = robotMaxAccel;
-				maxCurveDerivative = 0.0;
 				absoluteArcSum += arcSum;
 				arcSum = 0.0;
 				localLengthMap = new TreeMap<>();
@@ -88,6 +87,7 @@ strictfp public abstract class PathGenerator {
 		localLengthMap.put(arcSum, 1.);
 		featureSegmentMap.put(absoluteArcSum, new PathSegment(initCurve, calcCurvature(1.),
 				maxCurve, maxCurveDerivative, minAcc, maxAcc, arcSum, localLengthMap));
+		return featureSegmentMap;
 	}
 
 	protected void initialize(double threshold) {

@@ -5,38 +5,19 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class PathSegment {
-	public TreeMap<Double, Double> lengthMap = new TreeMap<>();
-	public double initCurve;
-	public double finCurve;
-	public double maxSpeed;
-	public double maxCurve;
-	public double maxCurveDerivative;
-	public double minAcc;
-	public double maxAcc;
-	public double finPercentage;
-	public double length;
+	public final TreeMap<Double, Double> lengthMap;
+	public final double maxCurve;
+	public final double length;
+	public final double minAcc;
+	public final double maxAcc;
 
-	public PathSegment(double maxCurve, double maxCurveDerivative,
-					   double length, TreeMap<Double, Double> lengthMap) {
+	public PathSegment(double maxCurve, double minAcc, double maxAcc, double length, TreeMap<Double, Double> lengthMap) {
 		this.maxCurve = maxCurve;
-		this.maxCurveDerivative = maxCurveDerivative;
 		this.length = length;
 		this.lengthMap = lengthMap;
-	}
-
-	public PathSegment(double maxCurve, double maxCurveDerivative,
-					   double minAcc, double maxAcc, double length, TreeMap<Double, Double> lengthMap) {
-		this.maxCurve = maxCurve;
-		this.maxCurveDerivative = maxCurveDerivative;
-		this.length = length;
-		this.lengthMap = lengthMap;
-//		System.out.println(lengthMap);
 		this.minAcc = minAcc;
 		this.maxAcc = maxAcc;
-	}
-
-	public PathSegment(double finCurve) {
-		this.finCurve = finCurve;
+//		System.out.println(lengthMap);
 	}
 
 	public double nearestPercentage(double distance) {
@@ -64,7 +45,6 @@ public class PathSegment {
 
 	@Override
 	public String toString() {
-		return "PathSegment#{InitCurve: " + initCurve + ", FinCurve: " + finCurve + ", MaxCurve: " + maxCurve
-			+ ", MaxCurveDeriv: " + maxCurveDerivative + ", Length: " + length + "}";
+		return "PathSegment#{MaxCurve: " + maxCurve + ", Length: " + length + "Acc: " + minAcc + " to " + maxAcc + "}";
 	}
 }

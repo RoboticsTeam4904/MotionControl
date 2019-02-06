@@ -186,7 +186,7 @@ strictfp public class MotionTrajectory {
 		double leftOffset = 1 - offset;
 		double rightOffset = 1 + offset;
 		double rightVel = generalSetpoint.vel * rightOffset;
-		double leftVel = generalSetpoint.vel * leftOffset;
+		double leftVel = generalSetpoint.vel  * leftOffset;
 		MotionTrajectoryPoint leftPoint = new MotionTrajectoryPoint(tick, lastPoints.getX().pos + leftVel * tickTime, leftVel,
 			(leftVel - lastPoints.getX().vel) / tickTime);
 		MotionTrajectoryPoint rightPoint = new MotionTrajectoryPoint(tick, lastPoints.getY().pos + rightVel * tickTime,

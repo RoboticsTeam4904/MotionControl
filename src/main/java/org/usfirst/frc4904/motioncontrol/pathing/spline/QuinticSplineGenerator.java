@@ -1,44 +1,7 @@
 package org.usfirst.frc4904.motioncontrol.pathing.spline;
 
 strictfp public class QuinticSplineGenerator extends SplineGenerator {
-	private final double initPosX, initPosY, finPosX, finPosY, initVelX, initVelY, finVelX, finVelY, initAccX, initAccY,
-			finAccX, finAccY;
-
-	public QuinticSplineGenerator(double initPosX, double initPosY, double finPosX, double finPosY, double initVelX,
-			double initVelY, double finVelX, double finVelY, double initAccX, double initAccY, double finAccX,
-			double finAccY, double curveDerivativeThreshold, double granularity) {
-		this.initPosX = initPosX;
-		this.initPosY = initPosY;
-		this.finPosX = finPosX;
-		this.finPosY = finPosY;
-		this.initVelX = initVelX;
-		this.initVelY = initVelY;
-		this.finVelX = finVelX;
-		this.finVelY = finVelY;
-		this.initAccX = initAccX;
-		this.initAccY = initAccY;
-		this.finAccX = finAccX;
-		this.finAccY = finAccY;
-		super.initialize(curveDerivativeThreshold, granularity);
-	}
-
-	public QuinticSplineGenerator(double initPosX, double initPosY, double finPosX, double finPosY, double initVelX,
-			double initVelY, double finVelX, double finVelY, double initAccX, double initAccY, double finAccX,
-			double finAccY, double curveDerivativeThreshold) {
-		this.initPosX = initPosX;
-		this.initPosY = initPosY;
-		this.finPosX = finPosX;
-		this.finPosY = finPosY;
-		this.initVelX = initVelX;
-		this.initVelY = initVelY;
-		this.finVelX = finVelX;
-		this.finVelY = finVelY;
-		this.initAccX = initAccX;
-		this.initAccY = initAccY;
-		this.finAccX = finAccX;
-		this.finAccY = finAccY;
-		super.initialize(curveDerivativeThreshold);
-	}
+	private final double initPosX, initPosY, finPosX, finPosY, initVelX, initVelY, finVelX, finVelY, initAccX, initAccY, finAccX, finAccY;
 
 	public QuinticSplineGenerator(double initPosX, double initPosY, double finPosX, double finPosY, double initVelX,
 			double initVelY, double finVelX, double finVelY, double initAccX, double initAccY, double finAccX,
@@ -58,10 +21,9 @@ strictfp public class QuinticSplineGenerator extends SplineGenerator {
 		super.initialize();
 	}
 
-
 	@Override
 	/**
-	 * Position
+	 * Solve for position polynomials
 	 */
 	protected void initializePos() {
 		double ax = -6 * initPosX + 6 * finPosX - 3 * initVelX - 3 * finVelX - (initAccX / 2.0) + (finAccX / 2.0);

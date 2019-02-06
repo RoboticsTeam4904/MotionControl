@@ -4,32 +4,6 @@ strictfp public class CubicSplineGenerator extends SplineGenerator {
 	private final double initPosX, initPosY, finPosX, finPosY, initVelX, initVelY, finVelX, finVelY;
 
 	public CubicSplineGenerator(double initPosX, double initPosY, double finPosX, double finPosY, double initVelX,
-			double initVelY, double finVelX, double finVelY, double curveDerivativeThreshold, double granularity) {
-		this.initPosX = initPosX;
-		this.initPosY = initPosY;
-		this.finPosX = finPosX;
-		this.finPosY = finPosY;
-		this.initVelX = initVelX;
-		this.initVelY = initVelY;
-		this.finVelX = finVelX;
-		this.finVelY = finVelY;
-		super.initialize(curveDerivativeThreshold, granularity);
-	}
-
-	public CubicSplineGenerator(double initPosX, double initPosY, double finPosX, double finPosY, double initVelX,
-			double initVelY, double finVelX, double finVelY, double curveDerivativeThreshold) {
-		this.initPosX = initPosX;
-		this.initPosY = initPosY;
-		this.finPosX = finPosX;
-		this.finPosY = finPosY;
-		this.initVelX = initVelX;
-		this.initVelY = initVelY;
-		this.finVelX = finVelX;
-		this.finVelY = finVelY;
-		super.initialize(curveDerivativeThreshold);
-	}
-
-	public CubicSplineGenerator(double initPosX, double initPosY, double finPosX, double finPosY, double initVelX,
 			double initVelY, double finVelX, double finVelY) {
 		this.initPosX = initPosX;
 		this.initPosY = initPosY;
@@ -43,6 +17,9 @@ strictfp public class CubicSplineGenerator extends SplineGenerator {
 	}
 
 	@Override
+	/**
+	 * Solve for position polynomials
+	 */
 	protected void initializePos() {
 		double ax = 2 * initPosX - 2 * finPosX + initVelX + finVelX;
 		double bx = -3 * initPosX + 3 * finPosX - 2 * initVelX - finVelX;
