@@ -11,7 +11,7 @@ strictfp public abstract class PathGenerator {
 	public static double robotMaxAccel = MotionTrajectoryExecutor.robotMaxAccel;
 	public static double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;
 	public static double plantWidth = MotionTrajectoryExecutor.plantWidth;
-	public TreeMap<Double, PathSegment> featureSegmentMap;
+	public TreeMap<Double, PathSegment> featureSegmentMap = new TreeMap<>();
 	public double absoluteLength;
 
 	/**

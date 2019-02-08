@@ -45,6 +45,6 @@ public class PathSegment {
 
 	@Override
 	public String toString() {
-		return "PathSegment#{MaxCurve: " + maxCurve + ", Length: " + length + "Acc: " + minAcc + " to " + maxAcc + "}";
+		return "PathSegment#{MaxCurve: " + maxCurve + ", Length: " + length + ", Acc: " + minAcc + " to " + maxAcc + "}";
 	}
 }
