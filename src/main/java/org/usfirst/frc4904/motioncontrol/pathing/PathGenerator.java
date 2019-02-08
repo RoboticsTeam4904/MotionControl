@@ -1,7 +1,6 @@
 package org.usfirst.frc4904.motioncontrol.pathing;
 
 import java.util.TreeMap;
-
 import org.usfirst.frc4904.motioncontrol.MotionTrajectoryExecutor;
 import org.usfirst.frc4904.motioncontrol.Tuple;
 
@@ -12,6 +11,7 @@ strictfp public abstract class PathGenerator {
 	public static double robotMaxAccel = MotionTrajectoryExecutor.robotMaxAccel;
 	public static double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;
 	public static double plantWidth = MotionTrajectoryExecutor.plantWidth;
+	public TreeMap<Double, PathSegment> featureSegmentMap;
 	public double absoluteLength;
 
 	/**
@@ -24,14 +24,9 @@ strictfp public abstract class PathGenerator {
 	 *
 	 * @return ordered list of distinct features of the generated spline
 	 */
-	public TreeMap<Double, PathSegment> segment(double curveDerivativeThreshold, double granularity) {
-		// absoluteLength = calcAbsoluteLength();
-		// Hopefully the curvature is never non-zero at the initial position of
-		// the arc. (It really shouldn't be)
-		TreeMap<Double, PathSegment> featureSegmentMap = new TreeMap<>();
-		double lastCurve = calcCurvature(0.0);
-		double maxCurve = lastCurve;
-		double maxCurveDerivative = 0.0;
+	public void segment(double curveDerivativeThreshold, double granularity) {
+		double initCurve = calcCurvature(0.0);
+		double maxCurve = initCurve;
 		double minAcc = -robotMaxAccel;
 		double maxAcc = robotMaxAccel;
 		double absoluteArcSum = 0.0;
@@ -42,7 +37,7 @@ strictfp public abstract class PathGenerator {
 			double instantSpeed = calcSpeed(percentage);
 			arcSum += instantSpeed / granularity;
 			double instantCurve = calcCurvature(percentage);
-			double instantCurveDerivative = Math.abs(lastCurve - instantCurve) * granularity;
+			double instantCurveDerivative = calcCurvatureDerivative(percentage);
 			double k = Math.signum(instantCurve);
 			double divisor = 1 + k * plantWidth * instantCurve;
 			double o = Math.signum(k * instantCurveDerivative / divisor);
@@ -62,9 +57,6 @@ strictfp public abstract class PathGenerator {
 			if (instantCurve > maxCurve) {
 				maxCurve = instantCurve;
 			}
-			if (instantCurveDerivative > maxCurveDerivative) {
-				maxCurveDerivative = instantCurveDerivative;
-			}
 			if (instantMinAcc > minAcc) {
 				minAcc = instantMinAcc;
 			}
@@ -72,8 +64,7 @@ strictfp public abstract class PathGenerator {
 				maxAcc = instantMaxAcc;
 			}
 			if (Math.abs(initCurve - instantCurve) > curveDerivativeThreshold) {
-				featureSegmentMap.put(absoluteArcSum, new PathSegment(initCurve, instantCurve,
-						maxCurve, minAcc, maxAcc, arcSum, localLengthMap));
+				featureSegmentMap.put(absoluteArcSum, new PathSegment(maxCurve, minAcc, maxAcc, arcSum, localLengthMap));
 				maxCurve = instantCurve;
 				minAcc = -robotMaxAccel;
 				maxAcc = robotMaxAccel;
@@ -82,25 +73,22 @@ strictfp public abstract class PathGenerator {
 				localLengthMap = new TreeMap<>();
 				initCurve = instantCurve;
 			}
-			lastCurve = instantCurve;
 		}
 		localLengthMap.put(arcSum, 1.);
-		featureSegmentMap.put(absoluteArcSum, new PathSegment(initCurve, calcCurvature(1.),
-				maxCurve, maxCurveDerivative, minAcc, maxAcc, arcSum, localLengthMap));
-		return featureSegmentMap;
+		featureSegmentMap.put(absoluteArcSum, new PathSegment(maxCurve, minAcc, maxAcc, arcSum, localLengthMap));
+		absoluteLength = arcSum;
 	}
 
-	protected void initialize(double threshold) {
-		initialize(threshold, INTEGRATION_GRANULARITY);
+	protected void segment(double threshold) {
+		segment(threshold, INTEGRATION_GRANULARITY);
 	}
 
-	protected void initialize() {
-		initialize(CURVATURE_THRESHOLD, INTEGRATION_GRANULARITY);
+	protected void segment() {
+		segment(CURVATURE_THRESHOLD, INTEGRATION_GRANULARITY);
 	}
 
 	/**
-	 * Calculate a map from arclength (along segment) to s Alternatively also
-	 * record the speed of the spline (deprecated)
+	 * Calculate a map from arclength (along segment) to s at a<=s<=b
 	 * 
 	 * @param a
 	 * @param b
@@ -110,25 +98,24 @@ strictfp public abstract class PathGenerator {
 	public TreeMap<Double, Double> calcFeatureLengthMap(double a, double b, double granularity) {
 		TreeMap<Double, Double> map = new TreeMap<Double, Double>();
 		double length = 0;
-		for (double i = a; i < b; i += 1 / granularity) {
+		for (double i = a; i <= b; i += 1 / granularity) {
 			length += calcSpeed(i);
 			map.put(length, i);
 		}
 		return map;
 	}
 
-	public TreeMap<Double, Double> calcFeatureLengthMap(double a, double b) {
-		return calcFeatureLengthMap(a, b, INTEGRATION_GRANULARITY);
-	}
-
 	/**
-	 * Calculates the arc-length traveled given percentages a and b, with
-	 * granularity set to a constant.
+	 * Calculate a map from arclength (along segment) to s at a<=s<=b
 	 * 
 	 * @param a
 	 * @param b
 	 * @return
 	 */
+	public TreeMap<Double, Double> calcFeatureLengthMap(double a, double b) {
+		return calcFeatureLengthMap(a, b, INTEGRATION_GRANULARITY);
+	}
+
 	/**
 	 * Equation for the curvature at a percentage of the arc-length.
 	 *
@@ -140,7 +127,7 @@ strictfp public abstract class PathGenerator {
 		Tuple<Double, Double> vel = calcVel(s);
 		Tuple<Double, Double> acc = calcAcc(s);
 		double speed = calcSpeed(s);
-		// if speed == 0: use jerk and acc instead of acc and vel. if acc == 0,
+		// TODO: if speed == 0: use jerk and acc instead of acc and vel. if acc == 0,
 		// just return 0 or go deeper or something
 		// System.out.println(speed);
 		return (vel.getX() * acc.getY() - vel.getY() * acc.getX()) / (speed * speed * speed);
@@ -170,9 +157,8 @@ strictfp public abstract class PathGenerator {
 	}
 
 	/**
-	 * @param s
-	 *            the position along the spline from [0-1]
-	 * @return the 'velocity' (note that this is not true physical velocity but
+	 * @param s the position along the spline from [0-1]
+	 * @return the 'speed' (note that this is not true physical speed but
 	 *         merely the magnitude of the spline velocity)
 	 */
 	public double calcSpeed(double s) {
@@ -181,8 +167,7 @@ strictfp public abstract class PathGenerator {
 	}
 
 	/**
-	 * @param s
-	 *            the position along the spline from [0-1]
+	 * @param s the position along the spline from [0-1]
 	 * @return a tuple of x-pos and y-pos
 	 */
 	public Tuple<Double, Double> calcPos(double s) {

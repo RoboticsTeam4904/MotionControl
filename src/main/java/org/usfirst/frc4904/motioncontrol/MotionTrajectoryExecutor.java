@@ -4,7 +4,7 @@ import org.usfirst.frc4904.motioncontrol.MotionTrajectory;
 import org.usfirst.frc4904.motioncontrol.MotionTrajectoryPoint;
 import org.usfirst.frc4904.motioncontrol.Tuple;
 import org.usfirst.frc4904.motioncontrol.pathing.PathGenerator;
-import org.usfirst.frc4904.motioncontrol.pathing.spline.QuinticSplineGenerator;
+import org.usfirst.frc4904.motioncontrol.pathing.SplineGenerator;
 
 strictfp public class MotionTrajectoryExecutor {
 	public static final double robotMaxVel = 5;
@@ -12,7 +12,7 @@ strictfp public class MotionTrajectoryExecutor {
 	public static final double plantWidth = 0.25; // radius
 
 	public static void main(String[] args) {
-		PathGenerator spline = new QuinticSplineGenerator(
+		PathGenerator spline = SplineGenerator.fitQuintic(
 				// xi, yi, xf, yf
 				// Position
 				0, 0, 1, 2,

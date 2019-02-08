@@ -182,7 +182,7 @@ strictfp public class MotionTrajectory {
 		Map.Entry<Double, PathSegment> segmentEntry = pathGenerator.featureSegmentMap.floorEntry(generalSetpoint.pos);
 		double percentage = segmentEntry.getValue().extrapolatePercentage(generalSetpoint.pos - segmentEntry.getKey());
 		double offset = plantWidth * pathGenerator.calcCurvature(percentage);
-		double accOffset = plantWidth * generalSetpoint.vel * pathGenerator.calcCurvatureDerivative(percentage);
+		// double accOffset = plantWidth * generalSetpoint.vel * pathGenerator.calcCurvatureDerivative(percentage);
 		double leftOffset = 1 - offset;
 		double rightOffset = 1 + offset;
 		double rightVel = generalSetpoint.vel * rightOffset;
