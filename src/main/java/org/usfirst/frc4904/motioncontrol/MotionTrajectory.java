@@ -56,19 +56,18 @@ strictfp public class MotionTrajectory {
 	public LinkedList<MotionTrajectorySegment> generateIsolatedSegments(TreeMap<Double, PathSegment> featureSegments) {
 		LinkedList<MotionTrajectorySegment> trajectorySegments = new LinkedList<>();
 		System.out.println(featureSegments.values());
-		Map.Entry<Double, PathSegment> firstEntry = featureSegments.firstEntry();
-		PathSegment firstFeature = firstEntry.getValue();
-		double maxVel = calcMaxVel(firstFeature.maxCurve);
-		double lastFinVel = 0.0;
+		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(0.0); // set initial velocity to 0
 		for (Map.Entry<Double, PathSegment> featureEntry : featureSegments.entrySet()) {
 			System.out.println("Max Accel: " + featureEntry.getValue().maxAcc + ",\tMin Accel: " + featureEntry.getValue().minAcc);
-			MotionTrajectorySegment segment = new MotionTrajectorySegment(featureEntry.getValue().length, lastFinVel, maxVel,
+			double maxVel = calcMaxVel(featureEntry.getValue().maxCurve);
+			double init_vel = Math.min(lastSegment.maxVel, maxVel); // maximal initial velocity is constrained by the maximum velocity of both segments
+			MotionTrajectorySegment segment = new MotionTrajectorySegment(featureEntry.getValue().length, init_vel, maxVel,
 				featureEntry.getValue().maxAcc, featureEntry.getValue().minAcc);
-			maxVel = calcMaxVel(featureEntry.getValue().maxCurve);
-			segment.finVel = Math.min(segment.maxVel, maxVel);
-			trajectorySegments.add(segment);
-			lastFinVel = segment.finVel;
+			lastSegment.finVel = init_vel;
+			trajectorySegments.add(segment); // TODO: ensure is mutable after adding to map, since finVel will be set
+			lastSegment = segment;
 		}
+		lastSegment.finVel = 0.0; // set final velocity to 0
 		System.out.println("Isolated:\t\t" + trajectorySegments);
 		return trajectorySegments;
 	}
@@ -121,7 +120,7 @@ strictfp public class MotionTrajectory {
 	}
 
 	/**
-	 * Attach an absolute context and finalize the path of each of the segments.
+	 * Profile the velocities across each of the segments.
 	 * 
 	 * @param trajectorySegments
 	 *        ordered segments that are forward and backward consistent.
@@ -218,7 +217,6 @@ strictfp public class MotionTrajectory {
 			return max2;
 		}
 	}
-
 	public double calcMaxVel(double curvature) {
 		return robotMaxVel / calcDivisor(curvature);
 	}

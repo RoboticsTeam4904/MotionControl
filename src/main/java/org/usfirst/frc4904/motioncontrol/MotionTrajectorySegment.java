@@ -25,6 +25,10 @@ public class MotionTrajectorySegment {
 		this.minAccel = minAccel;
 	}
 
+	public MotionTrajectorySegment(double maxVel) {
+		this.maxVel = maxVel;
+	}
+
 	public double calcVelFromFrontAndBack(double distance) {
 		return Math.min(maxVel, Math.min(calcMaxReachableVelForward(distance), calcMaxReachableVelBack(distance)));
 	}
@@ -116,9 +120,9 @@ public class MotionTrajectorySegment {
 		// + minAccel + ", MaxAccel: "
 		// + maxAccel + ", Length: " + length
 		// + ", Duration: " + duration + "}";
-		return "MotionTrajectorySegment[duration=" + duration + ", exp_duration=" + calcDuration() + "]";
+		return "MotionTrajectorySegment[duration=" + duration + ", adjustedMaxVel=" + adjustedMaxVel + "]";
 	}
-
+	// TODO: Is needed? Is correct?
 	public double calcDuration() {
 		return (minAccel * (maxVel - initVel) * (maxVel - initVel)
 			+ maxAccel * (2 * minAccel * length - (maxVel - finVel) * (maxVel - finVel))) / (2 * maxAccel * minAccel * maxVel);
