@@ -159,6 +159,7 @@ strictfp public class MotionTrajectory {
 			}
 			timeOverSegment -= segment.duration;
 			distanceTraveled += segment.length;
+			// System.out.println(distanceTraveled + ", " + timeOverSegment + ", " + tickCount);
 		}
 		this.tickTotal = tickCount;
 		return map;
@@ -179,13 +180,11 @@ strictfp public class MotionTrajectory {
 		Tuple<MotionTrajectoryPoint, MotionTrajectoryPoint> lastPoints) {
 		MotionTrajectoryPoint generalSetpoint = tickMap.get(tick);
 		Map.Entry<Double, PathSegment> segmentEntry = pathGenerator.featureSegmentMap.floorEntry(generalSetpoint.pos);
+		// System.out.println(tick + ", " + generalSetpoint.pos + ", " + segmentEntry);
 		double percentage = segmentEntry.getValue().extrapolatePercentage(generalSetpoint.pos - segmentEntry.getKey());
-		double offset = plantWidth * pathGenerator.calcCurvature(percentage);
-		// double accOffset = plantWidth * generalSetpoint.vel * pathGenerator.calcCurvatureDerivative(percentage);
-		double leftOffset = 1 - offset;
-		double rightOffset = 1 + offset;
-		double rightVel = generalSetpoint.vel * rightOffset;
-		double leftVel = generalSetpoint.vel  * leftOffset;
+		// System.out.println("_s: " + percentage);
+		double rightVel = generalSetpoint.vel * (1 + plantWidth * pathGenerator.calcCurvature(percentage));
+		double leftVel = generalSetpoint.vel * (1 - plantWidth * pathGenerator.calcCurvature(percentage));
 		MotionTrajectoryPoint leftPoint = new MotionTrajectoryPoint(tick, lastPoints.getX().pos + leftVel * tickTime, leftVel,
 			(leftVel - lastPoints.getX().vel) / tickTime);
 		MotionTrajectoryPoint rightPoint = new MotionTrajectoryPoint(tick, lastPoints.getY().pos + rightVel * tickTime,

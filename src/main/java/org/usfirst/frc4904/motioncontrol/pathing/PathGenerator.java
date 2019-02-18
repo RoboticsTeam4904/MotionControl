@@ -6,8 +6,8 @@ import org.usfirst.frc4904.motioncontrol.Tuple;
 
 
 strictfp public abstract class PathGenerator {
-	public static final double INTEGRATION_GRANULARITY = 400;
-	public static final double CURVATURE_THRESHOLD = 0.2;
+	public static final double INTEGRATION_GRANULARITY = 40;
+	public static final double CURVATURE_THRESHOLD = 0.3;
 	public static double robotMaxAccel = MotionTrajectoryExecutor.robotMaxAccel;
 	public static double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;
 	public static double plantWidth = MotionTrajectoryExecutor.plantWidth;
@@ -130,6 +130,7 @@ strictfp public abstract class PathGenerator {
 		// TODO: if speed == 0: use jerk and acc instead of acc and vel. if acc == 0,
 		// just return 0 or go deeper or something
 		// System.out.println(speed);
+		// System.out.println("s:" + s + ", " + speed + ", " + (vel.getX() * acc.getY() - vel.getY() * acc.getX()) / (speed * speed * speed));
 		return (vel.getX() * acc.getY() - vel.getY() * acc.getX()) / (speed * speed * speed);
 	}
 

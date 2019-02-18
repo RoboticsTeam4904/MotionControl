@@ -21,10 +21,10 @@ strictfp public class MotionTrajectoryExecutor {
 				// Acceleration
 				1, 0, 0, -20);
 		// PathGenerator spline = new CirclePathGenerator(0, 0, 1, 2, -0.2);
-//		testSpline(0.6, spline);
+		// testSpline(0.6, spline);
 		// System.out.println(spline.featureSegmentMap);
-		MotionTrajectory motionTrajectory = new MotionTrajectory(spline, plantWidth, 10);
-//		printPoints(motionTrajectory);
+		MotionTrajectory motionTrajectory = new MotionTrajectory(spline, plantWidth, 100);
+		printPoints(motionTrajectory);
 	}
 
 	public static void printPoints(MotionTrajectory motionTrajectory) {
