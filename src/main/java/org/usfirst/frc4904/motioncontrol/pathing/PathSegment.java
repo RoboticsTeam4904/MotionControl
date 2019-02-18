@@ -35,11 +35,15 @@ public class PathSegment {
 	public double extrapolatePercentage(double distance) {
 		Map.Entry<Double, Double> lowEntry = lengthMap.floorEntry(distance);
 		Map.Entry<Double, Double> highEntry = lengthMap.ceilingEntry(distance);
+		// System.out.println("low entry: " + lowEntry + ", " + "high entry: " + highEntry + ", L" +  (lowEntry == null) + ", H" +  (highEntry == null));
 		if (lowEntry == null || highEntry == null) {
 			return (lowEntry != null ? lowEntry.getValue() : highEntry.getValue());
 		}
+		if (highEntry.getKey() == lowEntry.getKey()) { // to prevent division by 0
+			return lowEntry.getValue();
+		}
 		double fraction = (distance - lowEntry.getKey())/(highEntry.getKey() - lowEntry.getKey());
-		double out = lowEntry.getValue() + fraction * (highEntry.getValue() - lowEntry.getValue()) / (highEntry.getKey() - lowEntry.getKey());
+		double out = lowEntry.getValue() + fraction * (highEntry.getValue() - lowEntry.getValue());
 		return out;
 	}
 
