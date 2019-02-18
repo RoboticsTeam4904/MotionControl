@@ -91,26 +91,28 @@ public class MotionTrajectorySegment {
 	}
 
 	protected MotionTrajectoryPoint calcSetpoint(double t, int tick) {
-		double pos;
-		double vel;
+		double init_pos;
+		double init_vel;
 		double accel;
 		if (t <= rampUpTime) {
-			pos = 0.0;
-			vel = initVel;
+			init_pos = 0.0;
+			init_vel = initVel;
 			accel = maxAccel;
 		} else if (t <= rampUpTime + cruiseTime) {
-			pos = rampUpDistance;
-			vel = adjustedMaxVel;
+			init_pos = rampUpDistance;
+			init_vel = adjustedMaxVel;
 			accel = 0.0;
 			t -= rampUpTime;
 		} else {
-			pos = rampUpDistance + cruiseDistance;
-			vel = adjustedMaxVel;
+			init_pos = rampUpDistance + cruiseDistance;
+			init_vel = adjustedMaxVel;
 			accel = minAccel;
 			t -= rampUpTime + cruiseTime;
 		}
-		vel = Vel(t, vel, accel);
-		pos += Pos(t, vel, accel);
+		double vel = Vel(t, init_vel, accel);
+		double pos = init_pos + Pos(t, init_vel, accel);
+		// System.out.println(init_pos + "," + init_vel + "," + accel + ", t:" + t + "\t" + rampUpTime + ",\t" + cruiseTime + ",\t" + rampDownTime + ",\t");
+		// System.out.println(pos + "," + vel + "," + accel + ", t:" + tick + "\t" + Pos(t, init_vel, accel) + "," + Vel(t, init_vel, accel));
 		return new MotionTrajectoryPoint(tick, pos, vel, accel);
 	}
 
