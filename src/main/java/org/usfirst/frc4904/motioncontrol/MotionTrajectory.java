@@ -59,7 +59,7 @@ strictfp public class MotionTrajectory {
 		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(0.0); // set initial velocity to 0
 		for (Map.Entry<Double, PathSegment> featureEntry : featureSegments.entrySet()) {
 			System.out.println("Max Accel: " + featureEntry.getValue().maxAcc + ",\tMin Accel: " + featureEntry.getValue().minAcc);
-			double maxVel = calcMaxVel(featureEntry.getValue().maxCurve);
+			double maxVel = featureEntry.getValue().maxVel;
 			double init_vel = Math.min(lastSegment.maxVel, maxVel); // maximal initial velocity is constrained by the maximum velocity of both segments
 			MotionTrajectorySegment segment = new MotionTrajectorySegment(featureEntry.getValue().length, init_vel, maxVel,
 				featureEntry.getValue().maxAcc, featureEntry.getValue().minAcc);

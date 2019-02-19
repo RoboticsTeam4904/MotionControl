@@ -6,13 +6,13 @@ import java.util.TreeMap;
 
 public class PathSegment {
 	public final TreeMap<Double, Double> lengthMap;
-	public final double maxCurve;
+	public final double maxVel;
 	public final double length;
 	public final double minAcc;
 	public final double maxAcc;
 
-	public PathSegment(double maxCurve, double minAcc, double maxAcc, double length, TreeMap<Double, Double> lengthMap) {
-		this.maxCurve = maxCurve;
+	public PathSegment(double maxVel, double minAcc, double maxAcc, double length, TreeMap<Double, Double> lengthMap) {
+		this.maxVel = maxVel;
 		this.length = length;
 		this.lengthMap = lengthMap;
 		this.minAcc = minAcc;
@@ -49,6 +49,6 @@ public class PathSegment {
 
 	@Override
 	public String toString() {
-		return "PathSegment#{MaxCurve: " + maxCurve + ", Length: " + length + ", Acc: " + minAcc + " to " + maxAcc + "}";
+		return "PathSegment#{MaxVel: " + maxVel + ", Length: " + length + ", Acc: " + minAcc + " to " + maxAcc + "}";
 	}
 }
