@@ -6,9 +6,10 @@ import org.usfirst.frc4904.motioncontrol.Tuple;
 
 
 strictfp public abstract class PathGenerator {
-	public static final double INTEGRATION_GRANULARITY = 400;
-	public static final double CURVATURE_THRESHOLD = 0.2;
+	public static final double INTEGRATION_GRANULARITY = 40;
+	public static final double CURVATURE_THRESHOLD = 0.3;
 	public static double robotMaxAccel = MotionTrajectoryExecutor.robotMaxAccel;
+	public static double robotMinAccel = -MotionTrajectoryExecutor.robotMaxAccel;
 	public static double robotMaxVel = MotionTrajectoryExecutor.robotMaxVel;
 	public static double plantWidth = MotionTrajectoryExecutor.plantWidth;
 	public TreeMap<Double, PathSegment> featureSegmentMap = new TreeMap<>();
@@ -26,8 +27,8 @@ strictfp public abstract class PathGenerator {
 	 */
 	public void segment(double curveDerivativeThreshold, double granularity) {
 		double initCurve = calcCurvature(0.0);
-		double maxCurve = initCurve;
-		double minAcc = -robotMaxAccel;
+		double maxVel = robotMaxVel;
+		double minAcc = robotMinAccel;
 		double maxAcc = robotMaxAccel;
 		double absoluteArcSum = 0.0;
 		double arcSum = 0.0;
@@ -38,35 +39,54 @@ strictfp public abstract class PathGenerator {
 			arcSum += instantSpeed / granularity;
 			double instantCurve = calcCurvature(percentage);
 			double instantCurveDerivative = calcCurvatureDerivative(percentage);
-			double k = Math.signum(instantCurve);
-			double divisor = 1 + k * plantWidth * instantCurve;
-			double o = Math.signum(k * instantCurveDerivative / divisor);
-			double minVelSqrd;
-			double maxVelSqrd;
-			if (o == 1.0) {
-				minVelSqrd = 0;
-				maxVelSqrd = robotMaxVel * robotMaxVel;
+
+			double rightModifier = 1 + plantWidth * instantCurve;
+			double leftModifier = 1 - plantWidth * instantCurve;
+			double instantMaxVel = robotMaxVel / Math.max(Math.abs(leftModifier), Math.abs(rightModifier));; 			// equivalent to without absolute values, but readably accounts for negative maximal velocity
+
+			// double minVelSqrd = 0;
+			double maxVelSqrd = instantMaxVel * instantMaxVel;
+
+			double maxAccRightMaxVel = (robotMaxAccel - plantWidth * maxVelSqrd * instantCurveDerivative / instantSpeed)
+				/ rightModifier;
+			double maxAccRightMinVel = robotMaxAccel / rightModifier;
+			double minAccRightMaxVel = (robotMinAccel - plantWidth * maxVelSqrd * instantCurveDerivative / instantSpeed)
+				/ rightModifier;
+			double minAccRightMinVel = robotMinAccel / rightModifier;
+			double maxAccRight, minAccRight;
+			if (rightModifier > 0) {
+				maxAccRight = Math.min(maxAccRightMaxVel, maxAccRightMinVel);
+				minAccRight = Math.max(minAccRightMaxVel, minAccRightMinVel);
 			} else {
-				maxVelSqrd = 0;
-				minVelSqrd = robotMaxVel * robotMaxVel;
+				maxAccRight = Math.min(minAccRightMaxVel, minAccRightMinVel);
+				minAccRight = Math.max(maxAccRightMaxVel, maxAccRightMinVel);
 			}
-			double instantMinAcc = (-robotMaxAccel
-					- k * plantWidth * maxVelSqrd * instantCurveDerivative / instantSpeed) / divisor;
-			double instantMaxAcc = (robotMaxAccel - k * plantWidth * minVelSqrd * instantCurveDerivative / instantSpeed)
-					/ divisor;
-			if (instantCurve > maxCurve) {
-				maxCurve = instantCurve;
+			
+			double maxAccLeftMaxVel = (robotMaxAccel + plantWidth * maxVelSqrd * instantCurveDerivative / instantSpeed)
+				/ leftModifier;
+			double maxAccLeftMinVel = robotMaxAccel / leftModifier;
+			double minAccLeftMaxVel = (robotMinAccel + plantWidth * maxVelSqrd * instantCurveDerivative / instantSpeed)
+				/ leftModifier;
+			double minAccLeftMinVel = robotMinAccel / leftModifier;
+			double maxAccLeft, minAccLeft;
+			if (leftModifier > 0) {
+				maxAccLeft = Math.min(maxAccLeftMaxVel, maxAccLeftMinVel);
+				minAccLeft = Math.max(minAccLeftMaxVel, minAccLeftMinVel);
+			} else {
+				maxAccLeft = Math.min(minAccLeftMaxVel, minAccLeftMinVel);
+				minAccLeft = Math.max(maxAccLeftMaxVel, maxAccLeftMinVel);
 			}
-			if (instantMinAcc > minAcc) {
-				minAcc = instantMinAcc;
-			}
-			if (instantMaxAcc < maxAcc) {
-				maxAcc = instantMaxAcc;
-			}
+
+			double instantMaxAcc = Math.min(maxAccLeft, maxAccRight);
+			double instantMinAcc = Math.max(minAccLeft, minAccRight);
+
+			maxVel = Math.min(maxVel, instantMaxVel);
+			minAcc = Math.max(minAcc, instantMinAcc);
+			maxAcc = Math.min(maxAcc, instantMaxAcc);
 			if (Math.abs(initCurve - instantCurve) > curveDerivativeThreshold) {
-				featureSegmentMap.put(absoluteArcSum, new PathSegment(maxCurve, minAcc, maxAcc, arcSum, localLengthMap));
-				maxCurve = instantCurve;
-				minAcc = -robotMaxAccel;
+				featureSegmentMap.put(absoluteArcSum, new PathSegment(maxVel, minAcc, maxAcc, arcSum, localLengthMap));
+				maxVel = robotMaxVel;
+				minAcc = robotMinAccel;
 				maxAcc = robotMaxAccel;
 				absoluteArcSum += arcSum;
 				arcSum = 0.0;
@@ -75,7 +95,7 @@ strictfp public abstract class PathGenerator {
 			}
 		}
 		localLengthMap.put(arcSum, 1.);
-		featureSegmentMap.put(absoluteArcSum, new PathSegment(maxCurve, minAcc, maxAcc, arcSum, localLengthMap));
+		featureSegmentMap.put(absoluteArcSum, new PathSegment(maxVel, minAcc, maxAcc, arcSum, localLengthMap)); //an issue
 		absoluteLength = arcSum;
 	}
 
@@ -130,6 +150,7 @@ strictfp public abstract class PathGenerator {
 		// TODO: if speed == 0: use jerk and acc instead of acc and vel. if acc == 0,
 		// just return 0 or go deeper or something
 		// System.out.println(speed);
+		// System.out.println("s:" + s + ", " + speed + ", " + (vel.getX() * acc.getY() - vel.getY() * acc.getX()) / (speed * speed * speed));
 		return (vel.getX() * acc.getY() - vel.getY() * acc.getX()) / (speed * speed * speed);
 	}
 
