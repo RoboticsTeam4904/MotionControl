@@ -42,7 +42,7 @@ strictfp public abstract class PathGenerator {
 
 			double rightModifier = 1 + plantWidth * instantCurve;
 			double leftModifier = 1 - plantWidth * instantCurve;
-			double instantMaxVel = robotMaxVel / Math.max(Math.abs(leftModifier), Math.abs(rightModifier));; 			// equivalent to without absolute values, but readably accounts for negative maximal velocity
+			double instantMaxVel = robotMaxVel / Math.max(Math.abs(leftModifier), Math.abs(rightModifier));; // equivalent to without absolute values, but readably accounts for negative maximal velocity
 
 			// double minVelSqrd = 0;
 			double maxVelSqrd = instantMaxVel * instantMaxVel;
