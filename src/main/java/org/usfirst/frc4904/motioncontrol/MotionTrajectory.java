@@ -55,7 +55,7 @@ strictfp public class MotionTrajectory {
 	 */
 	public LinkedList<MotionTrajectorySegment> generateIsolatedSegments(TreeMap<Double, PathSegment> featureSegments) {
 		LinkedList<MotionTrajectorySegment> trajectorySegments = new LinkedList<>();
-		System.out.println(featureSegments.values());
+		// System.out.println(featureSegments.values());
 		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(0.0); // set initial velocity to 0
 		for (Map.Entry<Double, PathSegment> featureEntry : featureSegments.entrySet()) {
 			System.out.println("Max Accel: " + featureEntry.getValue().maxAcc + ",\tMin Accel: " + featureEntry.getValue().minAcc);
@@ -68,7 +68,7 @@ strictfp public class MotionTrajectory {
 			lastSegment = segment;
 		}
 		lastSegment.finVel = 0.0; // set final velocity to 0
-		System.out.println("Isolated:\t\t" + trajectorySegments);
+		// System.out.println("Isolated:\t\t" + trajectorySegments);
 		return trajectorySegments;
 	}
 
@@ -90,7 +90,7 @@ strictfp public class MotionTrajectory {
 			segment.finVel = Math.min(segment.calcReachableEndVel(), segment.finVel);
 			lastFinVel = segment.finVel;
 		}
-		System.out.println("Forward consistency: \t" + trajectorySegments);
+		// System.out.println("Forward consistency: \t" + trajectorySegments);
 		return trajectorySegments;
 	}
 
@@ -115,7 +115,7 @@ strictfp public class MotionTrajectory {
 			trajectorySegment.initVel = Math.min(trajectorySegment.calcReachableStartVel(), trajectorySegment.initVel);
 			lastInitVel = trajectorySegment.initVel;
 		}
-		System.out.println("Backward consistency: \t" + trajectorySegments);
+		// System.out.println("Backward consistency: \t" + trajectorySegments);
 		return trajectorySegments;
 	}
 
@@ -161,6 +161,7 @@ strictfp public class MotionTrajectory {
 			distanceTraveled += segment.length;
 			// System.out.println(distanceTraveled + ", " + timeOverSegment + ", " + tickCount);
 		}
+		map.put(tickCount, new MotionTrajectoryPoint(tickCount, distanceTraveled, 0.0, 0.0)); // Add final point (0 vel, 0 acc)
 		this.tickTotal = tickCount;
 		return map;
 	}

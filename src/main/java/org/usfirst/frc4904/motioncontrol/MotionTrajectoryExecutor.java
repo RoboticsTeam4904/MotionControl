@@ -15,15 +15,15 @@ strictfp public class MotionTrajectoryExecutor {
 		PathGenerator spline = SplineGenerator.fitQuintic(
 				// xi, yi, xf, yf
 				// Position
-				0, 0, 1, 2,
+				0, 0, 10, 20,
 				// Velocity
-				1, 0, 0, 1,
+				20, 0, 0, 20,
 				// Acceleration
-				1, 0, 0, -20);
+				1, 0, 0, -1);
 		// PathGenerator spline = new CirclePathGenerator(0, 0, 1, 2, -0.2);
 		// testSpline(0.6, spline);
-		// System.out.println(spline.featureSegmentMap);
-		MotionTrajectory motionTrajectory = new MotionTrajectory(spline, plantWidth, 100);
+		System.out.println(spline.calcSpeed(0.975));
+		MotionTrajectory motionTrajectory = new MotionTrajectory(spline, plantWidth, 10);
 		printPoints(motionTrajectory);
 	}
 

@@ -6,7 +6,7 @@ import org.usfirst.frc4904.motioncontrol.Tuple;
 
 
 strictfp public abstract class PathGenerator {
-	public static final double INTEGRATION_GRANULARITY = 40;
+	public static final double INTEGRATION_GRANULARITY = 20;
 	public static final double CURVATURE_THRESHOLD = 0.3;
 	public static double robotMaxAccel = MotionTrajectoryExecutor.robotMaxAccel;
 	public static double robotMinAccel = -MotionTrajectoryExecutor.robotMaxAccel;
@@ -33,19 +33,22 @@ strictfp public abstract class PathGenerator {
 		double absoluteArcSum = 0.0;
 		double arcSum = 0.0;
 		TreeMap<Double, Double> localLengthMap = new TreeMap<>();
-		for (double percentage = 0; percentage < 1; percentage += 1/granularity) {
+		double lastCurve = initCurve;
+		for (int i = 0; i <= granularity; i += 1) {
+			double percentage = i/granularity; // To avoid floating point errors for the last iteration, we iterate with an int and then divide by granularity
 			localLengthMap.put(arcSum, percentage);
 			double instantSpeed = calcSpeed(percentage);
 			arcSum += instantSpeed / granularity;
 			double instantCurve = calcCurvature(percentage);
-			double instantCurveDerivative = calcCurvatureDerivative(percentage);
-
+			// double instantCurveDerivative = calcCurvatureDerivative(percentage);
+			double instantCurveDerivative = (instantCurve - lastCurve) * granularity;
 			double rightModifier = 1 + plantWidth * instantCurve;
 			double leftModifier = 1 - plantWidth * instantCurve;
 			double instantMaxVel = robotMaxVel / Math.max(Math.abs(leftModifier), Math.abs(rightModifier));; // equivalent to without absolute values, but readably accounts for negative maximal velocity
 
 			// double minVelSqrd = 0;
 			double maxVelSqrd = instantMaxVel * instantMaxVel;
+			System.out.println(percentage + ", " + instantCurveDerivative + ", " + calcCurvatureDerivative(percentage) + ", " + instantCurve); //+ instantSpeed + ", " + instantCurveDerivative / instantSpeed + ", " + maxVelSqrd);
 
 			double maxAccRightMaxVel = (robotMaxAccel - plantWidth * maxVelSqrd * instantCurveDerivative / instantSpeed)
 				/ rightModifier;
@@ -93,6 +96,7 @@ strictfp public abstract class PathGenerator {
 				localLengthMap = new TreeMap<>();
 				initCurve = instantCurve;
 			}
+			lastCurve = instantCurve;
 		}
 		localLengthMap.put(arcSum, 1.);
 		featureSegmentMap.put(absoluteArcSum, new PathSegment(maxVel, minAcc, maxAcc, arcSum, localLengthMap)); //an issue
