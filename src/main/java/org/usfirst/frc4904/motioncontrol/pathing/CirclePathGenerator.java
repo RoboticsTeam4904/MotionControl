@@ -1,16 +1,13 @@
 package org.usfirst.frc4904.motioncontrol.pathing;
 
 strictfp public class CirclePathGenerator extends PathGenerator {
-	private final double initPosX, initPosY, finPosX, finPosY, finAngle;
+	private final double finAngle;
+	// private final double initPosX, initPosY, finPosX, finPosY;
 	protected final double centerX, centerY, radius, initAngle;
 	protected final double absoluteLength;
 
 	public CirclePathGenerator(double initPosX, double initPosY, double finPosX, double finPosY, double finAngle) {
 		finAngle = finAngle + Math.PI / 2; // Only works if we are turning left
-		this.initPosX = initPosX;
-		this.initPosY = initPosY;
-		this.finPosX = finPosX;
-		this.finPosY = finPosY;
 		this.finAngle = finAngle;
 		this.radius = calcRadius(initPosX, initPosY, finPosX, finPosY, finAngle);
 		this.centerX = finPosX + radius * Math.cos(finAngle);
@@ -27,7 +24,6 @@ strictfp public class CirclePathGenerator extends PathGenerator {
 		// "
 		// + Double.toString(radius * Math.cos(percentageToAngle(a))) + " y, "
 		// + Double.toString(radius * Math.sin(percentageToAngle(a))));
-		segment();
 	}
 
 	protected double calcRadius(double initPosX, double initPosY, double finPosX, double finPosY, double phi) {

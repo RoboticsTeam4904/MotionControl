@@ -1,7 +1,6 @@
 package org.usfirst.frc4904.motioncontrol;
 
 
-import java.util.Deque;
 import java.util.concurrent.LinkedBlockingDeque;
 
 public class MotionTrajectoryQueue {

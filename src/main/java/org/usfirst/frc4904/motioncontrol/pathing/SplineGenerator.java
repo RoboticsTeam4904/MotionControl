@@ -51,7 +51,6 @@ strictfp public class SplineGenerator extends PathGenerator {
 		this.PosX = PosX;
 		this.PosY = PosY;
 		makeDerivatives();
-		segment();
 	}
 
 	/**

@@ -22,7 +22,7 @@ strictfp public class MotionTrajectoryExecutor {
 				1, 0, 0, -1);
 		// PathGenerator spline = new CirclePathGenerator(0, 0, 1, 2, -0.2);
 		// testSpline(0.6, spline);
-		System.out.println(spline.calcSpeed(0.975));
+		// System.out.println(spline.calcSpeed(0.975));
 		MotionTrajectory motionTrajectory = new MotionTrajectory(spline, plantWidth, 10);
 		printPoints(motionTrajectory);
 	}
