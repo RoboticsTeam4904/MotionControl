@@ -1,5 +1,6 @@
 package org.usfirst.frc4904.motioncontrol.pathing;
 
+
 import org.usfirst.frc4904.motioncontrol.pathing.PathGenerator;
 
 strictfp public class SplineGenerator extends PathGenerator {
@@ -9,7 +10,7 @@ strictfp public class SplineGenerator extends PathGenerator {
 	 * Solve for cubic position polynomials given intial and final constraints.
 	 */
 	public static SplineGenerator fitCubic(double initPosX, double initPosY, double finPosX, double finPosY,
-			double initVelX, double initVelY, double finVelX, double finVelY) {
+		double initVelX, double initVelY, double finVelX, double finVelY) {
 		double ax = 2 * initPosX - 2 * finPosX + initVelX + finVelX;
 		double bx = -3 * initPosX + 3 * finPosX - 2 * initVelX - finVelX;
 		double cx = initVelX;
@@ -31,17 +32,19 @@ strictfp public class SplineGenerator extends PathGenerator {
 		double ax = -6 * initPosX + 6 * finPosX - 3 * initVelX - 3 * finVelX - (initAccX / 2.0) + (finAccX / 2.0);
 		double bx = 15 * initPosX - 15 * finPosX + 8 * initVelX + 7 * finVelX + (3.0 / 2.0) * initAccX - finAccX;
 		double cx = -10 * initPosX + 10 * finPosX - 6 * initVelX - 4 * finVelX - (3.0 / 2.0) * initAccX
-				+ (finAccX / 2.0);
+			+ (finAccX / 2.0);
 		double dx = (initAccX / 2.0);
 		double ex = initVelX;
 		double fx = initPosX;
 		double ay = -6 * initPosY + 6 * finPosY - 3 * initVelY - 3 * finVelY - (initAccY / 2.0) + (finAccY / 2.0);
 		double by = 15 * initPosY - 15 * finPosY + 8 * initVelY + 7 * finVelY + (3.0 / 2.0) * initAccY - finAccY;
 		double cy = -10 * initPosY + 10 * finPosY - 6 * initVelY - 4 * finVelY - (3.0 / 2.0) * initAccY
-				+ (finAccY / 2.0);
+			+ (finAccY / 2.0);
 		double dy = (initAccY / 2.0);
 		double ey = initVelY;
 		double fy = initPosY;
+		System.out.println("Posx " + fx + ", " + ex + ", " + dx + ", " + cx + ", " + bx + ", " + ax);
+		System.out.println("Posy " + fy + ", " + ey + ", " + dy + ", " + cy + ", " + by + ", " + ay);
 		Polynomial PosX = new Polynomial(fx, ex, dx, cx, bx, ax);
 		Polynomial PosY = new Polynomial(fy, ey, dy, cy, by, ay);
 		return new SplineGenerator(PosX, PosY);
@@ -54,7 +57,7 @@ strictfp public class SplineGenerator extends PathGenerator {
 	}
 
 	/**
-	 * Construct the polynomials for derivatives of position. 
+	 * Construct the polynomials for derivatives of position.
 	 */
 	private void makeDerivatives() {
 		VelX = PosX.derivative();
@@ -127,7 +130,7 @@ strictfp public class SplineGenerator extends PathGenerator {
 		 * Evaluate the polynomial function at s
 		 *
 		 * @param s
-		 *            the position along the spline from [0-1]
+		 *          the position along the spline from [0-1]
 		 * @return
 		 */
 		protected double evaluate(double s) {

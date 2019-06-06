@@ -23,6 +23,8 @@ public class MotionTrajectorySegment {
 		this.maxVel = maxVel;
 		this.maxAccel = maxAccel;
 		this.minAccel = minAccel;
+		System.out.println("Length: " + length + "; Initial Velocity: " + initVel + "; Max Velocity: " + maxVel
+			+ "; Max Acceleration: " + maxAccel + "; Min Acceleration: " + minAccel);
 	}
 
 	public MotionTrajectorySegment(double maxVel) {
@@ -50,6 +52,8 @@ public class MotionTrajectorySegment {
 	}
 
 	public double calcAdjustedVel() {
+		System.out.println("Max Accel: " + maxAccel);
+		System.out.println("Min Accel: " + minAccel);
 		return Math.sqrt(maxAccel * (-2 * minAccel * length + (finVel * finVel)) - minAccel * (initVel * initVel))
 			/ Math.sqrt(maxAccel - minAccel);
 	}
@@ -63,16 +67,26 @@ public class MotionTrajectorySegment {
 	}
 
 	protected void dividePath() {
+		System.out.println("Max Velocity: " + maxVel);
+		System.out.println("Adjusted Velocity Calc: " + calcAdjustedVel());
 		adjustedMaxVel = Math.min(maxVel, calcAdjustedVel());
+		System.out.println("Adjusted Max Velocity: " + adjustedMaxVel);
 		rampUpTime = (adjustedMaxVel - initVel) / maxAccel;
+		System.out.println("Ramp Up Time: " + rampUpTime);
 		rampDownTime = (finVel - adjustedMaxVel) / minAccel;
+		System.out.println("Ramp Down Time: " + rampDownTime);
 		rampUpDistance = (adjustedMaxVel * adjustedMaxVel - initVel * initVel)
 			/ (2 * maxAccel);
+		System.out.println("Ramp Up Distance: " + rampUpDistance);
 		rampDownDistance = (finVel * finVel - adjustedMaxVel * adjustedMaxVel)
 			/ (2 * minAccel);
+		System.out.println("Ramp Down Distance: " + rampDownDistance);
 		cruiseDistance = length - rampUpDistance - rampDownDistance;
+		System.out.println("Cruise Distance: " + cruiseDistance);
 		cruiseTime = cruiseDistance / adjustedMaxVel;
+		System.out.println("Cruise Time: " + cruiseTime);
 		duration = rampUpTime + rampDownTime + cruiseTime;
+		System.out.println("Duration: " + duration);
 	}
 
 	/**
@@ -81,7 +95,7 @@ public class MotionTrajectorySegment {
 	 * @param t
 	 * @param tick
 	 * @param posOffset
-	 *        the amount to offset the position of the setpoint by
+	 *                  the amount to offset the position of the setpoint by
 	 * @return Relative setpoint with position offset by absolute context's distance.
 	 */
 	protected MotionTrajectoryPoint calcOffsetSetpoint(double t, int tick, double posOffset) {
@@ -124,6 +138,7 @@ public class MotionTrajectorySegment {
 		// + ", Duration: " + duration + "}";
 		return "MotionTrajectorySegment[duration=" + duration + ", adjustedMaxVel=" + adjustedMaxVel + "]";
 	}
+
 	// TODO: Is needed? Is correct?
 	public double calcDuration() {
 		return (minAccel * (maxVel - initVel) * (maxVel - initVel)

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.usfirst.frc4904.motioncontrol.pathing.PathGenerator;
 import org.usfirst.frc4904.motioncontrol.pathing.PathSegment;
 
@@ -27,9 +26,9 @@ strictfp public class MotionTrajectory {
 	 * 
 	 * @param pathGenerator
 	 * @param plantWidth
-	 *        the width of whatever system we will be moving (in our case the robot)
+	 *                      the width of whatever system we will be moving (in our case the robot)
 	 * @param tickTime
-	 *        the time that passes during a tick (in milliseconds)
+	 *                      the time that passes during a tick (in milliseconds)
 	 */
 	public MotionTrajectory(PathGenerator pathGenerator, double plantWidth, double tickTime) {
 		this.pathGenerator = pathGenerator;
@@ -53,7 +52,8 @@ strictfp public class MotionTrajectory {
 	 *
 	 * @return ordered list of distinct features of the generated spline
 	 */
-	public TreeMap<Double, PathSegment> constrainAndSegment(PathGenerator pathGenerator, double curveDerivativeThreshold, double granularity) {
+	public TreeMap<Double, PathSegment> constrainAndSegment(PathGenerator pathGenerator, double curveDerivativeThreshold,
+		double granularity) {
 		TreeMap<Double, PathSegment> featureSegmentMap = new TreeMap<>();
 		double initCurve = pathGenerator.calcCurvature(0.0);
 		double maxVel = robotMaxVel;
@@ -70,13 +70,13 @@ strictfp public class MotionTrajectory {
 			arcSum += instantSpeed / granularity;
 			double instantCurve = pathGenerator.calcCurvature(percentage);
 			double instantCurveDerivative = (instantCurve - lastCurve) * granularity; // calcCurvatureDerivative(percentage);
-			System.out.println(percentage + ", " + instantCurveDerivative + ", " + pathGenerator.calcCurvatureDerivative(percentage) + ", " + instantCurve);
-
+			System.out.println(percentage + ", " + instantCurveDerivative + ", "
+				+ pathGenerator.calcCurvatureDerivative(percentage) + ", " + instantCurve);
 			double rightModifier = 1 + plantWidth * instantCurve;
 			double leftModifier = 1 - plantWidth * instantCurve;
-			double instantMaxVel = robotMaxVel / Math.max(Math.abs(leftModifier), Math.abs(rightModifier));; // equivalent to without absolute values, but readably accounts for negative maximal velocity
-
-			// double minVelSqrd = 0;
+			double instantMaxVel = robotMaxVel / Math.max(Math.abs(leftModifier), Math.abs(rightModifier));
+			; // equivalent to without absolute values, but readably accounts for negative maximal velocity
+				// double minVelSqrd = 0;
 			double maxVelSqrd = instantMaxVel * instantMaxVel;
 			double maxAccRightMaxVel = (robotMaxAccel - plantWidth * maxVelSqrd * instantCurveDerivative / instantSpeed)
 				/ rightModifier;
@@ -92,7 +92,6 @@ strictfp public class MotionTrajectory {
 				maxAccRight = Math.min(minAccRightMaxVel, minAccRightMinVel);
 				minAccRight = Math.max(maxAccRightMaxVel, maxAccRightMinVel);
 			}
-
 			double maxAccLeftMaxVel = (robotMaxAccel + plantWidth * maxVelSqrd * instantCurveDerivative / instantSpeed)
 				/ leftModifier;
 			double maxAccLeftMinVel = robotMaxAccel / leftModifier;
@@ -107,12 +106,12 @@ strictfp public class MotionTrajectory {
 				maxAccLeft = Math.min(minAccLeftMaxVel, minAccLeftMinVel);
 				minAccLeft = Math.max(maxAccLeftMaxVel, maxAccLeftMinVel);
 			}
-
+			System.out.println("Max Accel: Left - " + maxAccLeft + "; Right - " + maxAccRight);
 			double instantMaxAcc = Math.min(maxAccLeft, maxAccRight);
 			double instantMinAcc = Math.max(minAccLeft, minAccRight);
-
 			maxVel = Math.min(maxVel, instantMaxVel);
 			minAcc = Math.max(minAcc, instantMinAcc);
+			System.out.println("Instant Max Acc at " + i + ": " + instantMaxAcc);
 			maxAcc = Math.min(maxAcc, instantMaxAcc);
 			if (Math.abs(initCurve - instantCurve) > curveDerivativeThreshold) {
 				featureSegmentMap.put(absoluteArcSum, new PathSegment(maxVel, minAcc, maxAcc, arcSum, localLengthMap));
@@ -127,7 +126,7 @@ strictfp public class MotionTrajectory {
 			lastCurve = instantCurve;
 		}
 		localLengthMap.put(arcSum, 1.);
-		featureSegmentMap.put(absoluteArcSum, new PathSegment(maxVel, minAcc, maxAcc, arcSum, localLengthMap)); //an issue
+		featureSegmentMap.put(absoluteArcSum, new PathSegment(maxVel, minAcc, maxAcc, arcSum, localLengthMap)); // an issue
 		return featureSegmentMap;
 	}
 
@@ -159,7 +158,8 @@ strictfp public class MotionTrajectory {
 		// System.out.println(featureSegments.values());
 		MotionTrajectorySegment lastSegment = new MotionTrajectorySegment(0.0); // set initial velocity to 0
 		for (Map.Entry<Double, PathSegment> featureEntry : featureSegments.entrySet()) {
-			System.out.println("Max Accel: " + featureEntry.getValue().maxAcc + ",\tMin Accel: " + featureEntry.getValue().minAcc);
+			System.out
+				.println("Max Accel: " + featureEntry.getValue().maxAcc + ",\tMin Accel: " + featureEntry.getValue().minAcc);
 			double maxVel = featureEntry.getValue().maxVel;
 			double init_vel = Math.min(lastSegment.maxVel, maxVel); // maximal initial velocity is constrained by the maximum velocity of both segments
 			MotionTrajectorySegment segment = new MotionTrajectorySegment(featureEntry.getValue().length, init_vel, maxVel,
@@ -172,6 +172,7 @@ strictfp public class MotionTrajectory {
 		// System.out.println("Isolated:\t\t" + trajectorySegments);
 		return trajectorySegments;
 	}
+
 	// TODO: Combine the following functions
 	/**
 	 * Adjusts the provided trajectory segments to ensure forward consistency between them.
@@ -204,7 +205,7 @@ strictfp public class MotionTrajectory {
 	 * @see {@link MotionTrajectory#finalizeSegments}
 	 *
 	 * @param trajectorySegments
-	 *        ordered segments that are forward consistent
+	 *                           ordered segments that are forward consistent
 	 * @return ordered right/left trajectory segments that are forward and backward consistent.
 	 */
 	public LinkedList<MotionTrajectorySegment> applyBackwardConsistency(
@@ -217,6 +218,7 @@ strictfp public class MotionTrajectory {
 			lastInitVel = trajectorySegment.initVel;
 		}
 		// System.out.println("Backward consistency: \t" + trajectorySegments);
+		System.out.println("Finalized: \t\t" + trajectorySegments);
 		return trajectorySegments;
 	}
 
@@ -224,13 +226,15 @@ strictfp public class MotionTrajectory {
 	 * Profile the velocities across each of the segments.
 	 * 
 	 * @param trajectorySegments
-	 *        ordered segments that are forward and backward consistent.
+	 *                           ordered segments that are forward and backward consistent.
 	 * @return finalized ordered right/left trajectory segments with absolute context attached.
 	 */
 	public LinkedList<MotionTrajectorySegment> finalizeSegments(LinkedList<MotionTrajectorySegment> trajectorySegments) {
+		System.out.println("Finalized: \t\t" + trajectorySegments);
 		double timePassed = 0;
 		double distanceTraveled = 0;
 		for (MotionTrajectorySegment segment : trajectorySegments) {
+			System.out.println("Looping ---------------");
 			segment.dividePath();
 			timePassed += segment.duration;
 			distanceTraveled += segment.length;
@@ -293,30 +297,29 @@ strictfp public class MotionTrajectory {
 			rightVel, (rightVel - lastPoints.getY().vel) / tickTime);
 		return new Tuple<>(leftPoint, rightPoint);
 	}
-
 	// public double calcMaxAcc(double curvature, double curveDerivative, double maxVel,
-	// 	double maxSplineVel) {
-	// 	double max1 = (robotMaxAccel + Math.signum(curvature) * (plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel)
-	// 		/ calcDivisor(curvature)); // Or flip signs? equivalent? Also, make better by finding min val of maxAccel across the segment by making all of these (including V of robot?) functions of s and solving or probably just check at various values of s
-	// 	double max2 = (robotMaxAccel - Math.signum(curvature) * (plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel)
-	// 		/ calcDivisor(-curvature));
-	// 	if (max1 > 2) {
-	// 		return max1;
-	// 	} else {
-	// 		return max2;
-	// 	}
+	// double maxSplineVel) {
+	// double max1 = (robotMaxAccel + Math.signum(curvature) * (plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel)
+	// / calcDivisor(curvature)); // Or flip signs? equivalent? Also, make better by finding min val of maxAccel across the segment by making all of these (including V of robot?) functions of s and solving or probably just check at various values of s
+	// double max2 = (robotMaxAccel - Math.signum(curvature) * (plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel)
+	// / calcDivisor(-curvature));
+	// if (max1 > 2) {
+	// return max1;
+	// } else {
+	// return max2;
+	// }
 	// }
 
 	// public double calcMinAcc(double curvature, double curveDerivative, double maxVel, double maxSplineVel) {
-	// 	double max1 = (robotMaxAccel + Math.signum(curvature) * (plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel)
-	// 		/ calcDivisor(curvature)); // Or flip signs? equivalent? Also, make better by finding min val of maxAccel across the segment by making all of these (including V of robot?) functions of s and solving or probably just check at various values of s
-	// 	double max2 = (robotMaxAccel - Math.signum(curvature) * (plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel)
-	// 		/ calcDivisor(-curvature));
-	// 	if (max1 < 2) {
-	// 		return max1;
-	// 	} else {
-	// 		return max2;
-	// 	}
+	// double max1 = (robotMaxAccel + Math.signum(curvature) * (plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel)
+	// / calcDivisor(curvature)); // Or flip signs? equivalent? Also, make better by finding min val of maxAccel across the segment by making all of these (including V of robot?) functions of s and solving or probably just check at various values of s
+	// double max2 = (robotMaxAccel - Math.signum(curvature) * (plantWidth * maxVel * maxVel * curveDerivative / maxSplineVel)
+	// / calcDivisor(-curvature));
+	// if (max1 < 2) {
+	// return max1;
+	// } else {
+	// return max2;
+	// }
 	// }
 	public double calcMaxVel(double curvature) {
 		return robotMaxVel / calcDivisor(curvature);
